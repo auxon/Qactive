@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QbservableClient", "Source\QbservableClient\QbservableClient.csproj", "{DE8EF976-4C04-489A-9C43-006F1830C425}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QbservableProvider", "Source\QbservableProvider\QbservableProvider.csproj", "{9B68408D-1974-4F76-9C89-ECCD466A25E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QbservableServer", "Source\QbservableServer\QbservableServer.csproj", "{FB7FC098-A383-4EB6-8ED1-8D27EC68A55F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedLibrary", "Source\SharedLibrary\SharedLibrary.csproj", "{307C321F-1054-43BE-9977-6973E4636192}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{9D1E9076-948A-4EED-B4E5-3D419E62E05A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source - Examples", "Source - Examples", "{BCC25A8F-A4FB-44A7-9369-D48D46115BB1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Artifacts", "Artifacts", "{E63D2A4E-6525-47A0-99C5-E9114F1F1DF7}"
+	ProjectSection(SolutionItems) = preProject
+		Artifacts\Security Guidelines.txt = Artifacts\Security Guidelines.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{AB656064-E9C9-41A8-B447-2F658A0CB424}"
+	ProjectSection(SolutionItems) = preProject
+		Build\Deploy.targets = Build\Deploy.targets
+		packages\repositories.config = packages\repositories.config
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DE8EF976-4C04-489A-9C43-006F1830C425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE8EF976-4C04-489A-9C43-006F1830C425}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE8EF976-4C04-489A-9C43-006F1830C425}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE8EF976-4C04-489A-9C43-006F1830C425}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B68408D-1974-4F76-9C89-ECCD466A25E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B68408D-1974-4F76-9C89-ECCD466A25E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B68408D-1974-4F76-9C89-ECCD466A25E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B68408D-1974-4F76-9C89-ECCD466A25E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB7FC098-A383-4EB6-8ED1-8D27EC68A55F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB7FC098-A383-4EB6-8ED1-8D27EC68A55F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB7FC098-A383-4EB6-8ED1-8D27EC68A55F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB7FC098-A383-4EB6-8ED1-8D27EC68A55F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{307C321F-1054-43BE-9977-6973E4636192}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{307C321F-1054-43BE-9977-6973E4636192}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{307C321F-1054-43BE-9977-6973E4636192}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{307C321F-1054-43BE-9977-6973E4636192}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DE8EF976-4C04-489A-9C43-006F1830C425} = {BCC25A8F-A4FB-44A7-9369-D48D46115BB1}
+		{9B68408D-1974-4F76-9C89-ECCD466A25E0} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
+		{FB7FC098-A383-4EB6-8ED1-8D27EC68A55F} = {BCC25A8F-A4FB-44A7-9369-D48D46115BB1}
+		{307C321F-1054-43BE-9977-6973E4636192} = {BCC25A8F-A4FB-44A7-9369-D48D46115BB1}
+	EndGlobalSection
+EndGlobal
