@@ -9,202 +9,186 @@ using ReactiveQ.Properties;
 
 namespace ReactiveQ
 {
-	[Serializable]
-	internal class DuplexCallback
-	{
-		protected IServerDuplexQbservableProtocolSink Sink
-		{
-			get
-			{
-				return sink;
-			}
-		}
+  [Serializable]
+  internal class DuplexCallback
+  {
+    public bool CanInvoke => sink != null;
 
-		protected QbservableProtocol Protocol
-		{
-			get
-			{
-				return protocol;
-			}
-		}
+    protected IServerDuplexQbservableProtocolSink Sink => sink;
 
-		protected int Id
-		{
-			get
-			{
-				return id;
-			}
-		}
+    protected QbservableProtocol Protocol => protocol;
 
-		private static readonly MethodInfo serverInvokeMethod = typeof(DuplexCallback)
-			.GetMethods()
-			.Where(m => m.IsGenericMethod && m.Name == "ServerInvoke")
-			.First();
+    protected int Id => id;
 
-		private static readonly MethodInfo serverInvokeVoidMethod = typeof(DuplexCallback)
-			.GetMethods()
-			.Where(m => !m.IsGenericMethod && m.Name == "ServerInvoke")
-			.First();
+    private static readonly MethodInfo serverInvokeMethod = typeof(DuplexCallback)
+      .GetMethods()
+      .Where(m => m.IsGenericMethod && m.Name == "ServerInvoke")
+      .First();
 
-		[NonSerialized]
-		private IServerDuplexQbservableProtocolSink sink;
-		[NonSerialized]
-		private QbservableProtocol protocol;
-		private readonly int id;
+    private static readonly MethodInfo serverInvokeVoidMethod = typeof(DuplexCallback)
+      .GetMethods()
+      .Where(m => !m.IsGenericMethod && m.Name == "ServerInvoke")
+      .First();
 
-		protected DuplexCallback(int id)
-		{
-			this.id = id;
-		}
+    [NonSerialized]
+    private IServerDuplexQbservableProtocolSink sink;
+    [NonSerialized]
+    private QbservableProtocol protocol;
+    private readonly int id;
 
-		private DuplexCallback(QbservableProtocol protocol, Func<int, object[], object> callback)
-		{
-			this.id = protocol
-				.GetOrAddSink(protocol.CreateClientDuplexSinkInternal)
-				.RegisterInvokeCallback(arguments => callback(this.id, arguments));
-		}
+    protected DuplexCallback(int id)
+    {
+      this.id = id;
+    }
 
-		public static Expression Create(QbservableProtocol protocol, object instance, PropertyInfo property)
-		{
-			return CreateInvoke(
-				new DuplexCallback(protocol, (id, __) => ConvertIfSequence(protocol, id, property.GetValue(instance))),
-				property.PropertyType);
-		}
+    private DuplexCallback(QbservableProtocol protocol, Func<int, object[], object> callback)
+    {
+      this.id = protocol
+        .GetOrAddSink(protocol.CreateClientDuplexSinkInternal)
+        .RegisterInvokeCallback(arguments => callback(this.id, arguments));
+    }
 
-		public static Expression Create(QbservableProtocol protocol, object instance, FieldInfo field)
-		{
-			return CreateInvoke(
-				new DuplexCallback(protocol, (id, __) => ConvertIfSequence(protocol, id, field.GetValue(instance))),
-				field.FieldType);
-		}
+    public static Expression Create(QbservableProtocol protocol, object instance, PropertyInfo property)
+    {
+      return CreateInvoke(
+        new DuplexCallback(protocol, (id, __) => ConvertIfSequence(protocol, id, property.GetValue(instance))),
+        property.PropertyType);
+    }
 
-		public static Expression Create(QbservableProtocol protocol, object instance, MethodInfo method, IEnumerable<Expression> argExpressions)
-		{
-			return CreateInvoke(
-				new DuplexCallback(protocol, (id, arguments) => ConvertIfSequence(protocol, id, method.Invoke(instance, arguments))),
-				method.ReturnType,
-				argExpressions);
-		}
+    public static Expression Create(QbservableProtocol protocol, object instance, FieldInfo field)
+    {
+      return CreateInvoke(
+        new DuplexCallback(protocol, (id, __) => ConvertIfSequence(protocol, id, field.GetValue(instance))),
+        field.FieldType);
+    }
 
-		public static Expression CreateEnumerable(QbservableProtocol protocol, object instance, Type dataType, Type type)
-		{
-			return Expression.Constant(
-				CreateRemoteEnumerable(protocol, (IEnumerable) instance, dataType),
-				type);
-		}
+    public static Expression Create(QbservableProtocol protocol, object instance, MethodInfo method, IEnumerable<Expression> argExpressions)
+    {
+      return CreateInvoke(
+        new DuplexCallback(protocol, (id, arguments) => ConvertIfSequence(protocol, id, method.Invoke(instance, arguments))),
+        method.ReturnType,
+        argExpressions);
+    }
 
-		public static Expression CreateObservable(QbservableProtocol protocol, object instance, Type dataType, Type type)
-		{
-			return Expression.Constant(
-				CreateRemoteObservable(protocol, instance, dataType),
-				type);
-		}
+    public static Expression CreateEnumerable(QbservableProtocol protocol, object instance, Type dataType, Type type)
+    {
+      return Expression.Constant(
+        CreateRemoteEnumerable(protocol, (IEnumerable)instance, dataType),
+        type);
+    }
 
-		private static Expression CreateInvoke(DuplexCallback callback, Type returnType, IEnumerable<Expression> arguments = null)
-		{
-			return Expression.Call(
-				Expression.Constant(callback),
-				returnType == typeof(void) ? DuplexCallback.serverInvokeVoidMethod : DuplexCallback.serverInvokeMethod.MakeGenericMethod(returnType),
-				Expression.NewArrayInit(
-					typeof(object),
-					(arguments == null ? new Expression[0] : arguments.Select(a => (Expression) Expression.Convert(a, typeof(object))))));
-		}
+    public static Expression CreateObservable(QbservableProtocol protocol, object instance, Type dataType, Type type)
+    {
+      return Expression.Constant(
+        CreateRemoteObservable(protocol, instance, dataType),
+        type);
+    }
 
-		private static object ConvertIfSequence(QbservableProtocol protocol, int id, object instance)
-		{
-			if (instance != null)
-			{
-				var type = instance.GetType();
+    private static Expression CreateInvoke(DuplexCallback callback, Type returnType, IEnumerable<Expression> arguments = null)
+    {
+      return Expression.Call(
+        Expression.Constant(callback),
+        returnType == typeof(void) ? DuplexCallback.serverInvokeVoidMethod : DuplexCallback.serverInvokeMethod.MakeGenericMethod(returnType),
+        Expression.NewArrayInit(
+          typeof(object),
+          (arguments == null ? new Expression[0] : arguments.Select(a => (Expression)Expression.Convert(a, typeof(object))))));
+    }
 
-				if (!type.IsSerializable)
-				{
-					var observableType = type.GetGenericInterfaceFromDefinition(typeof(IObservable<>));
+    private static object ConvertIfSequence(QbservableProtocol protocol, int id, object instance)
+    {
+      if (instance != null)
+      {
+        var type = instance.GetType();
 
-					if (observableType != null)
-					{
-						return CreateRemoteObservable(protocol, instance, observableType.GetGenericArguments()[0]);
-					}
+        if (!type.IsSerializable)
+        {
+          var observableType = type.GetGenericInterfaceFromDefinition(typeof(IObservable<>));
 
-					var enumerableType = type.GetGenericInterfaceFromDefinition(typeof(IEnumerable<>));
+          if (observableType != null)
+          {
+            return CreateRemoteObservable(protocol, instance, observableType.GetGenericArguments()[0]);
+          }
 
-					if (enumerableType != null)
-					{
-						return CreateRemoteEnumerable(protocol, (IEnumerable) instance, enumerableType.GetGenericArguments()[0]);
-					}
-					else if (instance is IEnumerable)
-					{
-						var enumerable = (IEnumerable) instance;
+          var enumerableType = type.GetGenericInterfaceFromDefinition(typeof(IEnumerable<>));
 
-						return CreateRemoteEnumerable(protocol, enumerable.Cast<object>(), typeof(object));
-					}
-				}
-			}
+          if (enumerableType != null)
+          {
+            return CreateRemoteEnumerable(protocol, (IEnumerable)instance, enumerableType.GetGenericArguments()[0]);
+          }
+          else if (instance is IEnumerable)
+          {
+            var enumerable = (IEnumerable)instance;
 
-			return instance;
-		}
+            return CreateRemoteEnumerable(protocol, enumerable.Cast<object>(), typeof(object));
+          }
+        }
+      }
 
-		private static object CreateRemoteEnumerable(QbservableProtocol protocol, IEnumerable instance, Type dataType)
-		{
-			var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSinkInternal);
+      return instance;
+    }
 
-			int id = 0;
-			id = sink.RegisterEnumerableCallback(instance.GetEnumerator);
+    private static object CreateRemoteEnumerable(QbservableProtocol protocol, IEnumerable instance, Type dataType)
+    {
+      var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSinkInternal);
 
-			return Activator.CreateInstance(typeof(DuplexCallbackEnumerable<>).MakeGenericType(dataType), id);
-		}
+      int id = 0;
+      id = sink.RegisterEnumerableCallback(instance.GetEnumerator);
 
-		private static object CreateRemoteObservable(QbservableProtocol protocol, object instance, Type dataType)
-		{
-			var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSinkInternal);
+      return Activator.CreateInstance(typeof(DuplexCallbackEnumerable<>).MakeGenericType(dataType), id);
+    }
 
-			int id = 0;
-			id = sink.RegisterObservableCallback(serverId => Subscribe(sink, new DuplexCallbackId(id, serverId), instance, dataType));
+    private static object CreateRemoteObservable(QbservableProtocol protocol, object instance, Type dataType)
+    {
+      var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSinkInternal);
 
-			return Activator.CreateInstance(typeof(DuplexCallbackObservable<>).MakeGenericType(dataType), id);
-		}
+      int id = 0;
+      id = sink.RegisterObservableCallback(serverId => Subscribe(sink, new DuplexCallbackId(id, serverId), instance, dataType));
 
-		private static IDisposable Subscribe(IClientDuplexQbservableProtocolSink sink, DuplexCallbackId id, object instance, Type dataType)
-		{
-			return dataType.UpCast(instance).Subscribe(
-				value => sink.SendOnNext(id, value),
-				ex => sink.SendOnError(id, ex),
-				() => sink.SendOnCompleted(id));
-		}
+      return Activator.CreateInstance(typeof(DuplexCallbackObservable<>).MakeGenericType(dataType), id);
+    }
 
-		public void SetServerProtocol(QbservableProtocol protocol)
-		{
-			Contract.Requires(protocol != null);
+    private static IDisposable Subscribe(IClientDuplexQbservableProtocolSink sink, DuplexCallbackId id, object instance, Type dataType)
+    {
+      return dataType.UpCast(instance).Subscribe(
+        value => sink.SendOnNext(id, value),
+        ex => sink.SendOnError(id, ex),
+        () => sink.SendOnCompleted(id));
+    }
 
-			this.protocol = protocol;
-			this.sink = protocol.FindSink<IServerDuplexQbservableProtocolSink>();
+    public void SetServerProtocol(QbservableProtocol protocol)
+    {
+      Contract.Requires(protocol != null);
 
-			if (sink == null)
-			{
-				throw new InvalidOperationException(Errors.ProtocolDuplexSinkUnavailableForClientCallback);
-			}
-		}
+      this.protocol = protocol;
+      this.sink = protocol.FindSink<IServerDuplexQbservableProtocolSink>();
 
-		public TResult ServerInvoke<TResult>(object[] arguments)
-		{
-			Contract.Requires(sink != null);
+      if (sink == null)
+      {
+        throw new InvalidOperationException(Errors.ProtocolDuplexSinkUnavailableForClientCallback);
+      }
+    }
 
-			var value = (TResult) sink.Invoke(id, arguments);
+    public TResult ServerInvoke<TResult>(object[] arguments)
+    {
+      Contract.Requires(CanInvoke);
 
-			var callback = value as DuplexCallback;
+      var value = (TResult)sink.Invoke(id, arguments);
 
-			if (callback != null)
-			{
-				callback.sink = sink;
-			}
+      var callback = value as DuplexCallback;
 
-			return value;
-		}
+      if (callback != null)
+      {
+        callback.sink = sink;
+      }
 
-		public void ServerInvoke(object[] arguments)
-		{
-			Contract.Requires(sink != null);
+      return value;
+    }
 
-			sink.Invoke(id, arguments);
-		}
-	}
+    public void ServerInvoke(object[] arguments)
+    {
+      Contract.Requires(CanInvoke);
+
+      sink.Invoke(id, arguments);
+    }
+  }
 }
