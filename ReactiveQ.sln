@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedLibrary", "Source\Sha
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{9D1E9076-948A-4EED-B4E5-3D419E62E05A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source - Examples", "Source - Examples", "{BCC25A8F-A4FB-44A7-9369-D48D46115BB1}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{BCC25A8F-A4FB-44A7-9369-D48D46115BB1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Artifacts", "Artifacts", "{E63D2A4E-6525-47A0-99C5-E9114F1F1DF7}"
 	ProjectSection(SolutionItems) = preProject
