@@ -138,32 +138,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Errors.resx</DependentUpon>
     </Compile>
-    <Compile Include="Expressions\SerializableBinaryExpression.cs" />
-    <Compile Include="Expressions\SerializableBlockExpression.cs" />
-    <Compile Include="Expressions\SerializableConditionalExpression.cs" />
-    <Compile Include="Expressions\SerializableConstantExpression.cs" />
-    <Compile Include="Expressions\SerializableDefaultExpression.cs" />
-    <Compile Include="Expressions\SerializableExpression.cs" />
-    <Compile Include="Expressions\SerializableExpressionConverter.cs" />
-    <Compile Include="Expressions\SerializableExpressionExtensions.cs" />
-    <Compile Include="Expressions\SerializableGotoExpression.cs" />
-    <Compile Include="Expressions\SerializableIndexExpression.cs" />
-    <Compile Include="Expressions\SerializableInvocationExpression.cs" />
-    <Compile Include="Expressions\SerializableLabelExpression.cs" />
-    <Compile Include="Expressions\SerializableLambdaExpression.cs" />
-    <Compile Include="Expressions\SerializableListInitExpression.cs" />
-    <Compile Include="Expressions\SerializableLoopExpression.cs" />
-    <Compile Include="Expressions\SerializableMemberExpression.cs" />
-    <Compile Include="Expressions\SerializableMemberInitExpression.cs" />
-    <Compile Include="Expressions\SerializableMethodCallExpression.cs" />
-    <Compile Include="Expressions\SerializableNewArrayExpression.cs" />
-    <Compile Include="Expressions\SerializableNewExpression.cs" />
-    <Compile Include="Expressions\SerializableParameterExpression.cs" />
-    <Compile Include="Expressions\SerializableRuntimeVariablesExpression.cs" />
-    <Compile Include="Expressions\SerializableSwitchExpression.cs" />
-    <Compile Include="Expressions\SerializableTryExpression.cs" />
-    <Compile Include="Expressions\SerializableTypeBinaryExpression.cs" />
-    <Compile Include="Expressions\SerializableUnaryExpression.cs" />
     <Compile Include="LocalEvaluationContext.cs" />
     <Compile Include="LocalEvaluationVisitor.cs" />
     <Compile Include="ImmediateLocalEvaluator.cs" />
@@ -203,6 +177,12 @@
       <LastGenOutput>Errors.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ReactiveQ.Expressions\ReactiveQ.Expressions.csproj">
+      <Project>{63f23287-b0d8-408e-995d-bf15a85cee48}</Project>
+      <Name>ReactiveQ.Expressions</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{AB656064
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveQ", "Source\ReactiveQ\ReactiveQ.csproj", "{9B68408D-1974-4F76-9C89-ECCD466A25E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveQ.Expressions", "Source\ReactiveQ.Expressions\ReactiveQ.Expressions.csproj", "{63F23287-B0D8-408E-995D-BF15A85CEE48}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{9B68408D-1974-4F76-9C89-ECCD466A25E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B68408D-1974-4F76-9C89-ECCD466A25E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B68408D-1974-4F76-9C89-ECCD466A25E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63F23287-B0D8-408E-995D-BF15A85CEE48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63F23287-B0D8-408E-995D-BF15A85CEE48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63F23287-B0D8-408E-995D-BF15A85CEE48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63F23287-B0D8-408E-995D-BF15A85CEE48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,5 +62,6 @@ Global
 		{FB7FC098-A383-4EB6-8ED1-8D27EC68A55F} = {BCC25A8F-A4FB-44A7-9369-D48D46115BB1}
 		{307C321F-1054-43BE-9977-6973E4636192} = {BCC25A8F-A4FB-44A7-9369-D48D46115BB1}
 		{9B68408D-1974-4F76-9C89-ECCD466A25E0} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
+		{63F23287-B0D8-408E-995D-BF15A85CEE48} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
 	EndGlobalSection
 EndGlobal
