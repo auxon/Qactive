@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>QbservableClient</RootNamespace>
     <AssemblyName>QbservableClient</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SccProjectName>SAK</SccProjectName>
@@ -86,10 +86,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\QbservableProvider\QbservableProvider.csproj">
-      <Project>{9b68408d-1974-4f76-9c89-eccd466a25e0}</Project>
-      <Name>QbservableProvider</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SharedLibrary\SharedLibrary.csproj">
       <Project>{307c321f-1054-43be-9977-6973e4636192}</Project>
       <Name>SharedLibrary</Name>

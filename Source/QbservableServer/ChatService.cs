@@ -4,7 +4,7 @@ using System.Net;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using QbservableProvider;
+using ReactiveQ;
 using SharedLibrary;
 
 namespace QbservableServer

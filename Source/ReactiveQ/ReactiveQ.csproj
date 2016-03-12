@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9B68408D-1974-4F76-9C89-ECCD466A25E0}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ReactiveQ</RootNamespace>
+    <AssemblyName>ReactiveQ</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <CodeContractsEnableRuntimeChecking>False</CodeContractsEnableRuntimeChecking>
+    <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
+    <CodeContractsRuntimeThrowOnFailure>False</CodeContractsRuntimeThrowOnFailure>
+    <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
+    <CodeContractsRuntimeSkipQuantifiers>False</CodeContractsRuntimeSkipQuantifiers>
+    <CodeContractsRunCodeAnalysis>False</CodeContractsRunCodeAnalysis>
+    <CodeContractsNonNullObligations>False</CodeContractsNonNullObligations>
+    <CodeContractsBoundsObligations>False</CodeContractsBoundsObligations>
+    <CodeContractsArithmeticObligations>False</CodeContractsArithmeticObligations>
+    <CodeContractsEnumObligations>False</CodeContractsEnumObligations>
+    <CodeContractsRedundantAssumptions>False</CodeContractsRedundantAssumptions>
+    <CodeContractsInferRequires>False</CodeContractsInferRequires>
+    <CodeContractsInferEnsures>False</CodeContractsInferEnsures>
+    <CodeContractsInferObjectInvariants>False</CodeContractsInferObjectInvariants>
+    <CodeContractsSuggestAssumptions>False</CodeContractsSuggestAssumptions>
+    <CodeContractsSuggestRequires>True</CodeContractsSuggestRequires>
+    <CodeContractsSuggestEnsures>False</CodeContractsSuggestEnsures>
+    <CodeContractsSuggestObjectInvariants>False</CodeContractsSuggestObjectInvariants>
+    <CodeContractsDisjunctiveRequires>False</CodeContractsDisjunctiveRequires>
+    <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
+    <CodeContractsShowSquigglies>False</CodeContractsShowSquigglies>
+    <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
+    <CodeContractsEmitXMLDocs>False</CodeContractsEmitXMLDocs>
+    <CodeContractsCustomRewriterAssembly />
+    <CodeContractsCustomRewriterClass />
+    <CodeContractsLibPaths />
+    <CodeContractsExtraRewriteOptions />
+    <CodeContractsExtraAnalysisOptions />
+    <CodeContractsBaseLineFile />
+    <CodeContractsCacheAnalysisResults>False</CodeContractsCacheAnalysisResults>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsReferenceAssembly>%28none%29</CodeContractsReferenceAssembly>
+    <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>Properties\TCPQPTemp.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-Interfaces.2.2.5\lib\net45\System.Reactive.Interfaces.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-Linq.2.2.5\lib\net45\System.Reactive.Linq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Reactive.PlatformServices, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Reactive.Providers, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-Providers.2.2.5\lib\net45\System.Reactive.Providers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AsyncConsumerQueue.cs" />
+    <Compile Include="Either.cs" />
+    <Compile Include="Either{TLeft,TRight}.cs" />
+    <Compile Include="IParameterizedQbservableProvider.cs" />
+    <Compile Include="KnownTypeContext.cs" />
+    <Compile Include="ExceptionDispatchInfoEqualityComparer.cs" />
+    <Compile Include="ExpressionOptions.cs" />
+    <Compile Include="QbservableTcpServer - Secure.cs" />
+    <Compile Include="DefaultServerDuplexQbservableProtocolSink.cs" />
+    <Compile Include="DuplexCallbackId.cs" />
+    <Compile Include="ExpressionSecurityException.cs" />
+    <Compile Include="IServerDuplexQbservableProtocolSink.cs" />
+    <Compile Include="Extensions\Observable3.cs" />
+    <Compile Include="ServerDuplexQbservableProtocolSink.cs" />
+    <Compile Include="DuplexQbservableMessage.cs" />
+    <Compile Include="IClientDuplexQbservableProtocolSink.cs" />
+    <Compile Include="DefaultClientDuplexQbservableProtocolSink.cs" />
+    <Compile Include="IProtocolMessage.cs" />
+    <Compile Include="QbservableProtocolSink{TMessage}.cs" />
+    <Compile Include="QbservableMessage.cs" />
+    <Compile Include="QbservableProtocol{TMessage}.cs" />
+    <Compile Include="DefaultQbservableProtocol.cs" />
+    <Compile Include="DuplexCallback.cs" />
+    <Compile Include="DuplexLocalEvaluator.cs" />
+    <Compile Include="ClientDuplexQbservableProtocolSink.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="LocalEvaluator.cs" />
+    <Compile Include="Properties\Errors.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Errors.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Expressions\SerializableBinaryExpression.cs" />
+    <Compile Include="Expressions\SerializableBlockExpression.cs" />
+    <Compile Include="Expressions\SerializableConditionalExpression.cs" />
+    <Compile Include="Expressions\SerializableConstantExpression.cs" />
+    <Compile Include="Expressions\SerializableDefaultExpression.cs" />
+    <Compile Include="Expressions\SerializableExpression.cs" />
+    <Compile Include="Expressions\SerializableExpressionConverter.cs" />
+    <Compile Include="Expressions\SerializableExpressionExtensions.cs" />
+    <Compile Include="Expressions\SerializableGotoExpression.cs" />
+    <Compile Include="Expressions\SerializableIndexExpression.cs" />
+    <Compile Include="Expressions\SerializableInvocationExpression.cs" />
+    <Compile Include="Expressions\SerializableLabelExpression.cs" />
+    <Compile Include="Expressions\SerializableLambdaExpression.cs" />
+    <Compile Include="Expressions\SerializableListInitExpression.cs" />
+    <Compile Include="Expressions\SerializableLoopExpression.cs" />
+    <Compile Include="Expressions\SerializableMemberExpression.cs" />
+    <Compile Include="Expressions\SerializableMemberInitExpression.cs" />
+    <Compile Include="Expressions\SerializableMethodCallExpression.cs" />
+    <Compile Include="Expressions\SerializableNewArrayExpression.cs" />
+    <Compile Include="Expressions\SerializableNewExpression.cs" />
+    <Compile Include="Expressions\SerializableParameterExpression.cs" />
+    <Compile Include="Expressions\SerializableRuntimeVariablesExpression.cs" />
+    <Compile Include="Expressions\SerializableSwitchExpression.cs" />
+    <Compile Include="Expressions\SerializableTryExpression.cs" />
+    <Compile Include="Expressions\SerializableTypeBinaryExpression.cs" />
+    <Compile Include="Expressions\SerializableUnaryExpression.cs" />
+    <Compile Include="LocalEvaluationContext.cs" />
+    <Compile Include="LocalEvaluationVisitor.cs" />
+    <Compile Include="ImmediateLocalEvaluator.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Qbservable2.cs" />
+    <Compile Include="QbservableBase.cs" />
+    <Compile Include="QbservableProviderDiagnostics.cs" />
+    <Compile Include="QbservableProtocol.cs" />
+    <Compile Include="QbservableServiceOptions.cs" />
+    <Compile Include="QbservableProtocolMessageKind.cs" />
+    <Compile Include="QbservableProtocolShutDownReason.cs" />
+    <Compile Include="QbservableSourcePlaceholder.cs" />
+    <Compile Include="QbservableSubscriptionException.cs" />
+    <Compile Include="QbservableTcpServer.cs" />
+    <Compile Include="QbservableTcpClient.cs" />
+    <Compile Include="DuplexCallbackEnumerable.cs" />
+    <Compile Include="DuplexCallbackObservable.cs" />
+    <Compile Include="ReplaceConstantsVisitor.cs" />
+    <Compile Include="CompilerGenerated.cs" />
+    <Compile Include="SecurityExpressionVisitor.cs" />
+    <Compile Include="QbservableServiceConverter.cs" />
+    <Compile Include="ServiceEvaluationContext.cs" />
+    <Compile Include="TcpClientTermination.cs" />
+    <Compile Include="TcpClientQbservableProvider.cs" />
+    <Compile Include="TcpClientQuery.cs" />
+    <Compile Include="TcpServerQbservableProvider.cs" />
+    <Compile Include="TcpServerQuery.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\TCPQPTemp.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Errors.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Errors.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

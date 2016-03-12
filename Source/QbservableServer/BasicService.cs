@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Reactive.Linq;
-using QbservableProvider;
+using ReactiveQ;
 using SharedLibrary;
 
 namespace QbservableServer
