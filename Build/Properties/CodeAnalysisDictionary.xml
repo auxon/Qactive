@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Dictionary xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="CodeAnalysisDictionary.xsd">
+	<Words>
+		<Unrecognized>
+		</Unrecognized>
+
+		<Recognized>
+		</Recognized>
+
+		<Compound>
+		</Compound>
+
+		<DiscreteExceptions>
+		</DiscreteExceptions>
+	</Words>
+
+	<Acronyms>
+		<CasingExceptions>
+		</CasingExceptions>
+	</Acronyms>
+
+</Dictionary>

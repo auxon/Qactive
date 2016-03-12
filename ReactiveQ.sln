@@ -21,11 +21,20 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{AB656064-E9C9-41A8-B447-2F658A0CB424}"
 	ProjectSection(SolutionItems) = preProject
 		Build\Deploy.targets = Build\Deploy.targets
+		ReactiveQ.vssettings = ReactiveQ.vssettings
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveQ", "Source\ReactiveQ\ReactiveQ.csproj", "{9B68408D-1974-4F76-9C89-ECCD466A25E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReactiveQ.Expressions", "Source\ReactiveQ.Expressions\ReactiveQ.Expressions.csproj", "{63F23287-B0D8-408E-995D-BF15A85CEE48}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Properties", "Properties", "{DDC0126B-16BC-49C0-8B11-31856E565F4F}"
+	ProjectSection(SolutionItems) = preProject
+		Build\Properties\AssemblyInfoShared.cs = Build\Properties\AssemblyInfoShared.cs
+		Build\Properties\CodeAnalysis.ruleset = Build\Properties\CodeAnalysis.ruleset
+		Build\Properties\CodeAnalysisDictionary.xml = Build\Properties\CodeAnalysisDictionary.xml
+		Build\Properties\CodeAnalysisDictionary.xsd = Build\Properties\CodeAnalysisDictionary.xsd
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,5 +72,6 @@ Global
 		{307C321F-1054-43BE-9977-6973E4636192} = {BCC25A8F-A4FB-44A7-9369-D48D46115BB1}
 		{9B68408D-1974-4F76-9C89-ECCD466A25E0} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
 		{63F23287-B0D8-408E-995D-BF15A85CEE48} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
+		{DDC0126B-16BC-49C0-8B11-31856E565F4F} = {AB656064-E9C9-41A8-B447-2F658A0CB424}
 	EndGlobalSection
 EndGlobal
