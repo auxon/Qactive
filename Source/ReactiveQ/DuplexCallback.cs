@@ -12,7 +12,7 @@ namespace ReactiveQ
   [Serializable]
   internal class DuplexCallback
   {
-    public bool CanInvoke => sink != null;
+    public bool CanInvoke => sink != null && protocol != null;
 
     protected IServerDuplexQbservableProtocolSink Sink => sink;
 
@@ -172,23 +172,38 @@ namespace ReactiveQ
     {
       Contract.Requires(CanInvoke);
 
-      var value = (TResult)sink.Invoke(id, arguments);
-
-      var callback = value as DuplexCallback;
-
-      if (callback != null)
+      try
       {
-        callback.sink = sink;
-      }
+        var value = (TResult)sink.Invoke(id, arguments);
 
-      return value;
+        var callback = value as DuplexCallback;
+
+        if (callback != null)
+        {
+          callback.sink = sink;
+        }
+
+        return value;
+      }
+      catch (Exception ex)
+      {
+        protocol.CancelAllCommunication(ex);
+        throw;
+      }
     }
 
     public void ServerInvoke(object[] arguments)
     {
       Contract.Requires(CanInvoke);
 
-      sink.Invoke(id, arguments);
+      try
+      {
+        sink.Invoke(id, arguments);
+      }
+      catch (Exception ex)
+      {
+        protocol.CancelAllCommunication(ex);
+      }
     }
   }
 }
