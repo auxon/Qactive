@@ -6,24 +6,21 @@ using System.Reflection;
 
 namespace Qactive.Expressions
 {
-	[Serializable]
-	internal sealed class SerializableMemberInitExpression : SerializableExpression
-	{
-		public readonly IList<Tuple<Tuple<MemberInfo, Type[]>, MemberBindingType, SerializableExpression, List<Tuple<Tuple<MethodInfo, Type[]>, IList<SerializableExpression>>>, IList<object>>> Bindings;
-		public readonly SerializableNewExpression NewExpression;
+  [Serializable]
+  internal sealed class SerializableMemberInitExpression : SerializableExpression
+  {
+    public readonly IList<Tuple<Tuple<MemberInfo, Type[]>, MemberBindingType, SerializableExpression, List<Tuple<Tuple<MethodInfo, Type[]>, IList<SerializableExpression>>>, IList<object>>> Bindings;
+    public readonly SerializableNewExpression NewExpression;
 
-		public SerializableMemberInitExpression(MemberInitExpression expression, SerializableExpressionConverter converter)
-			: base(expression)
-		{
-			Bindings = expression.Bindings.Select(converter.Convert).ToList();
-			NewExpression = converter.Convert<SerializableNewExpression>(expression.NewExpression);
-		}
+    public SerializableMemberInitExpression(MemberInitExpression expression, SerializableExpressionConverter converter)
+      : base(expression)
+    {
+      Bindings = expression.Bindings.Select(converter.Convert).ToList();
+      NewExpression = converter.Convert<SerializableNewExpression>(expression.NewExpression);
+    }
 
-		internal override Expression Convert()
-		{
-			return Expression.MemberInit(
-				NewExpression.TryConvert<NewExpression>(),
-				Bindings.Select(SerializableExpressionConverter.Convert));
-		}
-	}
+    internal override Expression Convert() => Expression.MemberInit(
+                                                NewExpression.TryConvert<NewExpression>(),
+                                                Bindings.Select(SerializableExpressionConverter.Convert));
+  }
 }

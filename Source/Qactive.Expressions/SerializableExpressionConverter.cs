@@ -39,35 +39,12 @@ namespace Qactive.Expressions
     private UnaryExpression unary;
 
     public IList<TSerializableExpression> Convert<TSerializableExpression>(IEnumerable<Expression> expressions)
-      where TSerializableExpression : SerializableExpression
-    {
-      if (expressions == null)
-      {
-        return new List<TSerializableExpression>(0);
-      }
-      else
-      {
-        return expressions.Select(Convert).Cast<TSerializableExpression>().ToList();
-      }
-    }
+      where TSerializableExpression : SerializableExpression => expressions?.Select(Convert).Cast<TSerializableExpression>().ToList() ?? new List<TSerializableExpression>(0);
 
-    public IList<SerializableExpression> Convert(IEnumerable<Expression> expressions)
-    {
-      if (expressions == null)
-      {
-        return new List<SerializableExpression>(0);
-      }
-      else
-      {
-        return expressions.Select(Convert).ToList();
-      }
-    }
+    public IList<SerializableExpression> Convert(IEnumerable<Expression> expressions) => expressions?.Select(Convert).ToList() ?? new List<SerializableExpression>(0);
 
     public TSerializableExpression Convert<TSerializableExpression>(Expression expression)
-      where TSerializableExpression : SerializableExpression
-    {
-      return (TSerializableExpression)Convert(expression);
-    }
+      where TSerializableExpression : SerializableExpression => (TSerializableExpression)Convert(expression);
 
     public SerializableExpression Convert(Expression expression)
     {
@@ -180,38 +157,17 @@ namespace Qactive.Expressions
       }
     }
 
-    public Expression Convert(SerializableExpression expression)
-    {
-      return expression.TryConvert();
-    }
+    public Expression Convert(SerializableExpression expression) => expression.TryConvert();
 
     // Workaround for a bug deserializing closed generic methods.
     // https://connect.microsoft.com/VisualStudio/feedback/details/736993/bound-generic-methodinfo-throws-argumentnullexception-on-deserialization
-    public Tuple<MethodInfo, Type[]> Convert(MethodInfo method)
-    {
-      if (method != null && method.IsGenericMethod && !method.IsGenericMethodDefinition)
-      {
-        return Tuple.Create(method.GetGenericMethodDefinition(), method.GetGenericArguments());
-      }
-      else
-      {
-        return Tuple.Create(method, (Type[])null);
-      }
-    }
+    public Tuple<MethodInfo, Type[]> Convert(MethodInfo method) => method != null && method.IsGenericMethod && !method.IsGenericMethodDefinition
+                                                                 ? Tuple.Create(method.GetGenericMethodDefinition(), method.GetGenericArguments())
+                                                                 : Tuple.Create(method, (Type[])null);
 
     // Workaround for a bug deserializing closed generic methods.
     // https://connect.microsoft.com/VisualStudio/feedback/details/736993/bound-generic-methodinfo-throws-argumentnullexception-on-deserialization
-    public static MethodInfo Convert(Tuple<MethodInfo, Type[]> method)
-    {
-      if (method.Item2 == null)
-      {
-        return method.Item1;
-      }
-      else
-      {
-        return method.Item1.MakeGenericMethod(method.Item2);
-      }
-    }
+    public static MethodInfo Convert(Tuple<MethodInfo, Type[]> method) => method.Item2 == null ? method.Item1 : method.Item1.MakeGenericMethod(method.Item2);
 
     public Tuple<MemberInfo, Type[]> Convert(MemberInfo member)
     {
@@ -243,17 +199,7 @@ namespace Qactive.Expressions
       }
     }
 
-    public IList<Tuple<MemberInfo, Type[]>> Convert(IEnumerable<MemberInfo> members)
-    {
-      if (members == null)
-      {
-        return new List<Tuple<MemberInfo, Type[]>>(0);
-      }
-      else
-      {
-        return members.Select(Convert).ToList();
-      }
-    }
+    public IList<Tuple<MemberInfo, Type[]>> Convert(IEnumerable<MemberInfo> members) => members?.Select(Convert).ToList() ?? new List<Tuple<MemberInfo, Type[]>>(0);
 
     public Tuple<Tuple<MemberInfo, Type[]>, MemberBindingType, SerializableExpression, List<Tuple<Tuple<MethodInfo, Type[]>, IList<SerializableExpression>>>, IList<object>> Convert(MemberBinding binding)
     {

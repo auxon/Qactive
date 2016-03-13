@@ -6,32 +6,16 @@ namespace Qactive.Expressions
   [Serializable]
   public abstract class SerializableExpression
   {
-    public ExpressionType NodeType
-    {
-      get
-      {
-        return nodeType;
-      }
-    }
-
-    public Type Type
-    {
-      get
-      {
-        return type;
-      }
-    }
-
-    private readonly ExpressionType nodeType;
-    private readonly Type type;
+    public ExpressionType NodeType { get; }
+    public Type Type { get; }
 
     [NonSerialized]
     private Expression converted;
 
     public SerializableExpression(Expression expression)
     {
-      this.nodeType = expression.NodeType;
-      this.type = expression.Type;
+      NodeType = expression.NodeType;
+      Type = expression.Type;
     }
 
     /* Caching is required to ensure that expressions referring to the same objects actually refer to the same
@@ -41,10 +25,7 @@ namespace Qactive.Expressions
      * 
      * Expression variable 'p' of type 'System.Int32' referenced from scope '', but it is not defined
      */
-    internal Expression ConvertWithCache()
-    {
-      return converted ?? (converted = Convert());
-    }
+    internal Expression ConvertWithCache() => converted ?? (converted = Convert());
 
     internal abstract Expression Convert();
   }
