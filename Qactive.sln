@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{BC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Artifacts", "Artifacts", "{E63D2A4E-6525-47A0-99C5-E9114F1F1DF7}"
 	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
 		Artifacts\Security Guidelines.txt = Artifacts\Security Guidelines.txt
 	EndProjectSection
 EndProject
