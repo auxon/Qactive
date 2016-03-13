@@ -11,7 +11,7 @@ using System.Resources;
 [assembly: AssemblyConfiguration(AssemblyConstants.Configuration)]
 
 [assembly: AssemblyCompany("Dave Sexton")]
-[assembly: AssemblyProduct("ReactiveQ")]
+[assembly: AssemblyProduct("Qactive")]
 [assembly: AssemblyCopyright("Copyright © 2012-2016 Dave Sexton")]
 [assembly: AssemblyTrademark("")]
 

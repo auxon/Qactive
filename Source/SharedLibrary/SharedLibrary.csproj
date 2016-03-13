@@ -80,6 +80,16 @@
     <None Include="packages.config" />
     <None Include="Properties\SharedLib.snk" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Qactive.Expressions\Qactive.Expressions.csproj">
+      <Project>{63f23287-b0d8-408e-995d-bf15a85cee48}</Project>
+      <Name>Qactive.Expressions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Qactive\Qactive.csproj">
+      <Project>{9b68408d-1974-4f76-9c89-eccd466a25e0}</Project>
+      <Name>Qactive</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

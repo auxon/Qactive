@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.ServiceModel.Syndication;
 using System.Xml;
-using ReactiveQ;
+using Qactive;
 using SharedLibrary;
 
 namespace QbservableServer

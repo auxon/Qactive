@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reflection;
-using ReactiveQ;
+using Qactive;
 using SharedLibrary;
 
 namespace QbservableClient

@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using System.Reflection;
 using System.Security;
 using System.Security.Permissions;
-using ReactiveQ;
+using Qactive;
 using SharedLibrary;
 
 namespace QbservableServer

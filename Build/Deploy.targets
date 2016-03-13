@@ -8,7 +8,7 @@
       <Deploy Include="$(OutDir)\*.config" Exclude="@(OutDir)\*.vshost.config" />
     </ItemGroup>
 
-    <Copy SourceFiles="@(Deploy)" DestinationFolder="$(MSBuildThisFileDirectory)..\Deploy\$(Configuration)\$(MSBuildProjectName)\" />
+    <Copy SourceFiles="@(Deploy)" DestinationFolder="$(MSBuildThisFileDirectory)..\Deployment\$(Configuration)\$(MSBuildProjectName)\" />
   </Target>
 
 </Project>

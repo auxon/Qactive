@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Security;
 using System.Security.Permissions;
 using System.Windows.Forms;
-using ReactiveQ;
+using Qactive;
 using SharedLibrary;
 
 namespace QbservableClient

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Reflection;
-using ReactiveQ;
+using Qactive;
 using SharedLibrary;
 
 namespace QbservableClient

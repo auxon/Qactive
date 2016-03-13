@@ -86,13 +86,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ReactiveQ.Expressions\ReactiveQ.Expressions.csproj">
+    <ProjectReference Include="..\Qactive.Expressions\Qactive.Expressions.csproj">
       <Project>{63f23287-b0d8-408e-995d-bf15a85cee48}</Project>
-      <Name>ReactiveQ.Expressions</Name>
+      <Name>Qactive.Expressions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ReactiveQ\ReactiveQ.csproj">
+    <ProjectReference Include="..\Qactive\Qactive.csproj">
       <Project>{9b68408d-1974-4f76-9c89-eccd466a25e0}</Project>
-      <Name>ReactiveQ</Name>
+      <Name>Qactive</Name>
     </ProjectReference>
     <ProjectReference Include="..\SharedLibrary\SharedLibrary.csproj">
       <Project>{307c321f-1054-43be-9977-6973e4636192}</Project>

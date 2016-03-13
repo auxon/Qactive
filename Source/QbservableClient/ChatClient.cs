@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using ReactiveQ;
+using Qactive;
 using SharedLibrary;
 
 namespace QbservableClient
