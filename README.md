@@ -6,7 +6,8 @@ A reactive queryable observable framework.
 * Depends on [Reactive Extensions (Rx.NET)](https://github.com/Reactive-Extensions/Rx.NET)
 
 ## Download
-**NuGet** packages coming soon.
+[Qactive on NuGet](https://www.nuget.org/packages/qactive) (depends on Qactive.Expressions)
+[Qactive.Expressions on NuGet](https://www.nuget.org/packages/qactive.expressions)
 
 ## Overview
 Qactive builds on Reactive Extension's queryable observable providers, enabling you to write elegant reactive queries that execute server-side, even though they are written on the client.
