@@ -50,7 +50,7 @@ namespace Qactive
     {
       if (call.Method.ReturnType == typeof(void))
       {
-        throw new InvalidOperationException(Errors.ExpressionCallLocalVoidFormat);
+        throw new InvalidOperationException(string.Format(Errors.ExpressionCallLocalVoidFormat, call.Method, call.Object));
       }
 
       object instance = Evaluate(call.Object, visitor, Errors.ExpressionCallMissingLocalInstanceFormat, call.Method);
