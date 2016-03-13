@@ -110,7 +110,17 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
   -->
+  <Target Name="AfterBuild">
+    <PropertyGroup>
+      <SandboxDir Condition=" '$(SandboxDir)' == '' ">$(OutDir)bin\</SandboxDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_Dependencies Include="$(OutDir)*.dll" />
+      <_Dependencies Include="$(OutDir)*.pdb" Exclude="$(TargetFile).pdb" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_Dependencies)" DestinationFolder="$(SandboxDir)" />
+  </Target>
 </Project>

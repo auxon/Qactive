@@ -20,18 +20,20 @@ namespace QbservableServer
     {
       var appBase = Path.GetDirectoryName(new Uri(Assembly.GetEntryAssembly().CodeBase).LocalPath);
 
-#if DEBUG
-      var newAppBase = appBase;
-#else
-			/* Released example apps have all of their dependencies in a bin\ folder.
-			 * It's more secure setting the bin folder as the app domain's base path 
-			 * instead of it being the same as the host app with a probing path.
-			 */
-			var newAppBase = Path.Combine(appBase, "bin");
-#endif
+      // Excluded this logic because the unless the exe is configured to load all assemblies from bin, you end up loading 
+      // two different copies of the same assembly into the AppDomains and the types are incompatible.
+      //#if DEBUG
+      //      var newAppBase = appBase;
+      //#else
+      //			/* Released example apps have all of their dependencies in a bin\ folder.
+      //			 * It's more secure setting the bin folder as the app domain's base path 
+      //			 * instead of it being the same as the host app with a probing path.
+      //			 */
+      //			var newAppBase = Path.Combine(appBase, "bin");
+      //#endif
 
       var service = QbservableTcpServer.CreateService<object, int>(
-        new AppDomainSetup() { ApplicationBase = newAppBase },
+        new AppDomainSetup() { ApplicationBase = appBase },
         endPoint,
         new QbservableServiceOptions() { AllowExpressionsUnrestricted = true },
         new Func<IObservable<object>, IObservable<int>>(CreateService));
