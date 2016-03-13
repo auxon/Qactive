@@ -3,18 +3,18 @@ using System.Collections;
 
 namespace Qactive
 {
-	public interface IClientDuplexQbservableProtocolSink
-	{
-		int RegisterInvokeCallback(Func<object[], object> callback);
+  public interface IClientDuplexQbservableProtocolSink
+  {
+    int RegisterInvokeCallback(Func<object[], object> callback);
 
-		int RegisterEnumerableCallback(Func<IEnumerator> getEnumerator);
+    int RegisterEnumerableCallback(Func<IEnumerator> getEnumerator);
 
-		int RegisterObservableCallback(Func<int, IDisposable> subscribe);
+    int RegisterObservableCallback(Func<int, IDisposable> subscribe);
 
-		void SendOnNext(DuplexCallbackId id, object value);
+    void SendOnNext(DuplexCallbackId id, object value);
 
-		void SendOnError(DuplexCallbackId id, Exception error);
+    void SendOnError(DuplexCallbackId id, Exception error);
 
-		void SendOnCompleted(DuplexCallbackId id);
-	}
+    void SendOnCompleted(DuplexCallbackId id);
+  }
 }

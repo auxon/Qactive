@@ -6,27 +6,27 @@ using System.Reflection;
 
 namespace Qactive
 {
-	internal static class TypeExtensions
-	{
-		private static readonly MethodInfo upCastMethod = typeof(TypeExtensions).GetMethod("UpCast", BindingFlags.NonPublic | BindingFlags.Static);
+  internal static class TypeExtensions
+  {
+    private static readonly MethodInfo upCastMethod = typeof(TypeExtensions).GetMethod("UpCast", BindingFlags.NonPublic | BindingFlags.Static);
 
-		public static IObservable<object> UpCast(this Type dataType, object observable)
-		{
-			return (IObservable<object>) upCastMethod.MakeGenericMethod(dataType).Invoke(null, new[] { observable });
-		}
+    public static IObservable<object> UpCast(this Type dataType, object observable)
+    {
+      return (IObservable<object>)upCastMethod.MakeGenericMethod(dataType).Invoke(null, new[] { observable });
+    }
 
-		private static IObservable<object> UpCast<TSource>(IObservable<TSource> source)
-		{
-			return source.Select(value => (object) value);
-		}
+    private static IObservable<object> UpCast<TSource>(IObservable<TSource> source)
+    {
+      return source.Select(value => (object)value);
+    }
 
-		public static Type GetGenericInterfaceFromDefinition(this Type type, Type interfaceTypeDefinition)
-		{
-			Contract.Requires(interfaceTypeDefinition.IsGenericTypeDefinition);
+    public static Type GetGenericInterfaceFromDefinition(this Type type, Type interfaceTypeDefinition)
+    {
+      Contract.Requires(interfaceTypeDefinition.IsGenericTypeDefinition);
 
-			return type.GetInterfaces()
-				.Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceTypeDefinition)
-				.FirstOrDefault();
-		}
-	}
+      return type.GetInterfaces()
+        .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceTypeDefinition)
+        .FirstOrDefault();
+    }
+  }
 }

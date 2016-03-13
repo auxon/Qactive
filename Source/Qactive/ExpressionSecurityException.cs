@@ -4,26 +4,26 @@ using System.Security;
 
 namespace Qactive
 {
-	[Serializable]
-	internal sealed class ExpressionSecurityException : SecurityException
-	{
-		public ExpressionSecurityException()
-		{
-		}
+  [Serializable]
+  internal sealed class ExpressionSecurityException : SecurityException
+  {
+    public ExpressionSecurityException()
+    {
+    }
 
-		public ExpressionSecurityException(string message)
-			: base(message)
-		{
-		}
+    public ExpressionSecurityException(string message)
+      : base(message)
+    {
+    }
 
-		public ExpressionSecurityException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-		}
+    public ExpressionSecurityException(string message, Exception innerException)
+      : base(message, innerException)
+    {
+    }
 
-		private ExpressionSecurityException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-		}
-	}
+    private ExpressionSecurityException(SerializationInfo info, StreamingContext context)
+      : base(info, context)
+    {
+    }
+  }
 }

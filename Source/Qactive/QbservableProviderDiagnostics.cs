@@ -6,22 +6,22 @@ using System.Security.Permissions;
 
 namespace Qactive
 {
-	internal static class QbservableProviderDiagnostics
-	{
-		private static PropertyInfo debugView;
+  internal static class QbservableProviderDiagnostics
+  {
+    private static PropertyInfo debugView;
 
-		[Conditional("DEBUG")]
-		[PermissionSet(SecurityAction.Assert, Unrestricted = true)]
-		public static void DebugPrint(Expression expression, string category)
-		{
-			if (debugView == null)
-			{
-				debugView = typeof(Expression).GetProperty("DebugView", BindingFlags.NonPublic | BindingFlags.Instance);
-			}
+    [Conditional("DEBUG")]
+    [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
+    public static void DebugPrint(Expression expression, string category)
+    {
+      if (debugView == null)
+      {
+        debugView = typeof(Expression).GetProperty("DebugView", BindingFlags.NonPublic | BindingFlags.Instance);
+      }
 
-			var value = debugView.GetValue(expression);
+      var value = debugView.GetValue(expression);
 
-			Debug.WriteLine(Environment.NewLine + value, category);
-		}
-	}
+      Debug.WriteLine(Environment.NewLine + value, category);
+    }
+  }
 }

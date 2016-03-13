@@ -2,110 +2,110 @@
 
 namespace Qactive
 {
-	[Serializable]
-	public sealed class QbservableServiceOptions
-	{
-		public static readonly QbservableServiceOptions Default = new QbservableServiceOptions()
-			{
-				frozen = true,
-				evaluationContext = new ServiceEvaluationContext()
-			};
+  [Serializable]
+  public sealed class QbservableServiceOptions
+  {
+    public static readonly QbservableServiceOptions Default = new QbservableServiceOptions()
+    {
+      frozen = true,
+      evaluationContext = new ServiceEvaluationContext()
+    };
 
-		public bool SendServerErrorsToClients
-		{
-			get
-			{
-				return sendServerErrorsToClients;
-			}
-			set
-			{
-				if (frozen)
-				{
-					throw new NotSupportedException();
-				}
+    public bool SendServerErrorsToClients
+    {
+      get
+      {
+        return sendServerErrorsToClients;
+      }
+      set
+      {
+        if (frozen)
+        {
+          throw new NotSupportedException();
+        }
 
-				sendServerErrorsToClients = value;
-			}
-		}
+        sendServerErrorsToClients = value;
+      }
+    }
 
-		public bool EnableDuplex
-		{
-			get
-			{
-				return enableDuplex;
-			}
-			set
-			{
-				if (frozen)
-				{
-					throw new NotSupportedException();
-				}
+    public bool EnableDuplex
+    {
+      get
+      {
+        return enableDuplex;
+      }
+      set
+      {
+        if (frozen)
+        {
+          throw new NotSupportedException();
+        }
 
-				enableDuplex = value;
-			}
-		}
+        enableDuplex = value;
+      }
+    }
 
-		public bool AllowExpressionsUnrestricted
-		{
-			get
-			{
-				return allowExpressionsUnrestricted;
-			}
-			set
-			{
-				if (frozen)
-				{
-					throw new NotSupportedException();
-				}
+    public bool AllowExpressionsUnrestricted
+    {
+      get
+      {
+        return allowExpressionsUnrestricted;
+      }
+      set
+      {
+        if (frozen)
+        {
+          throw new NotSupportedException();
+        }
 
-				allowExpressionsUnrestricted = value;
-			}
-		}
+        allowExpressionsUnrestricted = value;
+      }
+    }
 
-		public ExpressionOptions ExpressionOptions
-		{
-			get
-			{
-				return expressionOptions;
-			}
-			set
-			{
-				if (frozen)
-				{
-					throw new NotSupportedException();
-				}
+    public ExpressionOptions ExpressionOptions
+    {
+      get
+      {
+        return expressionOptions;
+      }
+      set
+      {
+        if (frozen)
+        {
+          throw new NotSupportedException();
+        }
 
-				expressionOptions = value;
-			}
-		}
+        expressionOptions = value;
+      }
+    }
 
-		public ServiceEvaluationContext EvaluationContext
-		{
-			get
-			{
-				if (evaluationContext == null)
-				{
-					evaluationContext = new ServiceEvaluationContext();
-				}
+    public ServiceEvaluationContext EvaluationContext
+    {
+      get
+      {
+        if (evaluationContext == null)
+        {
+          evaluationContext = new ServiceEvaluationContext();
+        }
 
-				return evaluationContext;
-			}
-			set
-			{
-				if (frozen)
-				{
-					throw new NotSupportedException();
-				}
+        return evaluationContext;
+      }
+      set
+      {
+        if (frozen)
+        {
+          throw new NotSupportedException();
+        }
 
-				evaluationContext = value;
-			}
-		}
+        evaluationContext = value;
+      }
+    }
 
-		private bool frozen;
-		private bool sendServerErrorsToClients;
-		private bool enableDuplex;
-		private bool allowExpressionsUnrestricted;
-		private ExpressionOptions expressionOptions;
-		private ServiceEvaluationContext evaluationContext;
-	}
+    private bool frozen;
+    private bool sendServerErrorsToClients;
+    private bool enableDuplex;
+    private bool allowExpressionsUnrestricted;
+    private ExpressionOptions expressionOptions;
+    private ServiceEvaluationContext evaluationContext;
+  }
 }

@@ -4,17 +4,17 @@ using System.Reactive.Disposables;
 
 namespace Qactive
 {
-	[Serializable]
-	internal sealed class DuplexCallbackObservable<T> : DuplexCallback, IObservable<T>
-	{
-		public DuplexCallbackObservable(int id)
-			: base(id)
-		{
-		}
+  [Serializable]
+  internal sealed class DuplexCallbackObservable<T> : DuplexCallback, IObservable<T>
+  {
+    public DuplexCallbackObservable(int id)
+      : base(id)
+    {
+    }
 
-		public IDisposable Subscribe(IObserver<T> observer)
-		{
-			/* In testing, the observer permanently blocked incoming data from the client unless concurrency was introduced.
+    public IDisposable Subscribe(IObserver<T> observer)
+    {
+      /* In testing, the observer permanently blocked incoming data from the client unless concurrency was introduced.
 			 * The order of events were as follows: 
 			 * 
 			 * 1. The server received an OnNext notification from an I/O completion port.
@@ -27,38 +27,38 @@ namespace Qactive
 			 * further data from being received, even via the Stream.AsyncRead method.  Apparently the only solution is to ensure 
 			 * that observable callbacks occur on pooled threads to prevent I/O completion ports from inadvertantly being blocked.
 			 */
-			var scheduler = TaskPoolScheduler.Default;
+      var scheduler = TaskPoolScheduler.Default;
 
-			Action<Action> tryExecute =
-				action =>
-				{
-					scheduler.Schedule(() =>
-					{
-						try
-						{
-							action();
-						}
-						catch (Exception ex)
-						{
-							Protocol.CancelAllCommunication(ex);
-						}
-					});
-				};
+      Action<Action> tryExecute =
+        action =>
+        {
+          scheduler.Schedule(() =>
+          {
+            try
+            {
+              action();
+            }
+            catch (Exception ex)
+            {
+              Protocol.CancelAllCommunication(ex);
+            }
+          });
+        };
 
-			try
-			{
-				return Sink.Subscribe(
-					Id,
-					value => tryExecute(() => observer.OnNext((T) value)),
-					ex => tryExecute(() => observer.OnError(ex)),
-					() => tryExecute(observer.OnCompleted));
-			}
-			catch (Exception ex)
-			{
-				Protocol.CancelAllCommunication(ex);
+      try
+      {
+        return Sink.Subscribe(
+          Id,
+          value => tryExecute(() => observer.OnNext((T)value)),
+          ex => tryExecute(() => observer.OnError(ex)),
+          () => tryExecute(observer.OnCompleted));
+      }
+      catch (Exception ex)
+      {
+        Protocol.CancelAllCommunication(ex);
 
-				return Disposable.Empty;
-			}
-		}
-	}
+        return Disposable.Empty;
+      }
+    }
+  }
 }
