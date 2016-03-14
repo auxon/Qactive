@@ -1,22 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Dictionary xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="CodeAnalysisDictionary.xsd">
-	<Words>
-		<Unrecognized>
-		</Unrecognized>
+  <Words>
+    <Unrecognized>
+    </Unrecognized>
 
-		<Recognized>
-		</Recognized>
+    <Recognized>
+      <Word>Qactive</Word>
+      <Word>Qbservable</Word>
+      <Word>IQbservable</Word>
+      <Word>Remotable</Word>
+    </Recognized>
 
-		<Compound>
-		</Compound>
+    <Compound>
+    </Compound>
 
-		<DiscreteExceptions>
-		</DiscreteExceptions>
-	</Words>
+    <DiscreteExceptions>
+    </DiscreteExceptions>
+  </Words>
 
-	<Acronyms>
-		<CasingExceptions>
-		</CasingExceptions>
-	</Acronyms>
+  <Acronyms>
+    <CasingExceptions>
+    </CasingExceptions>
+  </Acronyms>
 
 </Dictionary>
