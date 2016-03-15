@@ -49,7 +49,7 @@ For more information, see [this series of blog posts](http://davesexton.com/blog
 The following example creates a _cold_ observable sequence that generates a new notification every second and exposes it as an `IQbservable<long>` service over TCP port 3205 on the local computer.
 
 ### Server
-```
+```c#
 IObservable<long> source = Observable.Interval(TimeSpan.FromSeconds(1));
 
 var service = source.ServeQbservableTcp(new IPEndPoint(IPAddress.Loopback, 3205));
@@ -65,7 +65,7 @@ using (service.Subscribe(
 The following example creates a LINQ query over the `IQbservable<long>` service that is created by the previous example.  Subscribing to the query on the client causes the query to be serialized to the server and executed there.  In other words, the `where` clause is actually executed on the server so that the client only receives the data that it requested without having to do any filtering itself.  The client will receive the first six values, one per second.  The server then filters out the next 2 values - it does not send them to the client.  Finally, the remaining values are sent to the client until either the client or the server disposes of the subscription.
 
 ### Client
-```
+```c#
 var client = new QbservableTcpClient<long>(new IPEndPoint(IPAddress.Loopback, 3205));
 
 IQbservable<long> query =
