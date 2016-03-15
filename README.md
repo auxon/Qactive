@@ -54,9 +54,8 @@ IObservable<long> source = Observable.Interval(TimeSpan.FromSeconds(1));
 
 var service = source.ServeQbservableTcp(new IPEndPoint(IPAddress.Loopback, 3205));
 
-using (service.SubscribeEither(
+using (service.Subscribe(
 	client => Console.WriteLine("Client shutdown."),
-	ex => Console.WriteLine("Error: {0}", ex.Message),
 	ex => Console.WriteLine("Fatal error: {0}", ex.Message),
 	() => Console.WriteLine("This will never be printed because a service host never completes.")))
 {
