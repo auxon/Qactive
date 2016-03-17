@@ -43,7 +43,9 @@ namespace QbservableServer
         {
           foreach (var ex in terminatedClient.Exceptions)
           {
-            ConsoleTrace.WriteLine(ConsoleColor.Magenta, "Sandboxed service error: " + ex.SourceException.Message);
+            var security = ex.SourceException as SecurityException;
+
+            ConsoleTrace.WriteLine(ConsoleColor.Magenta, "Sandboxed service error: " + security?.Demanded ?? ex.SourceException.Message);
           }
 
           ConsoleTrace.WriteLine(ConsoleColor.Yellow, "Malicious client shutdown: " + terminatedClient.Reason);

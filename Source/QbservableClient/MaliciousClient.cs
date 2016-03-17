@@ -23,16 +23,16 @@ namespace QbservableClient
       var client = new QbservableTcpClient<int>(serviceEndPoint, typeof(MessageBox));
 
       /* The sandboxed service does not prevent Console.WriteLine because that API doesn't demand any permissions.
-			 * This shows why setting AllowExpressionsUnrestricted to true is a bad idea, unless you trust all clients.
-			 */
+       * This shows why setting AllowExpressionsUnrestricted to true is a bad idea, unless you trust all clients.
+       */
       IQbservable<string> query1 = client.Query()
         .Take(1)
         .Do(_ => Console.WriteLine("Hello from malicious client!"))
         .Select(_ => "Malicious message sent successfully.");
 
       /* The default expression limiter does not prevent Environment.CurrentDirectory from being read because it's a property.
-			 * This shows why hosting services in a sandboxed AppDomain is a good idea, unless you trust all clients.
-			 */
+       * This shows why hosting services in a sandboxed AppDomain is a good idea, unless you trust all clients.
+       */
       IQbservable<string> query2 = client.Query()
         .Take(1)
         .Select(_ => Environment.CurrentDirectory);
@@ -84,7 +84,7 @@ namespace QbservableClient
         Console.WriteLine();
         Console.WriteLine("Malicious client started.  Waiting for service errors...");
         Console.WriteLine();
-        Console.WriteLine("(Press any key to stop)");
+        Console.WriteLine("(Press any key to continue)");
         Console.WriteLine();
 
         Console.ReadKey(intercept: true);
@@ -103,7 +103,7 @@ namespace QbservableClient
         Console.WriteLine();
         Console.WriteLine("Waiting for service notifications...");
         Console.WriteLine();
-        Console.WriteLine("(Press any key to stop)");
+        Console.WriteLine("(Press any key to continue)");
         Console.WriteLine();
 
         Console.ReadKey(intercept: true);
