@@ -106,6 +106,7 @@ namespace Qactive
       return null;
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
     protected void Invoke(DuplexCallbackId id, object[] arguments)
     {
       Func<object[], object> callback;
@@ -129,6 +130,8 @@ namespace Qactive
       SendResponse(id, result);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The subscription local is registered with this sink object.")]
     protected void Subscribe(DuplexCallbackId id)
     {
       Func<int, IDisposable> subscribe;
@@ -167,6 +170,7 @@ namespace Qactive
       subscription.Dispose();
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
     protected void GetEnumerator(DuplexCallbackId id)
     {
       var enumerable = GetEnumerable(id.ClientId);
@@ -187,6 +191,7 @@ namespace Qactive
       SendGetEnumeratorResponse(id, enumeratorId);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
     protected void MoveNext(DuplexCallbackId id)
     {
       var enumerator = GetEnumerator(id.ClientId);
@@ -216,6 +221,7 @@ namespace Qactive
       SendEnumeratorResponse(id, result, current);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
     protected void ResetEnumerator(DuplexCallbackId id)
     {
       var enumerator = GetEnumerator(id.ClientId);
@@ -248,16 +254,19 @@ namespace Qactive
 
     protected abstract void SendResponse(DuplexCallbackId id, object result);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected abstract void SendError(DuplexCallbackId id, Exception error);
 
     protected abstract void SendSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId);
 
     protected abstract void SendGetEnumeratorResponse(DuplexCallbackId id, int clientEnumeratorId);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected abstract void SendGetEnumeratorError(DuplexCallbackId id, Exception error);
 
     protected abstract void SendEnumeratorResponse(DuplexCallbackId id, bool result, object current);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected abstract void SendEnumeratorError(DuplexCallbackId id, Exception error);
   }
 }

@@ -18,7 +18,7 @@ namespace Qactive.Expressions
       : base(expression)
     {
       Cases = expression.Cases.Select(c => Tuple.Create(converter.Convert(c.Body), converter.Convert(c.TestValues))).ToList();
-      Comparison = converter.Convert(expression.Comparison);
+      Comparison = SerializableExpressionConverter.Convert(expression.Comparison);
       DefaultBody = converter.Convert(expression.DefaultBody);
       SwitchValue = converter.Convert(expression.SwitchValue);
     }

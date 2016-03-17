@@ -46,6 +46,8 @@ namespace Qactive.Expressions
     public TSerializableExpression Convert<TSerializableExpression>(Expression expression)
       where TSerializableExpression : SerializableExpression => (TSerializableExpression)Convert(expression);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "It's not too complex; it's a simple factory method for a fixed number of concrete types.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "It's a factory method, so it must know about all concrete implementations.")]
     public SerializableExpression Convert(Expression expression)
     {
       if (expression == null)
@@ -69,7 +71,7 @@ namespace Qactive.Expressions
       }
       else if ((constant = expression as ConstantExpression) != null)
       {
-        return serialized[expression] = new SerializableConstantExpression(constant, this);
+        return serialized[expression] = new SerializableConstantExpression(constant);
       }
       else if ((member = expression as MemberExpression) != null)
       {
@@ -89,7 +91,7 @@ namespace Qactive.Expressions
       }
       else if ((@default = expression as DefaultExpression) != null)
       {
-        return serialized[expression] = new SerializableDefaultExpression(@default, this);
+        return serialized[expression] = new SerializableDefaultExpression(@default);
       }
       else if ((@goto = expression as GotoExpression) != null)
       {
@@ -129,7 +131,7 @@ namespace Qactive.Expressions
       }
       else if ((parameter = expression as ParameterExpression) != null)
       {
-        return serialized[expression] = new SerializableParameterExpression(parameter, this);
+        return serialized[expression] = new SerializableParameterExpression(parameter);
       }
       else if ((runtimeVariables = expression as RuntimeVariablesExpression) != null)
       {
@@ -157,21 +159,21 @@ namespace Qactive.Expressions
       }
     }
 
-    public Expression Convert(SerializableExpression expression) => expression.TryConvert();
+    public static Expression Convert(SerializableExpression expression) => expression.TryConvert();
 
     // Workaround for a bug deserializing closed generic methods.
     // https://connect.microsoft.com/VisualStudio/feedback/details/736993/bound-generic-methodinfo-throws-argumentnullexception-on-deserialization
-    public Tuple<MethodInfo, Type[]> Convert(MethodInfo method) => method != null && method.IsGenericMethod && !method.IsGenericMethodDefinition
-                                                                 ? Tuple.Create(method.GetGenericMethodDefinition(), method.GetGenericArguments())
-                                                                 : Tuple.Create(method, (Type[])null);
+    public static Tuple<MethodInfo, Type[]> Convert(MethodInfo method) => method != null && method.IsGenericMethod && !method.IsGenericMethodDefinition
+                                                                        ? Tuple.Create(method.GetGenericMethodDefinition(), method.GetGenericArguments())
+                                                                        : Tuple.Create(method, (Type[])null);
 
     // Workaround for a bug deserializing closed generic methods.
     // https://connect.microsoft.com/VisualStudio/feedback/details/736993/bound-generic-methodinfo-throws-argumentnullexception-on-deserialization
     public static MethodInfo Convert(Tuple<MethodInfo, Type[]> method) => method.Item2 == null ? method.Item1 : method.Item1.MakeGenericMethod(method.Item2);
 
-    public Tuple<MemberInfo, Type[]> Convert(MemberInfo member)
+    public Tuple<MemberInfo, Type[]> Convert(MemberInfo source)
     {
-      var method = member as MethodInfo;
+      var method = source as MethodInfo;
 
       if (method != null)
       {
@@ -181,7 +183,7 @@ namespace Qactive.Expressions
       }
       else
       {
-        return Tuple.Create(member, (Type[])null);
+        return Tuple.Create(source, (Type[])null);
       }
     }
 
@@ -199,8 +201,10 @@ namespace Qactive.Expressions
       }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Creating a custom type here would probably either require generics again or casting. It's fine as is.")]
     public IList<Tuple<MemberInfo, Type[]>> Convert(IEnumerable<MemberInfo> members) => members?.Select(Convert).ToList() ?? new List<Tuple<MemberInfo, Type[]>>(0);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Creating a custom type here would probably either require generics again or casting. It's fine as is.")]
     public Tuple<Tuple<MemberInfo, Type[]>, MemberBindingType, SerializableExpression, List<Tuple<Tuple<MethodInfo, Type[]>, IList<SerializableExpression>>>, IList<object>> Convert(MemberBinding binding)
     {
       switch (binding.BindingType)
@@ -224,19 +228,20 @@ namespace Qactive.Expressions
             list.Initializers.Select(i => Tuple.Create(Convert(i.AddMethod), Convert(i.Arguments))).ToList(),
             noRecursion);
         case MemberBindingType.MemberBinding:
-          var member = (MemberMemberBinding)binding;
+          var m = (MemberMemberBinding)binding;
 
           return Tuple.Create(
             Convert(binding.Member),
             binding.BindingType,
             noExpression,
             noInitializers,
-            (IList<object>)member.Bindings.Select(Convert).ToList());
+            (IList<object>)m.Bindings.Select(Convert).ToList());
         default:
           throw new InvalidOperationException("Unknown member binding type.");
       }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Creating a custom type here would probably either require generics again or casting. It's fine as is.")]
     public static MemberBinding Convert(Tuple<Tuple<MemberInfo, Type[]>, MemberBindingType, SerializableExpression, List<Tuple<Tuple<MethodInfo, Type[]>, IList<SerializableExpression>>>, IList<object>> data)
     {
       switch (data.Item2)

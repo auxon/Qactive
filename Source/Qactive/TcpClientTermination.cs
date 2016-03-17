@@ -34,7 +34,7 @@ namespace Qactive
       }
     }
 
-    public QbservableProtocolShutDownReason Reason
+    public QbservableProtocolShutdownReason Reason
     {
       get
       {
@@ -52,14 +52,14 @@ namespace Qactive
 
     private readonly EndPoint localEndPoint, remoteEndPoint;
     private readonly TimeSpan duration;
-    private readonly QbservableProtocolShutDownReason reason;
+    private readonly QbservableProtocolShutdownReason reason;
     private readonly ICollection<ExceptionDispatchInfo> exceptions;
 
     public TcpClientTermination(
       EndPoint localEndPoint,
       EndPoint remoteEndPoint,
       TimeSpan duration,
-      QbservableProtocolShutDownReason reason,
+      QbservableProtocolShutdownReason reason,
       IEnumerable<ExceptionDispatchInfo> exceptions)
     {
       this.localEndPoint = localEndPoint;
@@ -77,7 +77,7 @@ namespace Qactive
       localEndPoint = (EndPoint)info.GetValue("localEndPoint", typeof(EndPoint));
       remoteEndPoint = (EndPoint)info.GetValue("remoteEndPoint", typeof(EndPoint));
       duration = (TimeSpan)info.GetValue("duration", typeof(TimeSpan));
-      reason = (QbservableProtocolShutDownReason)info.GetValue("reason", typeof(QbservableProtocolShutDownReason));
+      reason = (QbservableProtocolShutdownReason)info.GetValue("reason", typeof(QbservableProtocolShutdownReason));
       exceptions = ((List<Exception>)info.GetValue("rawExceptions", typeof(List<Exception>)))
         .Select(ExceptionDispatchInfo.Capture)
         .ToList()

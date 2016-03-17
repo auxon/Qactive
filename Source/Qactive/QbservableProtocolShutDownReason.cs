@@ -1,9 +1,10 @@
 ﻿namespace Qactive
 {
-  public enum QbservableProtocolShutDownReason : byte
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1028:EnumStorageShouldBeInt32", Justification = "Underlying type is directly serialized to a byte stream over the net.")]
+  public enum QbservableProtocolShutdownReason : byte
   {
     None,
-    ProtocolNegotiationCancelled,
+    ProtocolNegotiationCanceled,
     ProtocolNegotiationError,
     ProtocolTerminated,
     ObservableTerminated,

@@ -107,7 +107,7 @@ namespace Qactive
           || EnsureGenericTypeArgumentsSerializable(type, genericArgumentsUpdated);
     }
 
-    private bool EnsureCompilerGeneratedTypeIsReplaced(Type type, Action<Type> replaceCompilerGeneratedType = null)
+    private static bool EnsureCompilerGeneratedTypeIsReplaced(Type type, Action<Type> replaceCompilerGeneratedType = null)
     {
       if (type == typeof(CompilerGenerated))
       {

@@ -72,8 +72,8 @@ namespace Qactive
                 case QbservableProtocolMessageKind.OnError:
                   observer.OnError(Deserialize<Exception>(message.Data));
                   goto Return;
-                case QbservableProtocolMessageKind.ShutDown:
-                  ShutDownWithoutResponse(GetShutDownReason(message, QbservableProtocolShutDownReason.None));
+                case QbservableProtocolMessageKind.Shutdown:
+                  ShutdownWithoutResponse(GetShutdownReason(message, QbservableProtocolShutdownReason.None));
                   goto Return;
                 default:
                   if (!message.Handled)
@@ -96,7 +96,7 @@ namespace Qactive
           {
             try
             {
-              await ShutDownAsync(QbservableProtocolShutDownReason.ClientTerminated).ConfigureAwait(false);
+              await ShutdownAsync(QbservableProtocolShutdownReason.ClientTerminated).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -132,9 +132,9 @@ namespace Qactive
         {
           var converter = new SerializableExpressionConverter();
 
-          return Tuple.Create(converter.Convert(Deserialize<SerializableExpression>(message.Data)), argument);
+          return Tuple.Create(SerializableExpressionConverter.Convert(Deserialize<SerializableExpression>(message.Data)), argument);
         }
-        else if (ServerHandleClientShutDown(message))
+        else if (ServerHandleClientShutdown(message))
         {
           throw new OperationCanceledException();
         }
@@ -160,11 +160,11 @@ namespace Qactive
       }
     }
 
-    private QbservableProtocolShutDownReason GetShutDownReason(QbservableMessage message, QbservableProtocolShutDownReason defaultReason)
+    private static QbservableProtocolShutdownReason GetShutdownReason(QbservableMessage message, QbservableProtocolShutdownReason defaultReason)
     {
       if (message.Data.Length > 0)
       {
-        return (QbservableProtocolShutDownReason)message.Data[0];
+        return (QbservableProtocolShutdownReason)message.Data[0];
       }
       else
       {
@@ -172,13 +172,13 @@ namespace Qactive
       }
     }
 
-    protected override bool ServerHandleClientShutDown(QbservableMessage message)
+    protected override bool ServerHandleClientShutdown(QbservableMessage message)
     {
-      if (message.Kind == QbservableProtocolMessageKind.ShutDown)
+      if (message.Kind == QbservableProtocolMessageKind.Shutdown)
       {
-        var reason = GetShutDownReason(message, QbservableProtocolShutDownReason.ClientTerminated);
+        var reason = GetShutdownReason(message, QbservableProtocolShutdownReason.ClientTerminated);
 
-        ShutDownWithoutResponse(reason);
+        ShutdownWithoutResponse(reason);
 
         return true;
       }
@@ -186,9 +186,9 @@ namespace Qactive
       return false;
     }
 
-    protected override Task ShutDownCoreAsync()
+    protected override Task ShutdownCoreAsync()
     {
-      return SendMessageAsync(new QbservableMessage(QbservableProtocolMessageKind.ShutDown, (byte)ShutDownReason));
+      return SendMessageAsync(new QbservableMessage(QbservableProtocolMessageKind.Shutdown, (byte)ShutdownReason));
     }
 
     private Task SendMessageAsync(QbservableProtocolMessageKind kind, object data)

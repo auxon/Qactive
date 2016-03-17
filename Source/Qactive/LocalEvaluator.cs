@@ -65,10 +65,12 @@ namespace Qactive
       }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Property", Justification = "Reviewed")]
     public abstract Expression GetValue(PropertyInfo property, MemberExpression member, ExpressionVisitor visitor, QbservableProtocol protocol);
 
     public abstract Expression GetValue(FieldInfo field, MemberExpression member, ExpressionVisitor visitor, QbservableProtocol protocol);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Call", Justification = "Reviewed")]
     public abstract Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, QbservableProtocol protocol);
 
     protected Either<object, Expression> TryEvaluateSequences(object value, Type type, QbservableProtocol protocol)

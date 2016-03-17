@@ -6,7 +6,7 @@ namespace Qactive.Expressions
   [Serializable]
   internal sealed class SerializableDefaultExpression : SerializableExpression
   {
-    public SerializableDefaultExpression(DefaultExpression expression, SerializableExpressionConverter converter)
+    public SerializableDefaultExpression(DefaultExpression expression)
       : base(expression)
     {
     }

@@ -12,6 +12,7 @@ namespace Qactive
     {
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
     public IEnumerator<T> GetEnumerator()
     {
       // A try..catch block is required because the Rx SelectMany operator doesn't send an exception from GetEnumerator to OnError.
@@ -76,6 +77,7 @@ namespace Qactive
         return result.Item1;
       }
 
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
       public void Reset()
       {
         // A try..catch block may be required, though Rx doesn't call the Reset method at all.
@@ -89,6 +91,7 @@ namespace Qactive
         }
       }
 
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
       public void Dispose()
       {
         // A try..catch block is required because the Rx SelectMany operator doesn't send an exception from Dispose to OnError.

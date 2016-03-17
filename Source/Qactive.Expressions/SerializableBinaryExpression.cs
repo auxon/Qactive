@@ -19,7 +19,7 @@ namespace Qactive.Expressions
       Conversion = converter.Convert<SerializableLambdaExpression>(expression.Conversion);
       IsLiftedToNull = expression.IsLiftedToNull;
       Left = converter.Convert(expression.Left);
-      Method = converter.Convert(expression.Method);
+      Method = SerializableExpressionConverter.Convert(expression.Method);
       Right = converter.Convert(expression.Right);
     }
 

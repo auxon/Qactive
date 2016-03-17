@@ -13,7 +13,7 @@ namespace Qactive.Expressions
     public SerializableUnaryExpression(UnaryExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Method = converter.Convert(expression.Method);
+      Method = SerializableExpressionConverter.Convert(expression.Method);
       Operand = converter.Convert(expression.Operand);
     }
 

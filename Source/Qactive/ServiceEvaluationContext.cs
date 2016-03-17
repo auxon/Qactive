@@ -234,7 +234,7 @@ namespace Qactive
     {
     }
 
-    public bool IsExtendedPrimitiveType(Type type)
+    public static bool IsExtendedPrimitiveType(Type type)
     {
       return extendedPrimitiveTypes.Contains(type.IsGenericType ? type.GetGenericTypeDefinition() : type);
     }
@@ -284,7 +284,7 @@ namespace Qactive
 
       if (!matched)
       {
-        throw new ArgumentException();
+        throw new ArgumentException("Unknown method name.", "name");
       }
     }
 
@@ -292,9 +292,7 @@ namespace Qactive
     {
       var matched = false;
 
-      foreach (var method in knownOperatorContainers.Where(m =>
-           string.Equals(m.Name, name, StringComparison.Ordinal)
-        && m.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameterTypes)))
+      foreach (var method in knownOperatorContainers.Where(m => string.Equals(m.Name, name, StringComparison.Ordinal) && m.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameterTypes)))
       {
         matched = true;
 
@@ -303,7 +301,7 @@ namespace Qactive
 
       if (!matched)
       {
-        throw new ArgumentException();
+        throw new ArgumentException("Unknown method name.", "name");
       }
     }
 

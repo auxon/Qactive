@@ -11,6 +11,7 @@ namespace Qactive
   /// the Subscribe method throws and it's wrapped with this exception, which indicates a failure to subscribe to the query.
   /// </summary>
   [Serializable]
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1064:ExceptionsShouldBePublic", Justification = "For internal use only. It should never be seen (or catchable) externally.")]
   internal sealed class QbservableSubscriptionException : Exception
   {
     public QbservableSubscriptionException(Exception innerException)

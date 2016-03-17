@@ -25,33 +25,41 @@ namespace Qactive
       this.argument = argument;
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The SocketAsyncEventArgs instance is either disposed before returning or by the observable's Finally operator.")]
     protected override IDisposable SubscribeCore(IObserver<TResult> observer)
     {
+      SocketAsyncEventArgs e = null;
       Socket socket = null;
       try
       {
         socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-        var e = new SocketAsyncEventArgs()
+        e = new SocketAsyncEventArgs()
         {
           RemoteEndPoint = Provider.EndPoint
         };
 
-        var completedSynchronously = new Subject<SocketAsyncEventArgs>();
-        var connected = Observable.FromEventPattern<SocketAsyncEventArgs>(
-          handler => e.Completed += handler,
-          handler => e.Completed -= handler)
-          .Select(e2 => e2.EventArgs)
-          .Amb(completedSynchronously)
-          .Take(1)
-          .Select(e2 => e2.ConnectSocket)
-          .PublishLast();
+        IConnectableObservable<Socket> connected;
+        IDisposable subscription;
 
-        var subscription = connected.Connect();
-
-        if (!socket.ConnectAsync(e))
+        using (var completedSynchronously = new Subject<SocketAsyncEventArgs>())
         {
-          completedSynchronously.OnNext(e);
+          connected = Observable.FromEventPattern<SocketAsyncEventArgs>(
+            handler => e.Completed += handler,
+            handler => e.Completed -= handler)
+            .Select(e2 => e2.EventArgs)
+            .Amb(completedSynchronously)
+            .Take(1)
+            .Select(e2 => e2.ConnectSocket)
+            .Finally(e.Dispose)
+            .PublishLast();
+
+          subscription = connected.Connect();
+
+          if (!socket.ConnectAsync(e))
+          {
+            completedSynchronously.OnNext(e);
+          }
         }
 
         return new CompositeDisposable(
@@ -76,12 +84,18 @@ namespace Qactive
                   select result))
           .Subscribe(observer));
       }
-      catch (Exception)
+      catch
       {
         if (socket != null)
         {
           socket.Dispose();
         }
+
+        if (e != null)
+        {
+          e.Dispose();
+        }
+
         throw;
       }
     }

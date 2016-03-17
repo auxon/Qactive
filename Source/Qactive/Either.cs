@@ -2,14 +2,14 @@
 {
   public static class Either
   {
-    public static Either<TLeft, TRight> Left<TLeft, TRight>(TLeft left)
+    public static Either<TLeft, TRight> Left<TLeft, TRight>(TLeft leftValue)
     {
-      return new Either<TLeft, TRight>(left, default(TRight), isLeft: true);
+      return new Either<TLeft, TRight>(leftValue, default(TRight), isLeft: true);
     }
 
-    public static Either<TLeft, TRight> Right<TLeft, TRight>(TRight right)
+    public static Either<TLeft, TRight> Right<TLeft, TRight>(TRight rightValue)
     {
-      return new Either<TLeft, TRight>(default(TLeft), right, isLeft: false);
+      return new Either<TLeft, TRight>(default(TLeft), rightValue, isLeft: false);
     }
   }
 }

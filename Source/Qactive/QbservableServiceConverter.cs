@@ -9,6 +9,7 @@ namespace Qactive
   {
     private readonly Func<IObservable<TSource>, IObservable<TResult>> service;
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
     public QbservableServiceConverter(Func<IObservable<TSource>, IObservable<TResult>> service)
     {
       this.service = service;

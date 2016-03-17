@@ -47,6 +47,7 @@ namespace Qactive
       return id;
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Returned to caller.")]
     public Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<object> onNext, Action<Exception> onError, Action onCompleted, Action<int> dispose)
     {
       var serverId = Interlocked.Increment(ref lastObservableId);

@@ -16,11 +16,6 @@ namespace Qactive
     {
     }
 
-    public ExpressionSecurityException(string message, Exception innerException)
-      : base(message, innerException)
-    {
-    }
-
     private ExpressionSecurityException(SerializationInfo info, StreamingContext context)
       : base(info, context)
     {

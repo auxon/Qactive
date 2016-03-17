@@ -14,13 +14,8 @@ namespace Qactive
   public abstract class QbservableProtocol<TMessage> : QbservableProtocol
     where TMessage : IProtocolMessage
   {
-    protected IList<QbservableProtocolSink<TMessage>> Sinks
-    {
-      get
-      {
-        return sinks;
-      }
-    }
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
+    protected IList<QbservableProtocolSink<TMessage>> Sinks => sinks;
 
     private readonly List<QbservableProtocolSink<TMessage>> sinks = new List<QbservableProtocolSink<TMessage>>();
 
@@ -36,12 +31,14 @@ namespace Qactive
       Contract.Ensures(!IsClient);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
     protected virtual IEnumerable<QbservableProtocolSink<TMessage>> CreateClientSinks()
     {
       // for derived types
       yield break;
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
     protected virtual IEnumerable<QbservableProtocolSink<TMessage>> CreateServerSinks()
     {
       // for derived types
@@ -64,13 +61,11 @@ namespace Qactive
 
     internal sealed override async Task ServerReceiveAsync()
     {
-      Contract.Requires(!IsClient);
-
       while (!Cancel.IsCancellationRequested)
       {
         var message = await ReceiveMessageAsync().ConfigureAwait(false);
 
-        if (ServerHandleClientShutDown(message))
+        if (ServerHandleClientShutdown(message))
         {
           break;
         }
@@ -81,7 +76,7 @@ namespace Qactive
       }
     }
 
-    protected abstract bool ServerHandleClientShutDown(TMessage message);
+    protected abstract bool ServerHandleClientShutdown(TMessage message);
 
     protected async Task SendMessageAsync(TMessage message)
     {

@@ -173,6 +173,7 @@
     <Compile Include="AsyncConsumerQueue.cs" />
     <Compile Include="Either.cs" />
     <Compile Include="Either{TLeft,TRight}.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IParameterizedQbservableProvider.cs" />
     <Compile Include="KnownTypeContext.cs" />
     <Compile Include="ExceptionDispatchInfoEqualityComparer.cs" />
@@ -212,7 +213,7 @@
     <Compile Include="QbservableProtocol.cs" />
     <Compile Include="QbservableServiceOptions.cs" />
     <Compile Include="QbservableProtocolMessageKind.cs" />
-    <Compile Include="QbservableProtocolShutDownReason.cs" />
+    <Compile Include="QbservableProtocolShutdownReason.cs" />
     <Compile Include="QbservableSourcePlaceholder.cs" />
     <Compile Include="QbservableSubscriptionException.cs" />
     <Compile Include="QbservableTcpServer.cs" />

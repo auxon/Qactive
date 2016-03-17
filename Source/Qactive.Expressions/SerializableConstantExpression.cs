@@ -8,7 +8,7 @@ namespace Qactive.Expressions
   {
     public readonly object Value;
 
-    public SerializableConstantExpression(ConstantExpression expression, SerializableExpressionConverter converter)
+    public SerializableConstantExpression(ConstantExpression expression)
       : base(expression)
     {
       Value = expression.Value;

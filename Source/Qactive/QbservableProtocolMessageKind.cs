@@ -6,7 +6,7 @@
     OnNext,
     OnCompleted,
     OnError,
-    ShutDown,
+    Shutdown,
     Argument,
     Subscribe,
     DuplexInvoke,

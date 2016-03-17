@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,8 +16,11 @@ namespace Qactive
       this.protocol = protocol;
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", MessageId = "protocol", Justification = "It's the same reference as the field.")]
     public override Task InitializeAsync(QbservableProtocol<QbservableMessage> protocol, CancellationToken cancel)
     {
+      Contract.Assume(this.protocol == protocol);
+
       return Task.FromResult(false);
     }
 

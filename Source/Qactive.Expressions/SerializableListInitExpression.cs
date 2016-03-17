@@ -15,7 +15,7 @@ namespace Qactive.Expressions
     public SerializableListInitExpression(ListInitExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Initializers = expression.Initializers.Select(i => Tuple.Create(converter.Convert(i.AddMethod), converter.Convert(i.Arguments))).ToList();
+      Initializers = expression.Initializers.Select(i => Tuple.Create(SerializableExpressionConverter.Convert(i.AddMethod), converter.Convert(i.Arguments))).ToList();
       NewExpression = converter.Convert<SerializableNewExpression>(expression.NewExpression);
     }
 

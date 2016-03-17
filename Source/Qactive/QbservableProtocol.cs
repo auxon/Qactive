@@ -22,6 +22,7 @@ namespace Qactive
   /// <summary>
   /// Provides the basic algorithm for a single observable communication channel between a client and server.
   /// </summary>
+  [ContractClass(typeof(QbservableProtocolContract))]
   public abstract class QbservableProtocol : IDisposable
   {
     public bool IsClient
@@ -48,11 +49,7 @@ namespace Qactive
       }
     }
 
-    public QbservableProtocolShutDownReason ShutDownReason
-    {
-      get;
-      private set;
-    }
+    public QbservableProtocolShutdownReason ShutdownReason { get; private set; }
 
     protected IRemotingFormatter Formatter
     {
@@ -62,19 +59,12 @@ namespace Qactive
       }
     }
 
-    protected CancellationToken Cancel
-    {
-      get
-      {
-        return cancel;
-      }
-    }
+    protected CancellationToken Cancel { get; }
 
     private readonly CancellationTokenSource protocolCancellation = new CancellationTokenSource();
     private readonly AsyncConsumerQueue sendQ = new AsyncConsumerQueue();
     private readonly AsyncConsumerQueue receiveQ = new AsyncConsumerQueue();
     private readonly List<ExceptionDispatchInfo> errors = new List<ExceptionDispatchInfo>();
-    private readonly CancellationToken cancel;
     private readonly NetworkStream stream;
     private readonly IRemotingFormatter formatter;
     private readonly QbservableServiceOptions serviceOptions;
@@ -87,7 +77,7 @@ namespace Qactive
       this.isClient = true;
       this.stream = stream;
       this.formatter = formatter;
-      this.cancel = protocolCancellation.Token;
+      Cancel = protocolCancellation.Token;
 
       cancel.Register(protocolCancellation.Cancel, useSynchronizationContext: false);
     }
@@ -162,9 +152,9 @@ namespace Qactive
 
       if (!protocolCancellation.IsCancellationRequested)
       {
-        if (ShutDownReason == QbservableProtocolShutDownReason.None)
+        if (ShutdownReason == QbservableProtocolShutdownReason.None)
         {
-          ShutDownReason = QbservableProtocolShutDownReason.ServerError;
+          ShutdownReason = QbservableProtocolShutdownReason.ServerError;
         }
 
         CancelAllCommunication();
@@ -230,9 +220,9 @@ namespace Qactive
         }
         catch (Exception ex)
         {
-          if (ShutDownReason == QbservableProtocolShutDownReason.None)
+          if (ShutdownReason == QbservableProtocolShutdownReason.None)
           {
-            ShutDownReason = QbservableProtocolShutDownReason.BadClientRequest;
+            ShutdownReason = QbservableProtocolShutdownReason.BadClientRequest;
           }
 
           CancelAllCommunication(ex);
@@ -244,26 +234,26 @@ namespace Qactive
       {
         if (errors.Count == 1)
         {
-          if (ShutDownReason == QbservableProtocolShutDownReason.None)
+          if (ShutdownReason == QbservableProtocolShutdownReason.None)
           {
-            ShutDownReason = QbservableProtocolShutDownReason.ServerError;
+            ShutdownReason = QbservableProtocolShutdownReason.ServerError;
           }
 
           fatalException = errors[0];
         }
         else if (errors.Count > 1)
         {
-          if (ShutDownReason == QbservableProtocolShutDownReason.None)
+          if (ShutdownReason == QbservableProtocolShutdownReason.None)
           {
-            ShutDownReason = QbservableProtocolShutDownReason.ServerError;
+            ShutdownReason = QbservableProtocolShutdownReason.ServerError;
           }
 
           fatalException = ExceptionDispatchInfo.Capture(new AggregateException(errors.Select(e => e.SourceException)));
         }
 
-        if (ShutDownReason == QbservableProtocolShutDownReason.None)
+        if (ShutdownReason == QbservableProtocolShutdownReason.None)
         {
-          ShutDownReason = QbservableProtocolShutDownReason.ClientTerminated;
+          ShutdownReason = QbservableProtocolShutdownReason.ClientTerminated;
         }
 
         fatalException = ExceptionDispatchInfo.Capture(ex);
@@ -300,13 +290,13 @@ namespace Qactive
 
     private async Task ExecuteServerQueryAsync(Tuple<Expression, object> input, IQbservableProvider provider)
     {
-      var shutDownReason = QbservableProtocolShutDownReason.ObservableTerminated;
+      var shutdownReason = QbservableProtocolShutdownReason.ObservableTerminated;
 
       ExceptionDispatchInfo createQueryError = null;
 
       if (input == null)
       {
-        shutDownReason = QbservableProtocolShutDownReason.ProtocolTerminated;
+        shutdownReason = QbservableProtocolShutdownReason.ProtocolTerminated;
       }
       else
       {
@@ -315,7 +305,7 @@ namespace Qactive
 
         if (expression == null)
         {
-          shutDownReason = QbservableProtocolShutDownReason.ProtocolTerminated;
+          shutdownReason = QbservableProtocolShutdownReason.ProtocolTerminated;
         }
         else
         {
@@ -328,13 +318,13 @@ namespace Qactive
           }
           catch (Exception ex)
           {
-            shutDownReason = QbservableProtocolShutDownReason.ServerError;
+            shutdownReason = QbservableProtocolShutdownReason.ServerError;
             createQueryError = ExceptionDispatchInfo.Capture(ex);
           }
 
           if (createQueryError == null)
           {
-            await SendObservableAsync(observable, dataType, serviceOptions.SendServerErrorsToClients, cancel).ConfigureAwait(false);
+            await SendObservableAsync(observable, dataType, serviceOptions.SendServerErrorsToClients, Cancel).ConfigureAwait(false);
           }
           else if (serviceOptions.SendServerErrorsToClients)
           {
@@ -343,7 +333,7 @@ namespace Qactive
         }
       }
 
-      await ShutDownAsync(shutDownReason).ConfigureAwait(false);
+      await ShutdownAsync(shutdownReason).ConfigureAwait(false);
 
       if (createQueryError != null)
       {
@@ -393,10 +383,10 @@ namespace Qactive
             catch (Exception ex)
             {
               /* Collecting exceptions handles a possible race condition.  Since this code is using a fire-and-forget model to 
-							 * subscribe to the observable, due to the async OnNext handler, it's possible that more than one SendAsync task
-							 * can be executing concurrently.  As a result, cancelling the cancelSubscription below does not guarantee that 
-							 * this catch block won't run again.
-							 */
+               * subscribe to the observable, due to the async OnNext handler, it's possible that more than one SendAsync task
+               * can be executing concurrently.  As a result, cancelling the cancelSubscription below does not guarantee that 
+               * this catch block won't run again.
+               */
               networkErrors.Add(ExceptionDispatchInfo.Capture(ex));
 
               cancelSubscription.Cancel();
@@ -414,13 +404,13 @@ namespace Qactive
       }
       catch (ExpressionSecurityException ex)
       {
-        ShutDownReason = QbservableProtocolShutDownReason.ExpressionSecurityViolation;
+        ShutdownReason = QbservableProtocolShutdownReason.ExpressionSecurityViolation;
 
         expressionSecurityError = ExceptionDispatchInfo.Capture(ex);
       }
       catch (QbservableSubscriptionException ex)
       {
-        ShutDownReason = QbservableProtocolShutDownReason.ExpressionSubscriptionException;
+        ShutdownReason = QbservableProtocolShutdownReason.ExpressionSubscriptionException;
 
         qbservableSubscriptionError = ExceptionDispatchInfo.Capture(ex.InnerException ?? ex);
       }
@@ -428,7 +418,7 @@ namespace Qactive
       {
         if (ex.InnerException is QbservableSubscriptionException)
         {
-          ShutDownReason = QbservableProtocolShutDownReason.ExpressionSubscriptionException;
+          ShutdownReason = QbservableProtocolShutdownReason.ExpressionSubscriptionException;
 
           qbservableSubscriptionError = ExceptionDispatchInfo.Capture(ex.InnerException.InnerException ?? ex.InnerException);
         }
@@ -467,11 +457,11 @@ namespace Qactive
         }
       }
 
-      /* There's an acceptable race condition here whereby ForEachAsync is cancelled by the external cancellation token though
-			 * it's still executing a fire-and-forget task.  It's possible for the fire-and-forget task to throw before seeing the 
-			 * cancellation, yet after the following code has already executed.  In that case, since the cancellation was requested 
-			 * externally, it's acceptable for the cancellation to simply beat the send error, thus the error can safely be ignored.
-			 */
+      /* There's an acceptable race condition here whereby ForEachAsync is canceled by the external cancellation token though
+       * it's still executing a fire-and-forget task.  It's possible for the fire-and-forget task to throw before seeing the 
+       * cancellation, yet after the following code has already executed.  In that case, since the cancellation was requested 
+       * externally, it's acceptable for the cancellation to simply beat the send error, thus the error can safely be ignored.
+       */
       if (networkErrors.Count > 0)
       {
         throw new AggregateException(networkErrors.Select(e => e.SourceException));
@@ -530,27 +520,28 @@ namespace Qactive
 
     protected abstract Task ClientSendQueryAsync(Expression expression, object argument);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Not worth refactoring into a discrete type just yet.")]
     protected abstract Task<Tuple<Expression, object>> ServerReceiveQueryAsync();
 
     protected abstract Task ServerSendAsync(NotificationKind kind, object data);
 
     protected abstract IObservable<TResult> ClientReceive<TResult>();
 
-    protected async Task ShutDownAsync(QbservableProtocolShutDownReason reason)
+    protected async Task ShutdownAsync(QbservableProtocolShutdownReason reason)
     {
-      ShutDownReason = reason;
+      ShutdownReason = reason;
 
-      await ShutDownCoreAsync().ConfigureAwait(false);
+      await ShutdownCoreAsync().ConfigureAwait(false);
     }
 
-    protected void ShutDownWithoutResponse(QbservableProtocolShutDownReason reason)
+    protected void ShutdownWithoutResponse(QbservableProtocolShutdownReason reason)
     {
-      ShutDownReason = reason;
+      ShutdownReason = reason;
 
       CancelAllCommunication();
     }
 
-    protected abstract Task ShutDownCoreAsync();
+    protected abstract Task ShutdownCoreAsync();
 
     protected Task SendAsync(byte[] buffer, int offset, int count)
     {
@@ -590,6 +581,7 @@ namespace Qactive
 
     internal abstract Task InitializeSinksAsync();
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "Reviewed")]
     public byte[] Serialize(object data, out long length)
     {
       using (var memory = new MemoryStream())
@@ -676,6 +668,74 @@ namespace Qactive
     protected virtual void Dispose(bool disposing)
     {
       // for derived classes
+    }
+  }
+
+  [ContractClassFor(typeof(QbservableProtocol))]
+  internal abstract class QbservableProtocolContract : QbservableProtocol
+  {
+    protected QbservableProtocolContract()
+      : base(null, null, CancellationToken.None)
+    {
+    }
+
+    public override TSink FindSink<TSink>()
+    {
+      throw new NotImplementedException();
+    }
+
+    public override TSink GetOrAddSink<TSink>(Func<TSink> createSink)
+    {
+      Contract.Requires(createSink != null);
+      return default(TSink);
+    }
+
+    protected override IObservable<TResult> ClientReceive<TResult>()
+    {
+      Contract.Ensures(Contract.Result<IObservable<TResult>>() != null);
+      return null;
+    }
+
+    protected override Task ClientSendQueryAsync(Expression expression, object argument)
+    {
+      // expression can be null
+      return null;
+    }
+
+    protected override Task<Tuple<Expression, object>> ServerReceiveQueryAsync()
+    {
+      throw new NotImplementedException();
+    }
+
+    protected override Task ServerSendAsync(NotificationKind kind, object data)
+    {
+      throw new NotImplementedException();
+    }
+
+    protected override Task ShutdownCoreAsync()
+    {
+      throw new NotImplementedException();
+    }
+
+    internal override IClientDuplexQbservableProtocolSink CreateClientDuplexSinkInternal()
+    {
+      throw new NotImplementedException();
+    }
+
+    internal override IServerDuplexQbservableProtocolSink CreateServerDuplexSinkInternal()
+    {
+      throw new NotImplementedException();
+    }
+
+    internal override Task InitializeSinksAsync()
+    {
+      throw new NotImplementedException();
+    }
+
+    internal override Task ServerReceiveAsync()
+    {
+      Contract.Requires(!IsClient);
+      return null;
     }
   }
 }

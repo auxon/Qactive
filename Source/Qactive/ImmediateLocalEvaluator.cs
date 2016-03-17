@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -50,7 +51,7 @@ namespace Qactive
     {
       if (call.Method.ReturnType == typeof(void))
       {
-        throw new InvalidOperationException(string.Format(Errors.ExpressionCallLocalVoidFormat, call.Method, call.Object));
+        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Errors.ExpressionCallLocalVoidFormat, call.Method, call.Object));
       }
 
       object instance = Evaluate(call.Object, visitor, Errors.ExpressionCallMissingLocalInstanceFormat, call.Method);

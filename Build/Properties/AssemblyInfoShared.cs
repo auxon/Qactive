@@ -15,7 +15,7 @@ using System.Resources;
 [assembly: AssemblyCopyright("Copyright © 2012-2016 Dave Sexton")]
 [assembly: AssemblyTrademark("")]
 
-[assembly: AssemblyVersion(AssemblyConstants.Version + ".*")]
+[assembly: AssemblyVersion(AssemblyConstants.Version + ".0")]
 [assembly: AssemblyFileVersion(AssemblyConstants.Version + ".0")]
 
 [assembly: SuppressMessage("Microsoft.Usage", "CA2243:AttributeStringLiteralsShouldParseCorrectly", Justification = "Required for NuGet semantic versioning.")]
@@ -24,7 +24,7 @@ using System.Resources;
 [SuppressMessage("Microsoft.Design", "CA1050:DeclareTypesInNamespaces", Justification = "Referenced by assembly-level attributes only.")]
 internal static class AssemblyConstants
 {
-  public const string Version = "1.0.0";
+  public const string Version = "1.0.1";
 
   /// <summary>
   /// Semantic version for the assembly, indicating a prerelease package in NuGet.

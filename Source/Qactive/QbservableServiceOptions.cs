@@ -5,6 +5,7 @@ namespace Qactive
   [Serializable]
   public sealed class QbservableServiceOptions
   {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "It's immutable due to the frozen flag.")]
     public static readonly QbservableServiceOptions Default = new QbservableServiceOptions()
     {
       frozen = true,

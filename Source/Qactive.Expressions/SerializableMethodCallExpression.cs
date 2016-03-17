@@ -16,7 +16,7 @@ namespace Qactive.Expressions
       : base(expression)
     {
       Arguments = converter.Convert(expression.Arguments);
-      Method = converter.Convert(expression.Method);
+      Method = SerializableExpressionConverter.Convert(expression.Method);
       Object = converter.Convert(expression.Object);
     }
 

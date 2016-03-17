@@ -181,7 +181,7 @@
     <value>The duplex callback enumerator identifier is invalid.</value>
   </data>
   <data name="ProtocolInvalidDuplexIdForInvoke" xml:space="preserve">
-    <value>The duplex callback inovcation identifier is invalid.</value>
+    <value>The duplex callback invocation identifier is invalid.</value>
   </data>
   <data name="ProtocolInvalidDuplexIdForObservable" xml:space="preserve">
     <value>The duplex callback observable identifier is invalid.</value>

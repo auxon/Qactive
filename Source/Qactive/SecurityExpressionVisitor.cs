@@ -210,7 +210,7 @@ namespace Qactive
 
       if (!options.HasFlag(ExpressionOptions.AllowConstructors)
         && !type.IsPrimitive
-        && !context.IsExtendedPrimitiveType(type))
+        && !ServiceEvaluationContext.IsExtendedPrimitiveType(type))
       {
         throw new ExpressionSecurityException("Constructors are not permitted.");
       }

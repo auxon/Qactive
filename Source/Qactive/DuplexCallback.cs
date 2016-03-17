@@ -51,21 +51,21 @@ namespace Qactive
     public static Expression Create(QbservableProtocol protocol, object instance, PropertyInfo property)
     {
       return CreateInvoke(
-        new DuplexCallback(protocol, (id, __) => ConvertIfSequence(protocol, id, property.GetValue(instance))),
+        new DuplexCallback(protocol, (_, __) => ConvertIfSequence(protocol, property.GetValue(instance))),
         property.PropertyType);
     }
 
     public static Expression Create(QbservableProtocol protocol, object instance, FieldInfo field)
     {
       return CreateInvoke(
-        new DuplexCallback(protocol, (id, __) => ConvertIfSequence(protocol, id, field.GetValue(instance))),
+        new DuplexCallback(protocol, (_, __) => ConvertIfSequence(protocol, field.GetValue(instance))),
         field.FieldType);
     }
 
     public static Expression Create(QbservableProtocol protocol, object instance, MethodInfo method, IEnumerable<Expression> argExpressions)
     {
       return CreateInvoke(
-        new DuplexCallback(protocol, (id, arguments) => ConvertIfSequence(protocol, id, method.Invoke(instance, arguments))),
+        new DuplexCallback(protocol, (_, arguments) => ConvertIfSequence(protocol, method.Invoke(instance, arguments))),
         method.ReturnType,
         argExpressions);
     }
@@ -94,7 +94,7 @@ namespace Qactive
           (arguments == null ? new Expression[0] : arguments.Select(a => (Expression)Expression.Convert(a, typeof(object))))));
     }
 
-    private static object ConvertIfSequence(QbservableProtocol protocol, int id, object instance)
+    private static object ConvertIfSequence(QbservableProtocol protocol, object instance)
     {
       if (instance != null)
       {
@@ -110,15 +110,14 @@ namespace Qactive
           }
 
           var enumerableType = type.GetGenericInterfaceFromDefinition(typeof(IEnumerable<>));
+          var enumerable = instance as IEnumerable;
 
           if (enumerableType != null)
           {
-            return CreateRemoteEnumerable(protocol, (IEnumerable)instance, enumerableType.GetGenericArguments()[0]);
+            return CreateRemoteEnumerable(protocol, enumerable, enumerableType.GetGenericArguments()[0]);
           }
-          else if (instance is IEnumerable)
+          else if (enumerable != null)
           {
-            var enumerable = (IEnumerable)instance;
-
             return CreateRemoteEnumerable(protocol, enumerable.Cast<object>(), typeof(object));
           }
         }
@@ -155,6 +154,7 @@ namespace Qactive
         () => sink.SendOnCompleted(id));
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", MessageId = "protocol", Justification = "It's setting the field.")]
     public void SetServerProtocol(QbservableProtocol protocol)
     {
       Contract.Requires(protocol != null);
@@ -192,6 +192,7 @@ namespace Qactive
       }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
     public void ServerInvoke(object[] arguments)
     {
       Contract.Requires(CanInvoke);

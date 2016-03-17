@@ -63,9 +63,9 @@ namespace Qactive
       this.expression = expression;
     }
 
-    protected bool IsSource(Expression expression)
+    protected bool IsSource(Expression candidate)
     {
-      var constant = expression as ConstantExpression;
+      var constant = candidate as ConstantExpression;
 
       return constant != null && constant.Value == this;
     }

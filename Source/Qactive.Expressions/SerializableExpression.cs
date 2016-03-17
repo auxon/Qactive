@@ -7,12 +7,14 @@ namespace Qactive.Expressions
   public abstract class SerializableExpression
   {
     public ExpressionType NodeType { get; }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "Mirrors the Expression.Type property.")]
     public Type Type { get; }
 
     [NonSerialized]
     private Expression converted;
 
-    public SerializableExpression(Expression expression)
+    protected SerializableExpression(Expression expression)
     {
       NodeType = expression.NodeType;
       Type = expression.Type;

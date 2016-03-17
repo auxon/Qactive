@@ -8,7 +8,7 @@ namespace Qactive.Expressions
   {
     public readonly string Name;
 
-    public SerializableParameterExpression(ParameterExpression expression, SerializableExpressionConverter converter)
+    public SerializableParameterExpression(ParameterExpression expression)
       : base(expression)
     {
       Name = expression.Name;
