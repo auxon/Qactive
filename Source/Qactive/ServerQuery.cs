@@ -6,11 +6,11 @@ using System.Security.Permissions;
 
 namespace Qactive
 {
-  internal sealed class TcpServerQuery<TSource, TResult> : QbservableBase<TResult, TcpServerQbservableProvider<TSource>>
+  internal sealed class ServerQuery<TSource, TResult> : QbservableBase<TResult, ServerQbservableProvider<TSource>>
   {
     private readonly object argument;
 
-    public TcpServerQuery(TcpServerQbservableProvider<TSource> provider, Expression expression, object argument)
+    public ServerQuery(ServerQbservableProvider<TSource> provider, Expression expression, object argument)
       : base(provider, expression)
     {
       this.argument = argument;
@@ -49,7 +49,7 @@ namespace Qactive
 
     private Expression PrepareExpression(out IQbservableProvider realProvider)
     {
-      QbservableProviderDiagnostics.DebugPrint(Expression, "TcpServerQuery Received Expression");
+      QbservableProviderDiagnostics.DebugPrint(Expression, "ServerQuery Received Expression");
 
       var source = Provider.GetSource(argument);
 
@@ -92,7 +92,7 @@ namespace Qactive
 
       preparedExpression = visitor.Visit(preparedExpression);
 
-      QbservableProviderDiagnostics.DebugPrint(preparedExpression, "TcpServerQuery Rewritten Expression");
+      QbservableProviderDiagnostics.DebugPrint(preparedExpression, "ServerQuery Rewritten Expression");
 
       return preparedExpression;
     }

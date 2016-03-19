@@ -1,73 +1,114 @@
 ﻿using System;
+using System.IO;
 using System.Linq.Expressions;
 using System.Net;
+using System.Net.Sockets;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 using System.Runtime.Remoting.Messaging;
+using System.Threading;
 
 namespace Qactive
 {
-  internal sealed class TcpClientQbservableProvider : IQbservableProvider
+  internal sealed class TcpClientQbservableProvider : ClientQbservableProvider
   {
-    public Type SourceType
-    {
-      get
-      {
-        return sourceType;
-      }
-    }
+    public IPEndPoint EndPoint { get; }
 
-    public IPEndPoint EndPoint
-    {
-      get
-      {
-        return endPoint;
-      }
-    }
-
-    public IRemotingFormatter Formatter
-    {
-      get
-      {
-        return formatter;
-      }
-    }
-
-    public LocalEvaluator LocalEvaluator
-    {
-      get
-      {
-        return localEvaluator;
-      }
-    }
-
-    private readonly Type sourceType;
-    private readonly IPEndPoint endPoint;
-    private readonly IRemotingFormatter formatter;
-    private readonly LocalEvaluator localEvaluator;
-    private readonly object argument;
+    public IRemotingFormatter Formatter { get; }
 
     public TcpClientQbservableProvider(Type sourceType, IPEndPoint endPoint, IRemotingFormatter formatter, LocalEvaluator localEvaluator)
+      : base(sourceType, localEvaluator)
     {
-      this.sourceType = sourceType;
-      this.endPoint = endPoint;
-      this.formatter = formatter;
-      this.localEvaluator = localEvaluator;
+      EndPoint = endPoint;
+      Formatter = formatter;
     }
 
     public TcpClientQbservableProvider(Type sourceType, IPEndPoint endPoint, IRemotingFormatter formatter, LocalEvaluator localEvaluator, object argument)
-      : this(sourceType, endPoint, formatter, localEvaluator)
+      : base(sourceType, localEvaluator, argument)
     {
-      this.argument = argument;
+      EndPoint = endPoint;
+      Formatter = formatter;
     }
 
-    internal IQbservable<TResult> CreateQuery<TResult>()
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The SocketAsyncEventArgs instance is either disposed before returning or by the observable's Finally operator.")]
+    public override IObservable<TResult> GetConnections<TResult>(Func<QbservableProtocol, Expression> prepareExpression)
     {
-      return new TcpClientQuery<TResult>(this, argument);
+      SocketAsyncEventArgs e = null;
+      Socket socket = null;
+      try
+      {
+        socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+        e = new SocketAsyncEventArgs()
+        {
+          RemoteEndPoint = EndPoint
+        };
+
+        IConnectableObservable<Socket> connected;
+        IDisposable subscription;
+
+        using (var completedSynchronously = new Subject<SocketAsyncEventArgs>())
+        {
+          connected = Observable.FromEventPattern<SocketAsyncEventArgs>(
+            handler => e.Completed += handler,
+            handler => e.Completed -= handler)
+            .Select(e2 => e2.EventArgs)
+            .Amb(completedSynchronously)
+            .Take(1)
+            .Select(e2 => e2.ConnectSocket)
+            .Finally(e.Dispose)
+            .PublishLast();
+
+          subscription = connected.Connect();
+
+          if (!socket.ConnectAsync(e))
+          {
+            completedSynchronously.OnNext(e);
+          }
+        }
+
+        return Observable.Using(
+            () => new CompositeDisposable(subscription, socket),
+            _ => (from connectedSocket in connected
+                  from result in
+                    Observable.Create<TResult>(
+                      innerObserver =>
+                      {
+                        var cancel = new CancellationDisposable();
+
+                        var s = Observable.Using(
+                          () => new NetworkStream(connectedSocket, ownsSocket: false),
+                          stream => ReadObservable<TResult>(stream, prepareExpression, cancel.Token))
+                          .Subscribe(innerObserver);
+
+                        return new CompositeDisposable(s, cancel);
+                      })
+                      .Finally(connectedSocket.Close)
+                  select result));
+      }
+      catch
+      {
+        if (socket != null)
+        {
+          socket.Dispose();
+        }
+
+        if (e != null)
+        {
+          e.Dispose();
+        }
+
+        throw;
+      }
     }
 
-    public IQbservable<TResult> CreateQuery<TResult>(Expression expression)
-    {
-      return new TcpClientQuery<TResult>(this, argument, expression);
-    }
+    private IObservable<TResult> ReadObservable<TResult>(Stream stream, Func<QbservableProtocol, Expression> prepareExpression, CancellationToken cancel) =>
+      from protocol in QbservableProtocol.NegotiateClientAsync(stream, Formatter, cancel).ToObservable()
+      from result in protocol
+       .ExecuteClient<TResult>(prepareExpression(protocol), Argument)
+       .Finally(protocol.Dispose)
+      select result;
   }
 }

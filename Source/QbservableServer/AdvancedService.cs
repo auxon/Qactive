@@ -18,11 +18,11 @@ namespace QbservableServer
 
     public IDisposable Start(TraceSource trace)
     {
-      var service = QbservableTcpServer.CreateService<IList<FeedServiceArgument>, FeedItem>(
+      var service = Qactive.TcpQbservableServer.CreateService<IList<FeedServiceArgument>, FeedItem>(
         endPoint,
         new QbservableServiceOptions() { SendServerErrorsToClients = true, AllowExpressionsUnrestricted = true },
-        request =>
-          (from arguments in request.Do(args => ConsoleTrace.WriteLine(ConsoleColor.DarkCyan, "Advanced service received {0} arguments.", args.Count))
+        (IObservable<IList<FeedServiceArgument>> request) =>
+          (from arguments in request.Do((IList<FeedServiceArgument> args) => ConsoleTrace.WriteLine(ConsoleColor.DarkCyan, "Advanced service received {0} arguments.", args.Count))
            from feed in arguments
            from _ in Observable.Timer(TimeSpan.Zero, TimeSpan.FromMinutes(1))
            from item in Observable.Using(() => new HttpClient(), client => client.GetStreamAsync(feed.Url).ToObservable().Select(feed => SyndicationFeed.Load(XmlReader.Create(feed))))

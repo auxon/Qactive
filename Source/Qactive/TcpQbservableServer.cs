@@ -10,7 +10,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Qactive
 {
-  public static partial class QbservableTcpServer
+  public static partial class TcpQbservableServer
   {
     // This method must be public otherwise CreateService fails inside of a new AppDomain - see CreateServiceProxy comments
     public static IRemotingFormatter CreateDefaultFormatter()
@@ -19,7 +19,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       IPEndPoint endPoint,
       Func<IObservable<TSource>, IObservable<TResult>> service)
     {
@@ -27,7 +27,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       IPEndPoint endPoint,
       QbservableServiceOptions options,
       Func<IObservable<TSource>, IObservable<TResult>> service)
@@ -36,7 +36,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       IPEndPoint endPoint,
       IRemotingFormatter formatter,
       Func<IObservable<TSource>, IObservable<TResult>> service)
@@ -45,7 +45,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       IPEndPoint endPoint,
       IRemotingFormatter formatter,
       QbservableServiceOptions options,
@@ -55,7 +55,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       IPEndPoint endPoint,
       Func<IObservable<TSource>, IQbservable<TResult>> service)
     {
@@ -63,7 +63,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       IPEndPoint endPoint,
       QbservableServiceOptions options,
       Func<IObservable<TSource>, IQbservable<TResult>> service)
@@ -72,7 +72,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       IPEndPoint endPoint,
       IRemotingFormatter formatter,
       Func<IObservable<TSource>, IQbservable<TResult>> service)
@@ -81,7 +81,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       IPEndPoint endPoint,
       IRemotingFormatter formatter,
       QbservableServiceOptions options,
@@ -91,7 +91,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    private static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    private static IObservable<ClientTermination> CreateService<TSource, TResult>(
       IPEndPoint endPoint,
       Func<IRemotingFormatter> formatterFactory,
       QbservableServiceOptions options,
@@ -121,7 +121,7 @@ namespace Qactive
               using (var stream = client.GetStream())
               using (var protocol = await QbservableProtocol.NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false))
               {
-                var provider = new TcpServerQbservableProvider<TResult>(
+                var provider = new ServerQbservableProvider<TResult>(
                   protocol,
                   options,
                   argument =>
@@ -172,7 +172,7 @@ namespace Qactive
               exceptions.Add(ExceptionDispatchInfo.Capture(ex));
             }
 
-            return new TcpClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
+            return new ClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
           })
           .Finally(client.Close));
     }

@@ -42,17 +42,17 @@ namespace Qactive
     }
 
     public QbservableTcpClient(IPEndPoint endPoint)
-      : this(endPoint, QbservableTcpServer.CreateDefaultFormatter())
+      : this(endPoint, TcpQbservableServer.CreateDefaultFormatter())
     {
     }
 
     public QbservableTcpClient(IPEndPoint endPoint, params Type[] knownTypes)
-      : this(endPoint, QbservableTcpServer.CreateDefaultFormatter(), knownTypes)
+      : this(endPoint, TcpQbservableServer.CreateDefaultFormatter(), knownTypes)
     {
     }
 
     public QbservableTcpClient(IPEndPoint endPoint, LocalEvaluator localEvaluator)
-      : this(endPoint, QbservableTcpServer.CreateDefaultFormatter(), localEvaluator)
+      : this(endPoint, TcpQbservableServer.CreateDefaultFormatter(), localEvaluator)
     {
     }
 

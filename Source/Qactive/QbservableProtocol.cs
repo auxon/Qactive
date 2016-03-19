@@ -5,7 +5,6 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -65,12 +64,12 @@ namespace Qactive
     private readonly AsyncConsumerQueue sendQ = new AsyncConsumerQueue();
     private readonly AsyncConsumerQueue receiveQ = new AsyncConsumerQueue();
     private readonly List<ExceptionDispatchInfo> errors = new List<ExceptionDispatchInfo>();
-    private readonly NetworkStream stream;
+    private readonly Stream stream;
     private readonly IRemotingFormatter formatter;
     private readonly QbservableServiceOptions serviceOptions;
     private readonly bool isClient;
 
-    internal QbservableProtocol(NetworkStream stream, IRemotingFormatter formatter, CancellationToken cancel)
+    internal QbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
     {
       Contract.Ensures(IsClient);
 
@@ -82,7 +81,7 @@ namespace Qactive
       cancel.Register(protocolCancellation.Cancel, useSynchronizationContext: false);
     }
 
-    internal QbservableProtocol(NetworkStream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    internal QbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
       : this(stream, formatter, cancel)
     {
       Contract.Ensures(!IsClient);
@@ -91,7 +90,7 @@ namespace Qactive
       this.isClient = false;
     }
 
-    public static async Task<QbservableProtocol> NegotiateClientAsync(NetworkStream stream, IRemotingFormatter formatter, CancellationToken cancel)
+    public static async Task<QbservableProtocol> NegotiateClientAsync(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
     {
       // TODO: Enable protocol registration and implement actual protocol negotiation
 
@@ -109,7 +108,7 @@ namespace Qactive
       return protocol;
     }
 
-    public static async Task<QbservableProtocol> NegotiateServerAsync(NetworkStream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    public static async Task<QbservableProtocol> NegotiateServerAsync(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
     {
       // TODO: Enable protocol registration and implement actual protocol negotiation
 

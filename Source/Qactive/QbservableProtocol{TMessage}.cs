@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,13 +19,13 @@ namespace Qactive
 
     private readonly List<QbservableProtocolSink<TMessage>> sinks = new List<QbservableProtocolSink<TMessage>>();
 
-    protected QbservableProtocol(NetworkStream stream, IRemotingFormatter formatter, CancellationToken cancel)
+    protected QbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
       : base(stream, formatter, cancel)
     {
       Contract.Ensures(IsClient);
     }
 
-    protected QbservableProtocol(NetworkStream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    protected QbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
       : base(stream, formatter, serviceOptions, cancel)
     {
       Contract.Ensures(!IsClient);

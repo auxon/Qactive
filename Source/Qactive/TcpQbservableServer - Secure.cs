@@ -13,13 +13,13 @@ using Qactive.Properties;
 
 namespace Qactive
 {
-  public static partial class QbservableTcpServer
+  public static partial class TcpQbservableServer
   {
     private static int appDomainNumber;
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
       IPEndPoint endPoint,
       Func<IObservable<TSource>, IObservable<TResult>> service,
@@ -31,7 +31,7 @@ namespace Qactive
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
       IPEndPoint endPoint,
       QbservableServiceOptions options,
@@ -44,7 +44,7 @@ namespace Qactive
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
       IPEndPoint endPoint,
       Func<IRemotingFormatter> formatterFactory,
@@ -57,7 +57,7 @@ namespace Qactive
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
       IPEndPoint endPoint,
       Func<IRemotingFormatter> formatterFactory,
@@ -71,7 +71,7 @@ namespace Qactive
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
       IPEndPoint endPoint,
       Func<IObservable<TSource>, IQbservable<TResult>> service,
@@ -83,7 +83,7 @@ namespace Qactive
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
       IPEndPoint endPoint,
       QbservableServiceOptions options,
@@ -96,7 +96,7 @@ namespace Qactive
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
       IPEndPoint endPoint,
       Func<IRemotingFormatter> formatterFactory,
@@ -109,7 +109,7 @@ namespace Qactive
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
       IPEndPoint endPoint,
       Func<IRemotingFormatter> formatterFactory,
@@ -127,7 +127,7 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "AppDomain setup is very finicky and requires lots of concrete type references.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<TcpClientTermination> CreateService<TSource, TResult>(
+    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
       PermissionSet permissions,
       IPEndPoint endPoint,
@@ -150,7 +150,7 @@ namespace Qactive
         appDomainSetup, minimumPermissions.Union(permissions),
         new[]
         {
-          typeof(QbservableTcpServer).Assembly.Evidence.GetHostEvidence<StrongName>(),
+          typeof(TcpQbservableServer).Assembly.Evidence.GetHostEvidence<StrongName>(),
           typeof(System.Reactive.Linq.Observable).Assembly.Evidence.GetHostEvidence<StrongName>(),
           typeof(System.Reactive.Linq.Qbservable).Assembly.Evidence.GetHostEvidence<StrongName>(),
           typeof(System.Reactive.Notification).Assembly.Evidence.GetHostEvidence<StrongName>(),
@@ -217,7 +217,7 @@ namespace Qactive
 
     private sealed class CreateServiceProxy<TSource, TResult> : MarshalByRefObject
     {
-      public IObservable<TcpClientTermination> CreateService(
+      public IObservable<ClientTermination> CreateService(
         IPEndPoint endPoint,
         QbservableServiceOptions options,
         CreateServiceProxyDelegates<TSource, TResult> delegates)
@@ -267,7 +267,7 @@ namespace Qactive
            */
         }
 
-        return QbservableTcpServer
+        return TcpQbservableServer
           .CreateService(endPoint, formatterFactory, options, service)
           .RemotableWithoutConfiguration();
       }

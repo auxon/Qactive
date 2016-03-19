@@ -10,46 +10,18 @@ namespace Qactive
   public abstract class QbservableBase<TData, TProvider> : ObservableBase<TData>, IQbservable<TData>
     where TProvider : IQbservableProvider
   {
-    public Type ElementType
-    {
-      get
-      {
-        return elementType;
-      }
-    }
+    public Type ElementType { get; } = typeof(TData);
 
-    public Expression Expression
-    {
-      get
-      {
-        return expression;
-      }
-    }
+    public Expression Expression { get; }
 
-    public TProvider Provider
-    {
-      get
-      {
-        return provider;
-      }
-    }
+    public TProvider Provider { get; }
 
-    IQbservableProvider IQbservable.Provider
-    {
-      get
-      {
-        return Provider;
-      }
-    }
-
-    private static readonly Type elementType = typeof(TData);
-    private readonly TProvider provider;
-    private readonly Expression expression;
+    IQbservableProvider IQbservable.Provider => Provider;
 
     protected QbservableBase(TProvider provider)
     {
-      this.provider = provider;
-      this.expression = Expression.Constant(this);
+      Provider = provider;
+      Expression = Expression.Constant(this);
     }
 
     [SuppressMessage("Microsoft.Contracts", "RequiresAtCall-typeof(IQbservable<TData>).IsAssignableFrom(expression.Type)")]
@@ -59,8 +31,8 @@ namespace Qactive
       Contract.Requires(expression != null);
       Contract.Requires(typeof(IQbservable<TData>).IsAssignableFrom(expression.Type));
 
-      this.provider = provider;
-      this.expression = expression;
+      Provider = provider;
+      Expression = expression;
     }
 
     protected bool IsSource(Expression candidate)

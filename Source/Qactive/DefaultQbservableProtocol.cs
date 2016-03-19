@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.IO;
 using System.Linq.Expressions;
-using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -17,12 +16,12 @@ namespace Qactive
 {
   internal sealed class DefaultQbservableProtocol : QbservableProtocol<QbservableMessage>
   {
-    public DefaultQbservableProtocol(NetworkStream stream, IRemotingFormatter formatter, CancellationToken cancel)
+    public DefaultQbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
       : base(stream, formatter, cancel)
     {
     }
 
-    public DefaultQbservableProtocol(NetworkStream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    public DefaultQbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
       : base(stream, formatter, serviceOptions, cancel)
     {
     }

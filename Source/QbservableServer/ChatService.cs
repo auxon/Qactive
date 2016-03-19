@@ -19,13 +19,13 @@ namespace QbservableServer
 
       messageDispatch.Subscribe(message => ConsoleTrace.WriteLine(ConsoleColor.DarkGray, message));
 
-      var service = QbservableTcpServer.CreateService<string, ChatServiceHooks>(
+      var service = Qactive.TcpQbservableServer.CreateService<string, ChatServiceHooks>(
         endPoint,
         new QbservableServiceOptions() { EnableDuplex = true, AllowExpressionsUnrestricted = true },
-        request =>
+        (IObservable<string> request) =>
           (from userName in request
            from hooks in Observable.Create<ChatServiceHooks>(
-            observer =>
+            (IObserver<ChatServiceHooks> observer) =>
             {
               messageDispatch.OnNext(userName + " is online.");
 

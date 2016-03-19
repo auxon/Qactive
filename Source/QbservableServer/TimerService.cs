@@ -13,10 +13,10 @@ namespace QbservableServer
 
     public IDisposable Start(TraceSource trace)
     {
-      var service = QbservableTcpServer.CreateService<TimeSpan, long>(
+      var service = Qactive.TcpQbservableServer.CreateService<TimeSpan, long>(
         endPoint,
         new QbservableServiceOptions() { AllowExpressionsUnrestricted = true },
-        request =>
+        (IObservable<TimeSpan> request) =>
           (from duration in request.Do(arg => Console.WriteLine("Timer client sent arg: " + arg))
            from value in Observable.Timer(duration)
            select value));

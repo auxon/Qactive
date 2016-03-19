@@ -32,7 +32,7 @@ namespace QbservableServer
       //			var newAppBase = Path.Combine(appBase, "bin");
       //#endif
 
-      var service = QbservableTcpServer.CreateService<object, int>(
+      var service = Qactive.TcpQbservableServer.CreateService<object, int>(
         new AppDomainSetup() { ApplicationBase = appBase },
         endPoint,
         new QbservableServiceOptions() { AllowExpressionsUnrestricted = true },
