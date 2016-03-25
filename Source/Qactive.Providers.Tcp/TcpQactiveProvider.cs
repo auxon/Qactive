@@ -25,6 +25,7 @@ namespace Qactive
     private TcpQactiveProvider(IPEndPoint endPoint, Action<Socket> prepareSocket, Func<IRemotingFormatter> formatterFactory)
     {
       EndPoint = endPoint;
+      this.prepareSocket = prepareSocket;
       this.formatterFactory = formatterFactory;
     }
 
@@ -32,6 +33,7 @@ namespace Qactive
       : base(sourceType, localEvaluator)
     {
       EndPoint = endPoint;
+      this.prepareSocket = prepareSocket;
       formatterFactory = () => formatter;
     }
 
@@ -39,6 +41,7 @@ namespace Qactive
       : base(sourceType, localEvaluator, argument)
     {
       EndPoint = endPoint;
+      this.prepareSocket = prepareSocket;
       formatterFactory = () => formatter;
     }
 
