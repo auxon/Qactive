@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Net;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.Remoting.Messaging;
 using System.Security;
 using System.Security.Permissions;
 using System.Security.Policy;
@@ -13,7 +11,7 @@ using Qactive.Properties;
 
 namespace Qactive
 {
-  public static partial class TcpQbservableServer
+  public static partial class QbservableServer
   {
     private static int appDomainNumber;
 
@@ -21,98 +19,44 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
     public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
-      IPEndPoint endPoint,
+      QactiveProviderFactory providerFactory,
       Func<IObservable<TSource>, IObservable<TResult>> service,
       [CallerMemberName] string appDomainBaseName = null,
       params Assembly[] fullTrustAssemblies)
     {
-      return CreateService<TSource, TResult>(appDomainSetup, endPoint, new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
+      return CreateService<TSource, TResult>(appDomainSetup, providerFactory, new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
     public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
-      IPEndPoint endPoint,
+      QactiveProviderFactory providerFactory,
       QbservableServiceOptions options,
       Func<IObservable<TSource>, IObservable<TResult>> service,
       [CallerMemberName] string appDomainBaseName = null,
       params Assembly[] fullTrustAssemblies)
     {
-      return CreateService<TSource, TResult>(appDomainSetup, endPoint, options, new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
+      return CreateService<TSource, TResult>(appDomainSetup, providerFactory, options, new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
     public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
-      IPEndPoint endPoint,
-      Func<IRemotingFormatter> formatterFactory,
-      Func<IObservable<TSource>, IObservable<TResult>> service,
-      [CallerMemberName] string appDomainBaseName = null,
-      params Assembly[] fullTrustAssemblies)
-    {
-      return CreateService<TSource, TResult>(appDomainSetup, endPoint, formatterFactory, new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
-    }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
-      AppDomainSetup appDomainSetup,
-      IPEndPoint endPoint,
-      Func<IRemotingFormatter> formatterFactory,
-      QbservableServiceOptions options,
-      Func<IObservable<TSource>, IObservable<TResult>> service,
-      [CallerMemberName] string appDomainBaseName = null,
-      params Assembly[] fullTrustAssemblies)
-    {
-      return CreateService<TSource, TResult>(appDomainSetup, endPoint, formatterFactory, options, new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
-    }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
-      AppDomainSetup appDomainSetup,
-      IPEndPoint endPoint,
+      QactiveProviderFactory providerFactory,
       Func<IObservable<TSource>, IQbservable<TResult>> service,
       [CallerMemberName] string appDomainBaseName = null,
       params Assembly[] fullTrustAssemblies)
     {
-      return CreateService<TSource, TResult>(appDomainSetup, endPoint, CreateDefaultFormatter, QbservableServiceOptions.Default, service, appDomainBaseName, fullTrustAssemblies);
+      return CreateService(appDomainSetup, providerFactory, QbservableServiceOptions.Default, service, appDomainBaseName, fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
     public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
-      IPEndPoint endPoint,
-      QbservableServiceOptions options,
-      Func<IObservable<TSource>, IQbservable<TResult>> service,
-      [CallerMemberName] string appDomainBaseName = null,
-      params Assembly[] fullTrustAssemblies)
-    {
-      return CreateService<TSource, TResult>(appDomainSetup, endPoint, CreateDefaultFormatter, options, service, appDomainBaseName, fullTrustAssemblies);
-    }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
-      AppDomainSetup appDomainSetup,
-      IPEndPoint endPoint,
-      Func<IRemotingFormatter> formatterFactory,
-      Func<IObservable<TSource>, IQbservable<TResult>> service,
-      [CallerMemberName] string appDomainBaseName = null,
-      params Assembly[] fullTrustAssemblies)
-    {
-      return CreateService<TSource, TResult>(appDomainSetup, endPoint, formatterFactory, QbservableServiceOptions.Default, service, appDomainBaseName, fullTrustAssemblies);
-    }
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    public static IObservable<ClientTermination> CreateService<TSource, TResult>(
-      AppDomainSetup appDomainSetup,
-      IPEndPoint endPoint,
-      Func<IRemotingFormatter> formatterFactory,
+      QactiveProviderFactory providerFactory,
       QbservableServiceOptions options,
       Func<IObservable<TSource>, IQbservable<TResult>> service,
       [CallerMemberName] string appDomainBaseName = null,
@@ -120,7 +64,7 @@ namespace Qactive
     {
       var permissions = new PermissionSet(PermissionState.None);
 
-      return CreateService<TSource, TResult>(appDomainSetup, permissions, endPoint, formatterFactory, options, service, appDomainBaseName, fullTrustAssemblies);
+      return CreateService(appDomainSetup, permissions, providerFactory, options, service, appDomainBaseName, fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2103:ReviewImperativeSecurity", Justification = "False positive; The Address is converted to a string before being passed to the permission, so it cannot be mutated later.")]
@@ -130,8 +74,7 @@ namespace Qactive
     public static IObservable<ClientTermination> CreateService<TSource, TResult>(
       AppDomainSetup appDomainSetup,
       PermissionSet permissions,
-      IPEndPoint endPoint,
-      Func<IRemotingFormatter> formatterFactory,
+      QactiveProviderFactory providerFactory,
       QbservableServiceOptions options,
       Func<IObservable<TSource>, IQbservable<TResult>> service,
       [CallerMemberName] string appDomainBaseName = null,
@@ -140,17 +83,22 @@ namespace Qactive
       var minimumPermissions = new PermissionSet(PermissionState.None);
 
       minimumPermissions.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution));
-      minimumPermissions.AddPermission(new SocketPermission(NetworkAccess.Accept, TransportType.Tcp, endPoint.Address.ToString(), endPoint.Port));
+
+      foreach (var permission in providerFactory.MinimumServerPermissions)
+      {
+        minimumPermissions.AddPermission(permission);
+      }
 
       var entryAssembly = Assembly.GetEntryAssembly();
 
       var domain = AppDomain.CreateDomain(
         Interlocked.Increment(ref appDomainNumber) + ':' + appDomainBaseName,
         null,
-        appDomainSetup, minimumPermissions.Union(permissions),
+        appDomainSetup,
+        minimumPermissions.Union(permissions),
         new[]
         {
-          typeof(TcpQbservableServer).Assembly.Evidence.GetHostEvidence<StrongName>(),
+          typeof(QbservableServer).Assembly.Evidence.GetHostEvidence<StrongName>(),
           typeof(System.Reactive.Linq.Observable).Assembly.Evidence.GetHostEvidence<StrongName>(),
           typeof(System.Reactive.Linq.Qbservable).Assembly.Evidence.GetHostEvidence<StrongName>(),
           typeof(System.Reactive.Notification).Assembly.Evidence.GetHostEvidence<StrongName>(),
@@ -158,7 +106,9 @@ namespace Qactive
           typeof(System.Reactive.Concurrency.TaskPoolScheduler).Assembly.Evidence.GetHostEvidence<StrongName>()
         }
         .Concat(entryAssembly == null ? new StrongName[0] : new[] { entryAssembly.Evidence.GetHostEvidence<StrongName>() })
+        .Concat(providerFactory.FullTrustAssemblies)
         .Concat(fullTrustAssemblies.Select(assembly => assembly.Evidence.GetHostEvidence<StrongName>()))
+        .Distinct()
         .ToArray());
 
       try
@@ -170,7 +120,7 @@ namespace Qactive
 
         var proxy = (CreateServiceProxy<TSource, TResult>)handle.Unwrap();
 
-        return proxy.CreateService(endPoint, options, new CreateServiceProxyDelegates<TSource, TResult>(formatterFactory, service))
+        return proxy.CreateService(providerFactory, options, new CreateServiceProxyDelegates<TSource, TResult>(service))
           .Finally(() => AppDomain.Unload(domain));
       }
       catch
@@ -182,31 +132,11 @@ namespace Qactive
 
     private sealed class CreateServiceProxyDelegates<TSource, TResult> : MarshalByRefObject
     {
-      public Func<IRemotingFormatter> FormatterFactory
-      {
-        get
-        {
-          return formatterFactory;
-        }
-      }
+      public Func<IObservable<TSource>, IQbservable<TResult>> Service { get; }
 
-      public Func<IObservable<TSource>, IQbservable<TResult>> Service
+      public CreateServiceProxyDelegates(Func<IObservable<TSource>, IQbservable<TResult>> service)
       {
-        get
-        {
-          return service;
-        }
-      }
-
-      private readonly Func<IRemotingFormatter> formatterFactory;
-      private readonly Func<IObservable<TSource>, IQbservable<TResult>> service;
-
-      public CreateServiceProxyDelegates(
-        Func<IRemotingFormatter> formatterFactory,
-        Func<IObservable<TSource>, IQbservable<TResult>> service)
-      {
-        this.formatterFactory = formatterFactory;
-        this.service = service;
+        Service = service;
       }
 
       public override object InitializeLifetimeService()
@@ -218,22 +148,24 @@ namespace Qactive
     private sealed class CreateServiceProxy<TSource, TResult> : MarshalByRefObject
     {
       public IObservable<ClientTermination> CreateService(
-        IPEndPoint endPoint,
+        QactiveProviderFactory providerFactory,
         QbservableServiceOptions options,
         CreateServiceProxyDelegates<TSource, TResult> delegates)
       {
         new PermissionSet(PermissionState.Unrestricted).Assert();
 
+        QactiveProvider provider;
         try
         {
-          InitializeInFullTrust();
+          provider = providerFactory.Create();
+
+          InitializeInFullTrust(provider);
         }
         finally
         {
           PermissionSet.RevertAssert();
         }
 
-        Func<IRemotingFormatter> formatterFactory;
         Func<IObservable<TSource>, IQbservable<TResult>> service;
 
         /* Retrieving a cross-domain delegate always fails with a SecurityException due to 
@@ -253,7 +185,6 @@ namespace Qactive
 
         try
         {
-          formatterFactory = delegates.FormatterFactory;
           service = delegates.Service;
         }
         catch (SecurityException ex)
@@ -267,16 +198,16 @@ namespace Qactive
            */
         }
 
-        return TcpQbservableServer
-          .CreateService(endPoint, formatterFactory, options, service)
-          .RemotableWithoutConfiguration();
+        return QbservableServer.CreateService(provider, options, service).RemotableWithoutConfiguration();
       }
 
       [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-      private static void InitializeInFullTrust()
+      private static void InitializeInFullTrust(IQactiveProvider provider)
       {
         // Rx demands full trust for the static initializer of the Observable class (as of v2.2.5)
         Observable.ToObservable(new string[0]);
+
+        provider.InitializeSecureServer();
       }
 
       public override object InitializeLifetimeService()

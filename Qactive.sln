@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qactive", "Source\Qactive\Q
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qactive.Expressions", "Source\Qactive.Expressions\Qactive.Expressions.csproj", "{63F23287-B0D8-408E-995D-BF15A85CEE48}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qactive.Providers.Tcp", "Source\Qactive.Providers.Tcp\Qactive.Providers.Tcp.csproj", "{33525618-7ED6-4B4E-A4B7-945BEAA372FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{63F23287-B0D8-408E-995D-BF15A85CEE48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63F23287-B0D8-408E-995D-BF15A85CEE48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63F23287-B0D8-408E-995D-BF15A85CEE48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33525618-7ED6-4B4E-A4B7-945BEAA372FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33525618-7ED6-4B4E-A4B7-945BEAA372FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33525618-7ED6-4B4E-A4B7-945BEAA372FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33525618-7ED6-4B4E-A4B7-945BEAA372FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,5 +80,6 @@ Global
 		{DDC0126B-16BC-49C0-8B11-31856E565F4F} = {AB656064-E9C9-41A8-B447-2F658A0CB424}
 		{9B68408D-1974-4F76-9C89-ECCD466A25E0} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
 		{63F23287-B0D8-408E-995D-BF15A85CEE48} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
+		{33525618-7ED6-4B4E-A4B7-945BEAA372FF} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
 	EndGlobalSection
 EndGlobal

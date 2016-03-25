@@ -20,8 +20,9 @@ namespace QbservableServer
     {
       var appBase = Path.GetDirectoryName(new Uri(Assembly.GetEntryAssembly().CodeBase).LocalPath);
 
-      // Excluded this logic because the unless the exe is configured to load all assemblies from bin, you end up loading 
+      // Excluded this logic because unless the exe is configured to load all assemblies from bin, you end up loading 
       // two different copies of the same assembly into the AppDomains and the types are incompatible.
+      //
       //#if DEBUG
       //      var newAppBase = appBase;
       //#else
@@ -32,7 +33,7 @@ namespace QbservableServer
       //			var newAppBase = Path.Combine(appBase, "bin");
       //#endif
 
-      var service = Qactive.TcpQbservableServer.CreateService<object, int>(
+      var service = TcpQbservableServer.CreateService(
         new AppDomainSetup() { ApplicationBase = appBase },
         endPoint,
         new QbservableServiceOptions() { AllowExpressionsUnrestricted = true },

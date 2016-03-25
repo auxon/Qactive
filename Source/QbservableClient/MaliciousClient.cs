@@ -20,7 +20,7 @@ namespace QbservableClient
 
     private void Run(IPEndPoint serviceEndPoint)
     {
-      var client = new QbservableTcpClient<int>(serviceEndPoint, typeof(MessageBox));
+      var client = new TcpQbservableClient<int>(serviceEndPoint, typeof(MessageBox));
 
       /* The sandboxed service does not prevent Console.WriteLine because that API doesn't demand any permissions.
        * This shows why setting AllowExpressionsUnrestricted to true is a bad idea, unless you trust all clients.

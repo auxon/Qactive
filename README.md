@@ -27,10 +27,13 @@ For more information, see [this series of blog posts](http://davesexton.com/blog
 > taking the necessary precautions to secure it first.
 
 ## Features
-* Simple server factory methods for hosting a Qbservable TCP service.
-  * Supports hosting any `IObservable<T>` query as a TCP service (_hot_ or _cold_).
-  * Supports hosting any `IQbservable<T>` query as a TCP service.
-* Simple client factory methods for acquiring a Qbservable TCP service.
+* Works immediately with pre-built transport providers.
+  * TCP with binary serialization is provided by the optional Qactive.Providers.Tcp package on NuGet.
+  * Extensible so that any kind of custom transport and/or serialization mechanism can be used.
+* Simple server factory methods for hosting a Qbservable service.
+  * Supports hosting any `IObservable<T>` query as a service (_hot_ or _cold_).
+  * Supports hosting any `IQbservable<T>` query as a service.
+* Simple client factory methods for acquiring a Qbservable service.
   * You must only specify the end point address and the expected return type.  The result is an `IQbservable<T>` that you can query and `Subscribe`.
   * All Qbservable Rx operators are supported.
 * Automatically serialized Expression trees.
@@ -55,30 +58,30 @@ IObservable<long> source = Observable.Interval(TimeSpan.FromSeconds(1));
 var service = source.ServeQbservableTcp(new IPEndPoint(IPAddress.Loopback, 3205));
 
 using (service.Subscribe(
-	client => Console.WriteLine("Client shutdown."),
-	ex => Console.WriteLine("Fatal error: {0}", ex.Message),
-	() => Console.WriteLine("This will never be printed because a service host never completes.")))
+  client => Console.WriteLine("Client shutdown."),
+  ex => Console.WriteLine("Fatal error: {0}", ex.Message),
+  () => Console.WriteLine("This will never be printed because a service host never completes.")))
 {
-	Console.ReadKey();
+  Console.ReadKey();
 }
 ```
 The following example creates a LINQ query over the `IQbservable<long>` service that is created by the previous example.  Subscribing to the query on the client causes the query to be serialized to the server and executed there.  In other words, the `where` clause is actually executed on the server so that the client only receives the data that it requested without having to do any filtering itself.  The client will receive the first six values, one per second.  The server then filters out the next 2 values - it does not send them to the client.  Finally, the remaining values are sent to the client until either the client or the server disposes of the subscription.
 
 ### Client
 ```c#
-var client = new QbservableTcpClient<long>(new IPEndPoint(IPAddress.Loopback, 3205));
+var client = new TcpQbservableClient<long>(new IPEndPoint(IPAddress.Loopback, 3205));
 
 IQbservable<long> query =
-	from value in client.Query()
-	where value <= 5 || value >= 8
-	select value;
+  from value in client.Query()
+  where value <= 5 || value >= 8
+  select value;
 
 using (query.Subscribe(
-	value => Console.WriteLine("Client observed: " + value),
-	ex => Console.WriteLine("Error: {0}", ex.Message),
-	() => Console.WriteLine("Completed")))
+  value => Console.WriteLine("Client observed: " + value),
+  ex => Console.WriteLine("Error: {0}", ex.Message),
+  () => Console.WriteLine("Completed")))
 {
-	Console.ReadKey();
+  Console.ReadKey();
 }
 ```
 

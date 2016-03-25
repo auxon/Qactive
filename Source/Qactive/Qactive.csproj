@@ -171,7 +171,7 @@
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
     <Compile Include="AsyncConsumerQueue.cs" />
-    <Compile Include="TcpClientQbservableProvider.cs" />
+    <Compile Include="IQactiveProvider.cs" />
     <Compile Include="Either.cs" />
     <Compile Include="Either{TLeft,TRight}.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -179,7 +179,9 @@
     <Compile Include="KnownTypeContext.cs" />
     <Compile Include="ExceptionDispatchInfoEqualityComparer.cs" />
     <Compile Include="ExpressionOptions.cs" />
-    <Compile Include="TcpQbservableServer - Secure.cs" />
+    <Compile Include="QactiveProviderFactory.cs" />
+    <Compile Include="QbservableServer.cs" />
+    <Compile Include="QbservableServer - Secure.cs" />
     <Compile Include="DefaultServerDuplexQbservableProtocolSink.cs" />
     <Compile Include="DuplexCallbackId.cs" />
     <Compile Include="ExpressionSecurityException.cs" />
@@ -217,8 +219,6 @@
     <Compile Include="QbservableProtocolShutdownReason.cs" />
     <Compile Include="QbservableSourcePlaceholder.cs" />
     <Compile Include="QbservableSubscriptionException.cs" />
-    <Compile Include="TcpQbservableServer.cs" />
-    <Compile Include="QbservableTcpClient.cs" />
     <Compile Include="DuplexCallbackEnumerable.cs" />
     <Compile Include="DuplexCallbackObservable.cs" />
     <Compile Include="ReplaceConstantsVisitor.cs" />
@@ -227,7 +227,7 @@
     <Compile Include="QbservableServiceConverter.cs" />
     <Compile Include="ServiceEvaluationContext.cs" />
     <Compile Include="ClientTermination.cs" />
-    <Compile Include="ClientQbservableProvider.cs" />
+    <Compile Include="QactiveProvider.cs" />
     <Compile Include="ClientQuery.cs" />
     <Compile Include="ServerQbservableProvider.cs" />
     <Compile Include="ServerQuery.cs" />

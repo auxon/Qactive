@@ -95,6 +95,10 @@
       <Project>{63f23287-b0d8-408e-995d-bf15a85cee48}</Project>
       <Name>Qactive.Expressions</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Qactive.Providers.Tcp\Qactive.Providers.Tcp.csproj">
+      <Project>{33525618-7ed6-4b4e-a4b7-945beaa372ff}</Project>
+      <Name>Qactive.Providers.Tcp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Qactive\Qactive.csproj">
       <Project>{9b68408d-1974-4f76-9c89-eccd466a25e0}</Project>
       <Name>Qactive</Name>
@@ -115,12 +119,10 @@
     <PropertyGroup>
       <SandboxDir Condition=" '$(SandboxDir)' == '' ">$(OutDir)bin\</SandboxDir>
     </PropertyGroup>
-
     <ItemGroup>
       <_Dependencies Include="$(OutDir)*.dll" />
       <_Dependencies Include="$(OutDir)*.pdb" Exclude="$(TargetFile).pdb" />
     </ItemGroup>
-
     <Copy SourceFiles="@(_Dependencies)" DestinationFolder="$(SandboxDir)" />
   </Target>
 </Project>

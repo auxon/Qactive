@@ -11,7 +11,7 @@ namespace QbservableClient
   {
     public void Run()
     {
-      var client = new QbservableTcpClient<ChatServiceHooks>(Program.ChatServiceEndPoint);
+      var client = new TcpQbservableClient<ChatServiceHooks>(Program.ChatServiceEndPoint);
 
       Console.WriteLine();
       Console.Write("Enter your user name> ");

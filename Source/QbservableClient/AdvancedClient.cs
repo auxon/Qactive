@@ -21,7 +21,7 @@ namespace QbservableClient
       var localObj = new LocalObject();
       var localTransferableObj = new SharedLibrary.TransferableObject(100);
 
-      var client = new QbservableTcpClient<long>(Program.BasicServiceEndPoint, typeof(SharedLibrary.TransferableObject));
+      var client = new TcpQbservableClient<long>(Program.BasicServiceEndPoint, typeof(SharedLibrary.TransferableObject));
 
       IQbservable<string> query =
         (from value in client.Query()

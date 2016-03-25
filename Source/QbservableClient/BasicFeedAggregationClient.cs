@@ -22,7 +22,7 @@ namespace QbservableClient
         new FeedServiceArgument() { IsAtom = true, Url = new Uri("http://social.msdn.microsoft.com/Forums/en-US/rx/threads?outputAs=atom") }
       };
 
-      var client = new QbservableTcpClient<FeedItem>(Program.AdvancedServiceEndPoint, typeof(FeedItem));
+      var client = new TcpQbservableClient<FeedItem>(Program.AdvancedServiceEndPoint, typeof(FeedItem));
 
       IQbservable<FeedItem> query =
         (from item in client.Query(feedAggregatorServiceArgs)

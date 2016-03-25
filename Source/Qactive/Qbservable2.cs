@@ -1,76 +1,47 @@
 ﻿using System;
-using System.Net;
+using System.Diagnostics.Contracts;
 using System.Reactive.Linq;
-using System.Runtime.Remoting.Messaging;
 
 namespace Qactive
 {
-  // TODO: Specify code contracts - applies to every type throughout this project, not just Qbservable2
-
   public static class Qbservable2
   {
-    public static IObservable<ClientTermination> ServeQbservableTcp<TSource>(
-      this IObservable<TSource> source,
-      IPEndPoint endPoint)
+    public static IObservable<ClientTermination> ServeQbservable<TSource>(this IObservable<TSource> source, IQactiveProvider provider)
     {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, _ => source);
+      Contract.Requires(source != null);
+      Contract.Requires(provider != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
+      return QbservableServer.CreateService<object, TSource>(provider, _ => source);
     }
 
-    public static IObservable<ClientTermination> ServeQbservableTcp<TSource>(
-      this IObservable<TSource> source,
-      IPEndPoint endPoint,
-      QbservableServiceOptions options)
+    public static IObservable<ClientTermination> ServeQbservable<TSource>(this IObservable<TSource> source, IQactiveProvider provider, QbservableServiceOptions options)
     {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, options, _ => source);
+      Contract.Requires(source != null);
+      Contract.Requires(provider != null);
+      Contract.Requires(options != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
+      return QbservableServer.CreateService<object, TSource>(provider, options, _ => source);
     }
 
-    public static IObservable<ClientTermination> ServeQbservableTcp<TSource>(
-      this IObservable<TSource> source,
-      IPEndPoint endPoint,
-      IRemotingFormatter formatter)
+    public static IObservable<ClientTermination> Serve<TSource>(this IQbservable<TSource> source, IQactiveProvider provider)
     {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, formatter, _ => source);
+      Contract.Requires(source != null);
+      Contract.Requires(provider != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
+      return QbservableServer.CreateService<object, TSource>(provider, _ => source);
     }
 
-    public static IObservable<ClientTermination> ServeQbservableTcp<TSource>(
-      this IObservable<TSource> source,
-      IPEndPoint endPoint,
-      IRemotingFormatter formatter,
-      QbservableServiceOptions options)
+    public static IObservable<ClientTermination> Serve<TSource>(this IQbservable<TSource> source, IQactiveProvider provider, QbservableServiceOptions options)
     {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, formatter, options, _ => source);
-    }
+      Contract.Requires(source != null);
+      Contract.Requires(provider != null);
+      Contract.Requires(options != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
 
-    public static IObservable<ClientTermination> ServeTcp<TSource>(
-      this IQbservable<TSource> source,
-      IPEndPoint endPoint)
-    {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, _ => source);
-    }
-
-    public static IObservable<ClientTermination> ServeTcp<TSource>(
-      this IQbservable<TSource> source,
-      IPEndPoint endPoint,
-      QbservableServiceOptions options)
-    {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, options, _ => source);
-    }
-
-    public static IObservable<ClientTermination> ServeTcp<TSource>(
-      this IQbservable<TSource> source,
-      IPEndPoint endPoint,
-      IRemotingFormatter formatter)
-    {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, formatter, _ => source);
-    }
-
-    public static IObservable<ClientTermination> ServeTcp<TSource>(
-      this IQbservable<TSource> source,
-      IPEndPoint endPoint,
-      IRemotingFormatter formatter,
-      QbservableServiceOptions options)
-    {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, formatter, options, _ => source);
+      return QbservableServer.CreateService<object, TSource>(provider, options, _ => source);
     }
   }
 }

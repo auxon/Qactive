@@ -10,7 +10,7 @@ namespace QbservableClient
   {
     public void Run()
     {
-      var client = new QbservableTcpClient<long>(Program.TimerServiceEndPoint);
+      var client = new TcpQbservableClient<long>(Program.TimerServiceEndPoint);
 
       IQbservable<int> query =
         (from value in client.Query(TimeSpan.FromSeconds(1))

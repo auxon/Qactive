@@ -5,21 +5,21 @@ using System.Reactive.Linq;
 
 namespace Qactive
 {
-  internal sealed class ClientQuery<TResult> : QbservableBase<TResult, ClientQbservableProvider>
+  internal sealed class ClientQuery<TResult> : QbservableBase<TResult, QactiveProvider>
   {
-    public ClientQuery(ClientQbservableProvider provider)
+    public ClientQuery(QactiveProvider provider)
       : base(provider)
     {
     }
 
-    public ClientQuery(ClientQbservableProvider provider, Expression expression)
+    public ClientQuery(QactiveProvider provider, Expression expression)
       : base(provider, expression)
     {
     }
 
     protected override IDisposable SubscribeCore(IObserver<TResult> observer)
     {
-      return Provider.GetConnections<TResult>(PrepareExpression).Subscribe(observer);
+      return Provider.Connect<TResult>(PrepareExpression).Subscribe(observer);
     }
 
     public Expression PrepareExpression(QbservableProtocol protocol)
@@ -27,7 +27,7 @@ namespace Qactive
       Contract.Requires(protocol != null);
       Contract.Ensures(Contract.Result<Expression>() != null);
 
-      QbservableProviderDiagnostics.DebugPrint(Expression, "TcpClientQuery Original Expression");
+      QbservableProviderDiagnostics.DebugPrint(Expression, "ClientQuery Original Expression");
 
       if (!Expression.Type.IsGenericType
         || (Expression.Type.GetGenericTypeDefinition() != typeof(IQbservable<>)
@@ -48,7 +48,7 @@ namespace Qactive
         throw new InvalidOperationException("A queryable observable service was not found in the query.");
       }
 
-      var evaluator = Provider.LocalEvaluator;
+      var evaluator = Provider.ClientEvaluator;
 
       if (!evaluator.IsKnownType(Provider.SourceType))
       {
@@ -59,7 +59,7 @@ namespace Qactive
 
       var preparedExpression = evaluationVisitor.Visit(result);
 
-      QbservableProviderDiagnostics.DebugPrint(preparedExpression, "TcpClientQuery Rewritten Expression");
+      QbservableProviderDiagnostics.DebugPrint(preparedExpression, "ClientQuery Rewritten Expression");
 
       return preparedExpression;
     }

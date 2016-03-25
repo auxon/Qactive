@@ -26,7 +26,7 @@ namespace QbservableClient
         .Take(2)
         .Do(value => trace.TraceInformation("localObservable: {0}", value));
 
-      var client = new QbservableTcpClient<long>(Program.BasicServiceEndPoint, new DuplexLocalEvaluator());
+      var client = new TcpQbservableClient<long>(Program.BasicServiceEndPoint, new DuplexLocalEvaluator());
 
       IQbservable<string> query =
         (from serviceValue in client.Query()

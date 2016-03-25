@@ -10,7 +10,7 @@ namespace QbservableClient
   {
     public void Run()
     {
-      var client = new QbservableTcpClient<long>(Program.BasicServiceEndPoint);
+      var client = new TcpQbservableClient<long>(Program.BasicServiceEndPoint);
 
       var query =
         (from value in client.Query()
