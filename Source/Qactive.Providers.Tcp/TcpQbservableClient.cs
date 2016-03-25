@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Runtime.Remoting.Messaging;
 
@@ -75,12 +76,22 @@ namespace Qactive
 
     public IQbservable<TSource> Query()
     {
-      return TcpQactiveProvider.Client(typeof(TSource), endPoint, formatter, localEvaluator).CreateQuery<TSource>();
+      return TcpQactiveProvider.Client(typeof(TSource), endPoint, Nop.Action, formatter, localEvaluator).CreateQuery<TSource>();
     }
 
     public IQbservable<TSource> Query(object argument)
     {
-      return TcpQactiveProvider.Client(typeof(TSource), endPoint, formatter, localEvaluator, argument).CreateQuery<TSource>();
+      return TcpQactiveProvider.Client(typeof(TSource), endPoint, Nop.Action, formatter, localEvaluator, argument).CreateQuery<TSource>();
+    }
+
+    public IQbservable<TSource> Query(Action<Socket> prepareSocket)
+    {
+      return TcpQactiveProvider.Client(typeof(TSource), endPoint, prepareSocket, formatter, localEvaluator).CreateQuery<TSource>();
+    }
+
+    public IQbservable<TSource> Query(Action<Socket> prepareSocket, object argument)
+    {
+      return TcpQactiveProvider.Client(typeof(TSource), endPoint, prepareSocket, formatter, localEvaluator, argument).CreateQuery<TSource>();
     }
   }
 }

@@ -68,6 +68,7 @@
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
+    <Compile Include="Nop.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TcpQactiveDefaults.cs" />
     <Compile Include="TcpQactiveProviderFactory.cs" />

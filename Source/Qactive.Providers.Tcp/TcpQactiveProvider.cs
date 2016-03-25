@@ -20,46 +20,39 @@ namespace Qactive
     public IPEndPoint EndPoint { get; }
 
     private readonly Func<IRemotingFormatter> formatterFactory;
+    private readonly Action<Socket> prepareSocket;
 
-    private TcpQactiveProvider(IPEndPoint endPoint, Func<IRemotingFormatter> formatterFactory)
+    private TcpQactiveProvider(IPEndPoint endPoint, Action<Socket> prepareSocket, Func<IRemotingFormatter> formatterFactory)
     {
       EndPoint = endPoint;
       this.formatterFactory = formatterFactory;
     }
 
-    private TcpQactiveProvider(Type sourceType, IPEndPoint endPoint, IRemotingFormatter formatter, LocalEvaluator localEvaluator)
+    private TcpQactiveProvider(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator)
       : base(sourceType, localEvaluator)
     {
       EndPoint = endPoint;
       formatterFactory = () => formatter;
     }
 
-    private TcpQactiveProvider(Type sourceType, IPEndPoint endPoint, IRemotingFormatter formatter, LocalEvaluator localEvaluator, object argument)
+    private TcpQactiveProvider(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator, object argument)
       : base(sourceType, localEvaluator, argument)
     {
       EndPoint = endPoint;
       formatterFactory = () => formatter;
     }
 
-    public static TcpQactiveProvider Client(Type sourceType, IPEndPoint endPoint, IRemotingFormatter formatter, LocalEvaluator localEvaluator)
-    {
-      return new TcpQactiveProvider(sourceType, endPoint, formatter, localEvaluator);
-    }
+    public static TcpQactiveProvider Client(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator)
+      => new TcpQactiveProvider(sourceType, endPoint, prepareSocket, formatter, localEvaluator);
 
-    public static TcpQactiveProvider Client(Type sourceType, IPEndPoint endPoint, IRemotingFormatter formatter, LocalEvaluator localEvaluator, object argument)
-    {
-      return new TcpQactiveProvider(sourceType, endPoint, formatter, localEvaluator, argument);
-    }
+    public static TcpQactiveProvider Client(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator, object argument)
+      => new TcpQactiveProvider(sourceType, endPoint, prepareSocket, formatter, localEvaluator, argument);
 
-    public static TcpQactiveProvider Server(IPEndPoint endPoint)
-    {
-      return new TcpQactiveProvider(endPoint, TcpQactiveDefaults.CreateDefaultFormatter);
-    }
+    public static TcpQactiveProvider Server(IPEndPoint endPoint, Action<Socket> prepareSocket)
+      => new TcpQactiveProvider(endPoint, prepareSocket, TcpQactiveDefaults.CreateDefaultFormatter);
 
-    public static TcpQactiveProvider Server(IPEndPoint endPoint, Func<IRemotingFormatter> formatterFactory)
-    {
-      return new TcpQactiveProvider(endPoint, formatterFactory);
-    }
+    public static TcpQactiveProvider Server(IPEndPoint endPoint, Action<Socket> prepareSocket, Func<IRemotingFormatter> formatterFactory)
+      => new TcpQactiveProvider(endPoint, prepareSocket, formatterFactory);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The SocketAsyncEventArgs instance is either disposed before returning or by the observable's Finally operator.")]
     public override IObservable<TResult> Connect<TResult>(Func<QbservableProtocol, Expression> prepareExpression)
@@ -69,6 +62,8 @@ namespace Qactive
       try
       {
         socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+        prepareSocket(socket);
 
         e = new SocketAsyncEventArgs()
         {
@@ -152,6 +147,8 @@ namespace Qactive
            .SelectMany(client => Observable
              .StartAsync(async cancel =>
              {
+               prepareSocket(client.Client);
+
                var watch = Stopwatch.StartNew();
 
                var localEndPoint = client.Client.LocalEndPoint;
