@@ -22,12 +22,12 @@ namespace QbservableClient
 
       Console.ReadKey(intercept: true);
 
-      //new BasicClient().Run();
-      //new TimerClient().Run();
-      //new BasicFeedAggregationClient().Run();
-      //new AdvancedClient().Run();
-      //new DuplexClient().Run();
-      //new ChatClient().Run();
+      new BasicClient().Run();
+      new TimerClient().Run();
+      new BasicFeedAggregationClient().Run();
+      new AdvancedClient().Run();
+      new DuplexClient().Run();
+      new ChatClient().Run();
       new MaliciousClient().Run();
     }
   }
