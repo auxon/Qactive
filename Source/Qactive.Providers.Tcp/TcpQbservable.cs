@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Reactive.Linq;
-using System.Runtime.Remoting.Messaging;
 
 namespace Qactive
 {
@@ -25,18 +24,18 @@ namespace Qactive
     public static IObservable<ClientTermination> ServeQbservableTcp<TSource>(
       this IObservable<TSource> source,
       IPEndPoint endPoint,
-      IRemotingFormatter formatter)
+      ITcpQactiveProviderTransportInitializer transportInitializer)
     {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, formatter, _ => source);
+      return TcpQbservableServer.CreateService<object, TSource>(endPoint, transportInitializer, _ => source);
     }
 
     public static IObservable<ClientTermination> ServeQbservableTcp<TSource>(
       this IObservable<TSource> source,
       IPEndPoint endPoint,
-      IRemotingFormatter formatter,
+      ITcpQactiveProviderTransportInitializer transportInitializer,
       QbservableServiceOptions options)
     {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, formatter, options, _ => source);
+      return TcpQbservableServer.CreateService<object, TSource>(endPoint, transportInitializer, options, _ => source);
     }
 
     public static IObservable<ClientTermination> ServeTcp<TSource>(
@@ -57,18 +56,18 @@ namespace Qactive
     public static IObservable<ClientTermination> ServeTcp<TSource>(
       this IQbservable<TSource> source,
       IPEndPoint endPoint,
-      IRemotingFormatter formatter)
+      ITcpQactiveProviderTransportInitializer transportInitializer)
     {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, formatter, _ => source);
+      return TcpQbservableServer.CreateService<object, TSource>(endPoint, transportInitializer, _ => source);
     }
 
     public static IObservable<ClientTermination> ServeTcp<TSource>(
       this IQbservable<TSource> source,
       IPEndPoint endPoint,
-      IRemotingFormatter formatter,
+      ITcpQactiveProviderTransportInitializer transportInitializer,
       QbservableServiceOptions options)
     {
-      return TcpQbservableServer.CreateService<object, TSource>(endPoint, formatter, options, _ => source);
+      return TcpQbservableServer.CreateService<object, TSource>(endPoint, transportInitializer, options, _ => source);
     }
   }
 }

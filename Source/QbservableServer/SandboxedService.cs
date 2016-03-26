@@ -2,9 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Messaging;
 using System.Security;
 using System.Security.Permissions;
 using Qactive;
@@ -33,7 +35,7 @@ namespace QbservableServer
       //			var newAppBase = Path.Combine(appBase, "bin");
       //#endif
 
-      var service = TcpQbservableServer.CreateService(
+      var service = TcpQbservableServer.CreateService<object, int, TransportInitializer>(
         new AppDomainSetup() { ApplicationBase = appBase },
         endPoint,
         new QbservableServiceOptions() { AllowExpressionsUnrestricted = true },
@@ -71,6 +73,34 @@ namespace QbservableServer
       finally
       {
         PermissionSet.RevertAssert();
+      }
+    }
+
+    /// <summary>
+    /// This type is entirely optional. You can omit the corresponding type arg when 
+    /// calling <see cref="TcpQbservableServer.CreateService"/> if you don't need to 
+    /// prepare sockets or create formatters.
+    /// </summary>
+    private sealed class TransportInitializer : ITcpQactiveProviderTransportInitializer
+    {
+      public void Prepare(Socket socket)
+      {
+        new SecurityPermission(SecurityPermissionFlag.UnmanagedCode).Assert();
+
+        try
+        {
+          socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+          socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
+        }
+        finally
+        {
+          CodeAccessPermission.RevertAssert();
+        }
+      }
+
+      public IRemotingFormatter CreateFormatter()
+      {
+        return null;
       }
     }
   }

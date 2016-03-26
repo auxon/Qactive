@@ -22,11 +22,20 @@ namespace Qactive
     private readonly Func<IRemotingFormatter> formatterFactory;
     private readonly Action<Socket> prepareSocket;
 
-    private TcpQactiveProvider(IPEndPoint endPoint, Action<Socket> prepareSocket, Func<IRemotingFormatter> formatterFactory)
+    private TcpQactiveProvider(IPEndPoint endPoint, ITcpQactiveProviderTransportInitializer transportInitializer)
     {
       EndPoint = endPoint;
-      this.prepareSocket = prepareSocket;
-      this.formatterFactory = formatterFactory;
+
+      if (transportInitializer != null)
+      {
+        prepareSocket = transportInitializer.Prepare;
+        formatterFactory = () => transportInitializer.CreateFormatter() ?? TcpQactiveDefaults.CreateDefaultFormatter();
+      }
+      else
+      {
+        prepareSocket = Nop.Action;
+        formatterFactory = TcpQactiveDefaults.CreateDefaultFormatter;
+      }
     }
 
     private TcpQactiveProvider(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator)
@@ -51,11 +60,8 @@ namespace Qactive
     public static TcpQactiveProvider Client(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator, object argument)
       => new TcpQactiveProvider(sourceType, endPoint, prepareSocket, formatter, localEvaluator, argument);
 
-    public static TcpQactiveProvider Server(IPEndPoint endPoint, Action<Socket> prepareSocket)
-      => new TcpQactiveProvider(endPoint, prepareSocket, TcpQactiveDefaults.CreateDefaultFormatter);
-
-    public static TcpQactiveProvider Server(IPEndPoint endPoint, Action<Socket> prepareSocket, Func<IRemotingFormatter> formatterFactory)
-      => new TcpQactiveProvider(endPoint, prepareSocket, formatterFactory);
+    public static TcpQactiveProvider Server(IPEndPoint endPoint, ITcpQactiveProviderTransportInitializer transportInitializer = null)
+      => new TcpQactiveProvider(endPoint, transportInitializer);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The SocketAsyncEventArgs instance is either disposed before returning or by the observable's Finally operator.")]
     public override IObservable<TResult> Connect<TResult>(Func<QbservableProtocol, Expression> prepareExpression)

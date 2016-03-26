@@ -22,6 +22,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{AB656064-E9C9-41A8-B447-2F658A0CB424}"
 	ProjectSection(SolutionItems) = preProject
 		Build\Deploy.targets = Build\Deploy.targets
+		Build\NuGet.props = Build\NuGet.props
 		Qactive.vssettings = Qactive.vssettings
 	EndProjectSection
 EndProject

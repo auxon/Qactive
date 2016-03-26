@@ -121,7 +121,7 @@ namespace Qactive
         var proxy = (CreateServiceProxy<TSource, TResult>)handle.Unwrap();
 
         return proxy.CreateService(providerFactory, options, new CreateServiceProxyDelegates<TSource, TResult>(service))
-          .Finally(() => AppDomain.Unload(domain));
+                    .Finally(() => AppDomain.Unload(domain));
       }
       catch
       {

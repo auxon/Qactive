@@ -50,13 +50,7 @@ namespace Qactive
 
     public QbservableProtocolShutdownReason ShutdownReason { get; private set; }
 
-    protected IRemotingFormatter Formatter
-    {
-      get
-      {
-        return formatter;
-      }
-    }
+    protected IRemotingFormatter Formatter { get; }
 
     protected CancellationToken Cancel { get; }
 
@@ -65,7 +59,6 @@ namespace Qactive
     private readonly AsyncConsumerQueue receiveQ = new AsyncConsumerQueue();
     private readonly List<ExceptionDispatchInfo> errors = new List<ExceptionDispatchInfo>();
     private readonly Stream stream;
-    private readonly IRemotingFormatter formatter;
     private readonly QbservableServiceOptions serviceOptions;
     private readonly bool isClient;
 
@@ -75,7 +68,7 @@ namespace Qactive
 
       this.isClient = true;
       this.stream = stream;
-      this.formatter = formatter;
+      Formatter = formatter;
       Cancel = protocolCancellation.Token;
 
       cancel.Register(protocolCancellation.Cancel, useSynchronizationContext: false);

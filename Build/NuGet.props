@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <NuSpecProjectUrl>https://github.com/RxDave/Qactive</NuSpecProjectUrl>
+    <NuSpecReleaseNotes>https://github.com/RxDave/Qactive/wiki/Release-Notes</NuSpecReleaseNotes>
+    <NuSpecIconUrl></NuSpecIconUrl>
+    <NuSpecLicenseUrl>https://github.com/RxDave/Qactive/blob/master/LICENSE.txt</NuSpecLicenseUrl>
+    <NuSpecTags>Rx, reactive, Reactive Extensions, Rx.NET, IObservable, IQbservable, queryable, service, stream</NuSpecTags>
+  </PropertyGroup>
+
+  <Target Name="_nop" />
+
+</Project>
