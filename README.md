@@ -6,11 +6,13 @@ A reactive queryable observable framework.
 * **Dependencies:** [Reactive Extensions (Rx.NET)](https://github.com/Reactive-Extensions/Rx.NET)
 
 ## Download
-> [Qactive.Providers.Tcp on NuGet](https://www.nuget.org/packages/qactive.providers.tcp) (depends on Qactive and Qactive.Expressions)
+Qactive is available as the following NuGet packages.
 
-> [Qactive on NuGet](https://www.nuget.org/packages/qactive) (depends on Qactive.Expressions)
+> [Qactive.Providers.Tcp](https://www.nuget.org/packages/qactive.providers.tcp) (depends on Qactive and Qactive.Expressions)
 
-> [Qactive.Expressions on NuGet](https://www.nuget.org/packages/qactive.expressions)
+> [Qactive](https://www.nuget.org/packages/qactive) (depends on Qactive.Expressions)
+
+> [Qactive.Expressions](https://www.nuget.org/packages/qactive.expressions)
 
 Add a reference to the **Qactive.Providers.Tcp** package in your Visual Studio project. That package references the other packages as dependencies, so NuGet will automatically download all of them for you.
 
