@@ -1,3 +1,4 @@
+<img align="right" src="https://raw.githubusercontent.com/RxDave/Qactive/master/Artifacts/Logo.png" />
 # Qactive
 A reactive queryable observable framework.
 
