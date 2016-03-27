@@ -216,7 +216,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Qbservable2.cs" />
     <Compile Include="QbservableBase.cs" />
-    <Compile Include="QbservableProviderDiagnostics.cs" />
     <Compile Include="QbservableProtocol.cs" />
     <Compile Include="QbservableServiceOptions.cs" />
     <Compile Include="QbservableProtocolMessageKind.cs" />

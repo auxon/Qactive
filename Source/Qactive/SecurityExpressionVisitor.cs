@@ -4,7 +4,7 @@ namespace Qactive
 {
   public class SecurityExpressionVisitor : ExpressionVisitor
   {
-    // TODO: Place configurable caps on the use of some kinds of types, operators and parameters (see Security Guidelines.txt)
+    // TODO: Place configurable caps on the use of some kinds of types, operators and parameters (see Security Guidelines.md)
 
     public ExpressionOptions Options
     {

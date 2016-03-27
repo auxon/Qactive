@@ -27,7 +27,7 @@ namespace Qactive
       Contract.Requires(protocol != null);
       Contract.Ensures(Contract.Result<Expression>() != null);
 
-      QbservableProviderDiagnostics.DebugPrint(Expression, "ClientQuery Original Expression");
+      Log.DebugPrint(Expression, "ClientQuery Original Expression");
 
       if (!Expression.Type.IsGenericType
         || (Expression.Type.GetGenericTypeDefinition() != typeof(IQbservable<>)
@@ -59,7 +59,7 @@ namespace Qactive
 
       var preparedExpression = evaluationVisitor.Visit(result);
 
-      QbservableProviderDiagnostics.DebugPrint(preparedExpression, "ClientQuery Rewritten Expression");
+      Log.DebugPrint(preparedExpression, "ClientQuery Rewritten Expression");
 
       return preparedExpression;
     }

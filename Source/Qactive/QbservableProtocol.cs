@@ -651,7 +651,11 @@ namespace Qactive
       Justification = "Async usage causes ObjectDisposedExceptions to occur in unexpected places that should simply respect cancellation and stop silently.")]
     protected virtual void Dispose(bool disposing)
     {
-      // for derived classes
+      if (disposing)
+      {
+        sendQ.Dispose();
+        receiveQ.Dispose();
+      }
     }
   }
 

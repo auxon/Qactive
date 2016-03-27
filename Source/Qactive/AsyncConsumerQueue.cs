@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Qactive
 {
-  internal sealed class AsyncConsumerQueue
+  internal sealed class AsyncConsumerQueue : IDisposable
   {
     private readonly ConcurrentQueue<Tuple<Func<Task>, TaskCompletionSource<bool>>> q = new ConcurrentQueue<Tuple<Func<Task>, TaskCompletionSource<bool>>>();
     private readonly Subject<ExceptionDispatchInfo> unhandledExceptions = new Subject<ExceptionDispatchInfo>();
@@ -62,6 +62,11 @@ namespace Qactive
 
         isDequeueing = 0;
       }
+    }
+
+    public void Dispose()
+    {
+      unhandledExceptions.Dispose();
     }
   }
 }

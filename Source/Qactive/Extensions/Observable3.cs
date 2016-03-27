@@ -27,6 +27,7 @@ namespace Qactive
 
       public override object InitializeLifetimeService() => null;
 
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We must catch any exception type otherwise we run the risk of losing the info. See the comment inline.")]
       public IDisposable Subscribe(IObserver<T> observer) => new RemotableSubscription(observable.Subscribe(
         value =>
         {

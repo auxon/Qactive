@@ -66,7 +66,7 @@ namespace Qactive
 
     private Expression PrepareExpression(out IQbservableProvider realProvider)
     {
-      QbservableProviderDiagnostics.DebugPrint(Expression, "ServerQuery Received Expression");
+      Log.DebugPrint(Expression, "ServerQuery Received Expression");
 
       var source = Provider.GetSource(argument);
 
@@ -109,7 +109,7 @@ namespace Qactive
 
       preparedExpression = visitor.Visit(preparedExpression);
 
-      QbservableProviderDiagnostics.DebugPrint(preparedExpression, "ServerQuery Rewritten Expression");
+      Log.DebugPrint(preparedExpression, "ServerQuery Rewritten Expression");
 
       return preparedExpression;
     }

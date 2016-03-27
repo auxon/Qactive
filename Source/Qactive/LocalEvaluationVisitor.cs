@@ -290,9 +290,9 @@ namespace Qactive
         genericArgumentsUpdated: updatedType =>
         {
           /* Overload resolution should be unaffected here, so keep the same constructor index.  We're just swapping a 
-					 * compiler-generated type for the internal CompilerGenerated class, neither of which can be statically 
-					 * referenced by users.
-					 */
+           * compiler-generated type for the internal CompilerGenerated class, neither of which can be statically 
+           * referenced by users.
+           */
           var flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
           var oldConstructorIndex = Array.IndexOf(node.Constructor.DeclaringType.GetConstructors(flags), node.Constructor);
