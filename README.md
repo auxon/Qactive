@@ -1,14 +1,20 @@
 # Qactive
 A reactive queryable observable framework.
 
-* Runtime: .NET Framework 4.6.1.
-* Development: Visual Studio 2015 and C# 6
-* Depends on [Reactive Extensions (Rx.NET)](https://github.com/Reactive-Extensions/Rx.NET)
+* **Runtime:** .NET Framework 4.6.1.
+* **Development:** Visual Studio 2015 and C# 6
+* **Dependencies:** [Reactive Extensions (Rx.NET)](https://github.com/Reactive-Extensions/Rx.NET)
 
-## Download
-> [Qactive on NuGet](https://www.nuget.org/packages/qactive) (depends on Qactive.Expressions)
+## Download from NuGet
+> [Qactive.Providers.Tcp](https://www.nuget.org/packages/qactive.providers.tcp) (depends on Qactive and Qactive.Expressions)
 
-> [Qactive.Expressions on NuGet](https://www.nuget.org/packages/qactive.expressions)
+> [Qactive](https://www.nuget.org/packages/qactive) (depends on Qactive.Expressions)
+
+> [Qactive.Expressions](https://www.nuget.org/packages/qactive.expressions)
+
+Add a reference to the **Qactive.Providers.Tcp** package in your Visual Studio project. That package references the other packages as dependencies, so NuGet will automatically download all of them for you.
+
+Currently, the TCP provider is the only provider available.
 
 ## Overview
 Qactive builds on Reactive Extension's queryable observable providers, enabling you to write elegant reactive queries that execute server-side, even though they are written on the client.
@@ -48,7 +54,7 @@ For more information, see [this series of blog posts](http://davesexton.com/blog
   * Duplex communication automatically supports iterator blocks.
 * Designed with extensibility in mind; e.g., supports custom Qbservable service providers, protocols and sinks.
 
-## Simple Examples
+## Example
 The following example creates a _cold_ observable sequence that generates a new notification every second and exposes it as an `IQbservable<long>` service over TCP port 3205 on the local computer.
 
 ### Server
@@ -84,7 +90,6 @@ using (query.Subscribe(
   Console.ReadKey();
 }
 ```
-
 ## Getting Started
 Qactive is a set of .NET class libraries that you can reference in your projects. NuGet is recommended.
 
