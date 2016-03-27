@@ -1,5 +1,5 @@
-<img align="right" margin="0" padding="0" style="margin: 0; padding: 0;" src="https://raw.githubusercontent.com/RxDave/Qactive/master/Artifacts/Logo.png" />
 # Qactive
+<img align="right" src="https://raw.githubusercontent.com/RxDave/Qactive/master/Artifacts/Logo.png" />
 A reactive queryable observable framework.
 
 * **Runtime:** .NET Framework 4.6.1.
