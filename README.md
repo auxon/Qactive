@@ -5,9 +5,7 @@ A reactive queryable observable framework.
 * **Development:** Visual Studio 2015 and C# 6
 * **Dependencies:** [Reactive Extensions (Rx.NET)](https://github.com/Reactive-Extensions/Rx.NET)
 
-## Download
-Qactive is available as the following NuGet packages.
-
+## Download from NuGet
 > [Qactive.Providers.Tcp](https://www.nuget.org/packages/qactive.providers.tcp) (depends on Qactive and Qactive.Expressions)
 
 > [Qactive](https://www.nuget.org/packages/qactive) (depends on Qactive.Expressions)
