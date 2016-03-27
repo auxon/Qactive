@@ -47,7 +47,7 @@ namespace QbservableClient
         Console.WriteLine();
         Console.WriteLine("Advanced client started.  Waiting for basic service notifications...");
         Console.WriteLine();
-        Console.WriteLine("(Press any key to stop)");
+        Console.WriteLine("(Press any key to continue)");
         Console.WriteLine();
 
         Console.ReadKey(intercept: true);

@@ -32,21 +32,9 @@ namespace Qactive
       }
     }
 
-    public IList<ExceptionDispatchInfo> Exceptions
-    {
-      get
-      {
-        return errors.AsReadOnly();
-      }
-    }
+    public IReadOnlyCollection<ExceptionDispatchInfo> Exceptions => errors;
 
-    public QbservableServiceOptions ServiceOptions
-    {
-      get
-      {
-        return serviceOptions;
-      }
-    }
+    public QbservableServiceOptions ServiceOptions { get; }
 
     public QbservableProtocolShutdownReason ShutdownReason { get; private set; }
 
@@ -57,9 +45,8 @@ namespace Qactive
     private readonly CancellationTokenSource protocolCancellation = new CancellationTokenSource();
     private readonly AsyncConsumerQueue sendQ = new AsyncConsumerQueue();
     private readonly AsyncConsumerQueue receiveQ = new AsyncConsumerQueue();
-    private readonly List<ExceptionDispatchInfo> errors = new List<ExceptionDispatchInfo>();
+    private readonly ConcurrentBag<ExceptionDispatchInfo> errors = new ConcurrentBag<ExceptionDispatchInfo>();
     private readonly Stream stream;
-    private readonly QbservableServiceOptions serviceOptions;
     private readonly bool isClient;
 
     internal QbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
@@ -72,6 +59,9 @@ namespace Qactive
       Cancel = protocolCancellation.Token;
 
       cancel.Register(protocolCancellation.Cancel, useSynchronizationContext: false);
+
+      sendQ.UnhandledExceptions.Subscribe(errors.Add);
+      receiveQ.UnhandledExceptions.Subscribe(errors.Add);
     }
 
     internal QbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
@@ -79,7 +69,7 @@ namespace Qactive
     {
       Contract.Ensures(!IsClient);
 
-      this.serviceOptions = serviceOptions;
+      ServiceOptions = serviceOptions;
       this.isClient = false;
     }
 
@@ -164,9 +154,10 @@ namespace Qactive
              .Catch<TResult, OperationCanceledException>(
                ex =>
                {
-                 if (errors.Count == 1)
+                 ExceptionDispatchInfo error;
+                 if (errors.Count == 1 && errors.TryTake(out error))
                  {
-                   return Observable.Throw<TResult>(errors[0].SourceException);
+                   return Observable.Throw<TResult>(error.SourceException);
                  }
                  else if (errors.Count > 1)
                  {
@@ -224,14 +215,15 @@ namespace Qactive
       }
       catch (OperationCanceledException ex)
       {
-        if (errors.Count == 1)
+        ExceptionDispatchInfo error;
+        if (errors.Count == 1 && errors.TryTake(out error))
         {
           if (ShutdownReason == QbservableProtocolShutdownReason.None)
           {
             ShutdownReason = QbservableProtocolShutdownReason.ServerError;
           }
 
-          fatalException = errors[0];
+          fatalException = error;
         }
         else if (errors.Count > 1)
         {
@@ -316,9 +308,9 @@ namespace Qactive
 
           if (createQueryError == null)
           {
-            await SendObservableAsync(observable, dataType, serviceOptions.SendServerErrorsToClients, Cancel).ConfigureAwait(false);
+            await SendObservableAsync(observable, dataType, ServiceOptions.SendServerErrorsToClients, Cancel).ConfigureAwait(false);
           }
-          else if (serviceOptions.SendServerErrorsToClients)
+          else if (ServiceOptions.SendServerErrorsToClients)
           {
             await ServerSendAsync(NotificationKind.OnError, createQueryError.SourceException).ConfigureAwait(false);
           }

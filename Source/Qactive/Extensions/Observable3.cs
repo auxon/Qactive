@@ -2,15 +2,15 @@
 
 namespace Qactive
 {
-  public static class Observable3
+  internal static class Observable3
   {
     /* Observable.Remotable cannot be used within a sandboxed AppDomain because it requires the RemotingConfiguration permission, 
-		 * but it doesn't assert it and it can't be asserted by user code because the assertion must not occur around the call to Subscribe;
-		 * otherwise, clients would be able to perform remoting configuration within queries.  Adding this permission to the granted 
-		 * permission set for the AppDomain would also mean that clients would be able to perform remoting configuration within queries.
-		 * 
-		 * To solve this problem, RemotableWithoutConfiguration avoids this permission.
-		 */
+     * but it doesn't assert it and it can't be asserted by user code because the assertion must not occur around the call to Subscribe;
+     * otherwise, clients would be able to perform remoting configuration within queries.  Adding this permission to the granted 
+     * permission set for the AppDomain would also mean that clients would be able to perform remoting configuration within queries.
+     * 
+     * To solve this problem, RemotableWithoutConfiguration avoids this permission.
+     */
     public static IObservable<TSource> RemotableWithoutConfiguration<TSource>(this IObservable<TSource> observable)
     {
       return new SerializableObservable<TSource>(new RemotableObservable<TSource>(observable));
@@ -25,15 +25,28 @@ namespace Qactive
         this.observable = observable;
       }
 
-      public override object InitializeLifetimeService()
-      {
-        return null;
-      }
+      public override object InitializeLifetimeService() => null;
 
-      public IDisposable Subscribe(IObserver<T> observer)
-      {
-        return new RemotableSubscription(observable.Subscribe(observer));
-      }
+      public IDisposable Subscribe(IObserver<T> observer) => new RemotableSubscription(observable.Subscribe(
+        value =>
+        {
+          try
+          {
+            observer.OnNext(value);
+          }
+          catch (Exception ex)
+          {
+            Log.Unsafe(ex);
+
+            // Failure to marshal notifications across the AppDomain boundary due to serialization or permission errors are swallowed by Rx, 
+            // and without any first-chance exception being thrown and without the downstream observer receiving any notification, causing it
+            // to hang indenfitely without even running any Finally actions. We must at least attempt to push the notification to ensure that 
+            // the exception is observed and that the downstream subscription is disposed.
+            observer.OnError(ex);
+          }
+        },
+        observer.OnError,
+        observer.OnCompleted));
 
       private sealed class RemotableSubscription : MarshalByRefObject, IDisposable
       {
@@ -44,15 +57,9 @@ namespace Qactive
           this.disposable = disposable;
         }
 
-        public override object InitializeLifetimeService()
-        {
-          return null;
-        }
+        public override object InitializeLifetimeService() => null;
 
-        public void Dispose()
-        {
-          disposable.Dispose();
-        }
+        public void Dispose() => disposable.Dispose();
       }
     }
 
@@ -67,10 +74,7 @@ namespace Qactive
         this.observable = observable;
       }
 
-      public IDisposable Subscribe(IObserver<T> observer)
-      {
-        return observable.Subscribe(new RemotableObserver<T>(observer));
-      }
+      public IDisposable Subscribe(IObserver<T> observer) => observable.Subscribe(new RemotableObserver<T>(observer));
     }
 
     private sealed class RemotableObserver<T> : MarshalByRefObject, IObserver<T>
@@ -82,25 +86,13 @@ namespace Qactive
         this.observer = observer;
       }
 
-      public override object InitializeLifetimeService()
-      {
-        return null;
-      }
+      public override object InitializeLifetimeService() => null;
 
-      public void OnNext(T value)
-      {
-        observer.OnNext(value);
-      }
+      public void OnNext(T value) => observer.OnNext(value);
 
-      public void OnError(Exception error)
-      {
-        observer.OnError(error);
-      }
+      public void OnError(Exception error) => observer.OnError(error);
 
-      public void OnCompleted()
-      {
-        observer.OnCompleted();
-      }
+      public void OnCompleted() => observer.OnCompleted();
     }
   }
 }

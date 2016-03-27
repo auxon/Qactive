@@ -149,69 +149,65 @@ namespace Qactive
       Func<QbservableProtocol, IParameterizedQbservableProvider> providerFactory)
       => from listener in Observable.Return(new TcpListener(EndPoint))
          .Do(listener => listener.Start())
-         from result in Observable
-           .FromAsync(listener.AcceptTcpClientAsync)
-           .Repeat()
-           .Finally(listener.Stop)
-           .SelectMany(client => Observable
-             .StartAsync(async cancel =>
-             {
-               prepareSocket(client.Client);
+         from client in Observable.FromAsync(listener.AcceptTcpClientAsync).Repeat().Finally(listener.Stop)
+         from result in Observable.StartAsync(async cancel =>
+          {
+            prepareSocket(client.Client);
 
-               var watch = Stopwatch.StartNew();
+            var watch = Stopwatch.StartNew();
 
-               var localEndPoint = client.Client.LocalEndPoint;
-               var remoteEndPoint = client.Client.RemoteEndPoint;
+            var localEndPoint = client.Client.LocalEndPoint;
+            var remoteEndPoint = client.Client.RemoteEndPoint;
 
-               var exceptions = new List<ExceptionDispatchInfo>();
-               var shutdownReason = QbservableProtocolShutdownReason.None;
+            var exceptions = new List<ExceptionDispatchInfo>();
+            var shutdownReason = QbservableProtocolShutdownReason.None;
 
-               try
-               {
-                 using (var stream = client.GetStream())
-                 using (var protocol = await QbservableProtocol.NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false))
-                 {
-                   var provider = providerFactory(protocol);
+            try
+            {
+              using (var stream = client.GetStream())
+              using (var protocol = await QbservableProtocol.NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false))
+              {
+                var provider = providerFactory(protocol);
 
-                   try
-                   {
-                     await protocol.ExecuteServerAsync(provider).ConfigureAwait(false);
-                   }
-                   catch (OperationCanceledException)
-                   {
-                   }
-                   catch (Exception ex)
-                   {
-                     exceptions.Add(ExceptionDispatchInfo.Capture(ex));
-                   }
+                try
+                {
+                  await protocol.ExecuteServerAsync(provider).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception ex)
+                {
+                  exceptions.Add(ExceptionDispatchInfo.Capture(ex));
+                }
 
-                   var protocolExceptions = protocol.Exceptions;
+                var protocolExceptions = protocol.Exceptions;
 
-                   if (protocolExceptions != null)
-                   {
-                     foreach (var exception in protocolExceptions)
-                     {
-                       exceptions.Add(exception);
-                     }
-                   }
+                if (protocolExceptions != null)
+                {
+                  foreach (var exception in protocolExceptions)
+                  {
+                    exceptions.Add(exception);
+                  }
+                }
 
-                   shutdownReason = protocol.ShutdownReason;
-                 }
-               }
-               catch (OperationCanceledException)
-               {
-                 shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationCanceled;
-               }
-               catch (Exception ex)
-               {
-                 shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationError;
+                shutdownReason = protocol.ShutdownReason;
+              }
+            }
+            catch (OperationCanceledException)
+            {
+              shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationCanceled;
+            }
+            catch (Exception ex)
+            {
+              shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationError;
 
-                 exceptions.Add(ExceptionDispatchInfo.Capture(ex));
-               }
+              exceptions.Add(ExceptionDispatchInfo.Capture(ex));
+            }
 
-               return new ClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
-             })
-             .Finally(client.Close))
+            return new ClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
+          })
+          .Finally(client.Close)
          select result;
   }
 }

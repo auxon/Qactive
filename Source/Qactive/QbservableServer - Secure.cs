@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -198,7 +199,37 @@ namespace Qactive
            */
         }
 
-        return QbservableServer.CreateService(provider, options, service).RemotableWithoutConfiguration();
+        return QbservableServer.CreateService(provider, options, service)
+                               .SelectMany(termination => Observable.Create<ClientTermination>(observer =>
+                                {
+                                  // This is required to construct SocketException and serialize it across the AppDomain boundary if it's contained within the termination object.
+                                  new SecurityPermission(SecurityPermissionFlag.SerializationFormatter | SecurityPermissionFlag.UnmanagedCode).Assert();
+                                  var reverted = false;
+
+                                  try
+                                  {
+                                    observer.OnNext(termination);
+                                  }
+                                  catch (Exception ex)
+                                  {
+                                    CodeAccessPermission.RevertAssert();
+                                    reverted = true;
+
+                                    Log.Unsafe(ex);
+
+                                    observer.OnError(ex);
+                                  }
+                                  finally
+                                  {
+                                    if (!reverted)
+                                    {
+                                      CodeAccessPermission.RevertAssert();
+                                    }
+                                  }
+
+                                  return Disposable.Empty;
+                                }))
+                               .RemotableWithoutConfiguration();
       }
 
       [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]

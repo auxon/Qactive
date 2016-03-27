@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,7 +11,10 @@ namespace Qactive
   internal sealed class AsyncConsumerQueue
   {
     private readonly ConcurrentQueue<Tuple<Func<Task>, TaskCompletionSource<bool>>> q = new ConcurrentQueue<Tuple<Func<Task>, TaskCompletionSource<bool>>>();
+    private readonly Subject<ExceptionDispatchInfo> unhandledExceptions = new Subject<ExceptionDispatchInfo>();
     private int isDequeueing;
+
+    public IObservable<ExceptionDispatchInfo> UnhandledExceptions => unhandledExceptions.AsObservable();
 
     public Task EnqueueAsync(Func<Task> actionAsync)
     {
@@ -31,20 +37,27 @@ namespace Qactive
         {
           try
           {
-            await data.Item1().ConfigureAwait(false);
-          }
-          catch (OperationCanceledException)
-          {
-            data.Item2.SetCanceled();
-            continue;
+            try
+            {
+              await data.Item1().ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+              data.Item2.SetCanceled();
+              continue;
+            }
+            catch (Exception ex)
+            {
+              data.Item2.SetException(ex);
+              continue;
+            }
+
+            data.Item2.SetResult(true);
           }
           catch (Exception ex)
           {
-            data.Item2.SetException(ex);
-            continue;
+            unhandledExceptions.OnNext(ExceptionDispatchInfo.Capture(ex));
           }
-
-          data.Item2.SetResult(true);
         }
 
         isDequeueing = 0;

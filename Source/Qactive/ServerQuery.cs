@@ -26,16 +26,33 @@ namespace Qactive
 
         var query = realProvider.CreateQuery<TResult>(preparedExpression);
 
-        new ReflectionPermission(ReflectionPermissionFlag.MemberAccess).Assert();
+        ISecureQbservable<TResult> secureQuery = null;
 
-        try
+        if (RxSecureQbservable<TResult>.IsRxQuery(query))
         {
-          return query.Subscribe(observer);
+          secureQuery = new RxSecureQbservable<TResult>(query);
+          query = secureQuery;
         }
-        finally
+        else
         {
-          CodeAccessPermission.RevertAssert();
+          secureQuery = query as ISecureQbservable<TResult>;
         }
+
+        if (secureQuery != null)
+        {
+          new PermissionSet(PermissionState.Unrestricted).Assert();
+
+          try
+          {
+            secureQuery.PrepareUnsafe();
+          }
+          finally
+          {
+            PermissionSet.RevertAssert();
+          }
+        }
+
+        return query.Subscribe(observer);
       }
       catch (ExpressionSecurityException)
       {

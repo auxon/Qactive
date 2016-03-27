@@ -177,9 +177,11 @@
     <Compile Include="Either{TLeft,TRight}.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IParameterizedQbservableProvider.cs" />
+    <Compile Include="ISecureQbservable.cs" />
     <Compile Include="KnownTypeContext.cs" />
     <Compile Include="ExceptionDispatchInfoEqualityComparer.cs" />
     <Compile Include="ExpressionOptions.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="QactiveProviderFactory.cs" />
     <Compile Include="QbservableServer.cs" />
     <Compile Include="QbservableServer - Secure.cs" />
@@ -188,6 +190,7 @@
     <Compile Include="ExpressionSecurityException.cs" />
     <Compile Include="IServerDuplexQbservableProtocolSink.cs" />
     <Compile Include="Extensions\Observable3.cs" />
+    <Compile Include="RxSecureQbservable.cs" />
     <Compile Include="ServerDuplexQbservableProtocolSink.cs" />
     <Compile Include="DuplexQbservableMessage.cs" />
     <Compile Include="IClientDuplexQbservableProtocolSink.cs" />
