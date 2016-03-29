@@ -1,6 +1,6 @@
 # Qactive
-<img align="right" src="https://raw.githubusercontent.com/RxDave/Qactive/master/Artifacts/Logo.png" />
 A reactive queryable observable framework.
+<img align="right" src="https://raw.githubusercontent.com/RxDave/Qactive/master/Artifacts/Logo.png" />
 
 * **Runtime:** .NET Framework 4.6.1.
 * **Development:** Visual Studio 2015 and C# 6
