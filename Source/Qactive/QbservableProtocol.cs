@@ -452,7 +452,13 @@ namespace Qactive
       }
       else
       {
-        await ServerSendAsync(terminationKind, (qbservableError == null ? null : qbservableError.SourceException)).ConfigureAwait(false);
+        try
+        {
+          await ServerSendAsync(terminationKind, (qbservableError == null ? null : qbservableError.SourceException)).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+        }
 
         if (qbservableError != null)
         {
