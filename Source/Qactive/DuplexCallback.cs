@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using Qactive.Properties;
 
 namespace Qactive
@@ -187,7 +188,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        protocol.CancelAllCommunication(ex);
+        protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
         throw;
       }
     }
@@ -203,7 +204,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        protocol.CancelAllCommunication(ex);
+        protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
       }
     }
   }

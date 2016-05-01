@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 
 namespace Qactive
 {
@@ -24,7 +25,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        Protocol.CancelAllCommunication(ex);
+        Protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
 
         return Enumerable.Empty<T>().GetEnumerator();
       }
@@ -87,7 +88,7 @@ namespace Qactive
         }
         catch (Exception ex)
         {
-          protocol.CancelAllCommunication(ex);
+          protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
         }
       }
 
@@ -101,7 +102,7 @@ namespace Qactive
         }
         catch (Exception ex)
         {
-          protocol.CancelAllCommunication(ex);
+          protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
         }
       }
     }

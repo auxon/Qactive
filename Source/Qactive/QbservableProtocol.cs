@@ -128,9 +128,9 @@ namespace Qactive
       }
     }
 
-    public void CancelAllCommunication(Exception exception)
+    public void CancelAllCommunication(ExceptionDispatchInfo exception)
     {
-      errors.Add(ExceptionDispatchInfo.Capture(exception));
+      errors.Add(exception);
 
       if (!protocolCancellation.IsCancellationRequested)
       {
@@ -172,7 +172,7 @@ namespace Qactive
                 ex =>
                 {
                   // Cancellation is required in case client-side code is awaiting socket communication in the background; e.g., via a sink
-                  CancelAllCommunication(ex);
+                  CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
 
                   return Observable.Throw<TResult>(ex);
                 });
@@ -208,9 +208,9 @@ namespace Qactive
             ShutdownReason = QbservableProtocolShutdownReason.BadClientRequest;
           }
 
-          CancelAllCommunication(ex);
-
           fatalException = ExceptionDispatchInfo.Capture(ex);
+
+          CancelAllCommunication(fatalException);
         }
       }
       catch (OperationCanceledException ex)
@@ -244,9 +244,9 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        CancelAllCommunication(ex);
-
         fatalException = ExceptionDispatchInfo.Capture(ex);
+
+        CancelAllCommunication(fatalException);
       }
 
       if (receivingAsync != null)

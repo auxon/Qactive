@@ -102,7 +102,7 @@ namespace Qactive
             }
             catch (Exception ex)
             {
-              CancelAllCommunication(ex);
+              CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
             }
           }));
       });
@@ -279,7 +279,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        CancelAllCommunication(ex);
+        CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
       }
     }
 
