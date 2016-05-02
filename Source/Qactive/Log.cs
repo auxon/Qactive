@@ -8,23 +8,25 @@ using System.Security.Permissions;
 
 namespace Qactive
 {
-  // TODO: Use a TraceSource
-  internal static class Log
+  internal static partial class Log
   {
     private static PropertyInfo debugView;
 
-    [Conditional("DEBUG")]
     [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
-    public static void DebugPrint(Expression expression, string category)
+    private static object GetDebugView(Expression expression)
     {
       if (debugView == null)
       {
         debugView = typeof(Expression).GetProperty("DebugView", BindingFlags.NonPublic | BindingFlags.Instance);
       }
 
-      var value = debugView.GetValue(expression);
+      return debugView.GetValue(expression);
+    }
 
-      Debug.WriteLine(Environment.NewLine + value, category);
+    [Conditional("DEBUG")]
+    private static void DebugPrint(object expressionDebugView, string category)
+    {
+      Debug.WriteLine(Environment.NewLine + expressionDebugView, category);
     }
 
     public static void Unsafe(Exception exception)
@@ -33,11 +35,11 @@ namespace Qactive
 
       try
       {
-        Trace.WriteLine(exception);
+        QactiveTraceSources.Qactive.TraceData(TraceEventType.Error, 0, exception);
       }
       catch (Exception ex)
       {
-        WriteLine($"Failed to log full exception: {exception.Message}\r\n{ex}");
+        WriteLine(QactiveTraceSources.Qactive, $"Failed to log full exception: {exception.Message}\r\n{ex}");
         throw;
       }
       finally
@@ -46,9 +48,58 @@ namespace Qactive
       }
     }
 
-    public static void WriteLine(FormattableString message)
+    private static void WriteLine(this TraceSource trace, FormattableString message)
+      => trace.TraceEvent(TraceEventType.Error, 0, message?.ToString(CultureInfo.InvariantCulture));
+
+    private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, string message, object data)
+      => trace.TraceData(type, (int)id, message, data);
+
+    private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, object data)
+      => trace.TraceData(type, (int)id, data);
+
+    private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, string message)
+      => trace.TraceEvent(type, (int)id, message);
+
+    private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, string format, params object[] args)
     {
-      Trace.WriteLine(message.ToString(CultureInfo.InvariantCulture));
+      if (format == null || args == null)
+      {
+        trace.Semantic(id, type, format);
+      }
+      else
+      {
+        trace.TraceEvent(type, (int)id, format, args);
+      }
     }
+
+    private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, FormattableString message)
+      => trace.TraceEvent(type, (int)id, message?.ToString(CultureInfo.InvariantCulture));
+
+    private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string message, object data)
+      => trace.TraceData(type, (int)id, FormatObjectId(objectId), message, data);
+
+    private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, object data)
+      => trace.TraceData(type, (int)id, FormatObjectId(objectId), data);
+
+    private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string message)
+      => trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + message);
+
+    private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string format, params object[] args)
+    {
+      if (format == null || args == null)
+      {
+        trace.SemanticObject(id, type, objectId, format);
+      }
+      else
+      {
+        trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + string.Format(CultureInfo.InvariantCulture, format, args));
+      }
+    }
+
+    private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, FormattableString message)
+      => trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + message?.ToString(CultureInfo.InvariantCulture));
+
+    private static string FormatObjectId(object value)
+      => "[" + (value?.ToString() ?? "?") + "] ";
   }
 }

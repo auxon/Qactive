@@ -24,8 +24,8 @@ namespace Qactive
 
     public IQbservable<TSource> GetSource(object argument) => sourceSelector(argument);
 
-    public IQbservable<TResult> CreateQuery<TResult>(Expression expression) => new ServerQuery<TSource, TResult>(this, expression, null);
+    public IQbservable<TResult> CreateQuery<TResult>(Expression expression) => new ServerQuery<TSource, TResult>(Protocol.GetCurrentClientId(), this, expression, null);
 
-    public IQbservable<TResult> CreateQuery<TResult>(Expression expression, object argument) => new ServerQuery<TSource, TResult>(this, expression, argument);
+    public IQbservable<TResult> CreateQuery<TResult>(Expression expression, object argument) => new ServerQuery<TSource, TResult>(Protocol.GetCurrentClientId(), this, expression, argument);
   }
 }

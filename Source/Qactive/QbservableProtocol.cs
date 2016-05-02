@@ -24,13 +24,7 @@ namespace Qactive
   [ContractClass(typeof(QbservableProtocolContract))]
   public abstract class QbservableProtocol : IDisposable
   {
-    public bool IsClient
-    {
-      get
-      {
-        return isClient;
-      }
-    }
+    public bool IsClient { get; }
 
     public IReadOnlyCollection<ExceptionDispatchInfo> Exceptions => errors;
 
@@ -47,13 +41,14 @@ namespace Qactive
     private readonly AsyncConsumerQueue receiveQ = new AsyncConsumerQueue();
     private readonly ConcurrentBag<ExceptionDispatchInfo> errors = new ConcurrentBag<ExceptionDispatchInfo>();
     private readonly Stream stream;
-    private readonly bool isClient;
+
+    private object currentClientId;
 
     internal QbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
     {
       Contract.Ensures(IsClient);
 
-      this.isClient = true;
+      IsClient = true;
       this.stream = stream;
       Formatter = formatter;
       Cancel = protocolCancellation.Token;
@@ -70,7 +65,7 @@ namespace Qactive
       Contract.Ensures(!IsClient);
 
       ServiceOptions = serviceOptions;
-      this.isClient = false;
+      IsClient = false;
     }
 
     public static async Task<QbservableProtocol> NegotiateClientAsync(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
@@ -178,7 +173,7 @@ namespace Qactive
                 });
     }
 
-    public async Task ExecuteServerAsync(IQbservableProvider provider)
+    public async Task ExecuteServerAsync(object clientId, IQbservableProvider provider)
     {
       Contract.Requires(!IsClient);
 
@@ -195,7 +190,7 @@ namespace Qactive
 
         try
         {
-          await ExecuteServerQueryAsync(input, provider).ConfigureAwait(false);
+          await ExecuteServerQueryAsync(clientId, input, provider).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -272,7 +267,7 @@ namespace Qactive
 
     internal abstract Task ServerReceiveAsync();
 
-    private async Task ExecuteServerQueryAsync(Tuple<Expression, object> input, IQbservableProvider provider)
+    private async Task ExecuteServerQueryAsync(object clientId, Tuple<Expression, object> input, IQbservableProvider provider)
     {
       var shutdownReason = QbservableProtocolShutdownReason.ObservableTerminated;
 
@@ -298,6 +293,8 @@ namespace Qactive
 
           try
           {
+            currentClientId = clientId;
+
             observable = CreateQuery(provider, expression, argument, out dataType);
           }
           catch (Exception ex)
@@ -568,6 +565,9 @@ namespace Qactive
           }
         });
     }
+
+    protected internal object GetCurrentClientId()
+      => currentClientId;
 
     internal abstract Task InitializeSinksAsync();
 

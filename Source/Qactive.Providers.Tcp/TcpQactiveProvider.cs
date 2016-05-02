@@ -19,12 +19,23 @@ namespace Qactive
   {
     public IPEndPoint EndPoint { get; }
 
+    protected override object Id
+      => clientNumber.HasValue
+       ? "C" + clientNumber.Value + " " + EndPoint
+       : "S" + serverNumber.Value + " " + EndPoint;
+
+    private static int lastServerNumber = -1;
+    private static int lastClientNumber = -1;
+
     private readonly Func<IRemotingFormatter> formatterFactory;
     private readonly Action<Socket> prepareSocket;
+    private readonly int? serverNumber, clientNumber;
+    private int lastServerClientNumber = -1;
 
     private TcpQactiveProvider(IPEndPoint endPoint, ITcpQactiveProviderTransportInitializer transportInitializer)
     {
       EndPoint = endPoint;
+      serverNumber = Interlocked.Increment(ref lastServerNumber);
 
       if (transportInitializer != null)
       {
@@ -42,6 +53,7 @@ namespace Qactive
       : base(sourceType, localEvaluator)
     {
       EndPoint = endPoint;
+      clientNumber = Interlocked.Increment(ref lastClientNumber);
       this.prepareSocket = prepareSocket;
       formatterFactory = () => formatter;
     }
@@ -50,6 +62,7 @@ namespace Qactive
       : base(sourceType, localEvaluator, argument)
     {
       EndPoint = endPoint;
+      clientNumber = Interlocked.Increment(ref lastClientNumber);
       this.prepareSocket = prepareSocket;
       formatterFactory = () => formatter;
     }
@@ -150,64 +163,65 @@ namespace Qactive
       => from listener in Observable.Return(new TcpListener(EndPoint))
          .Do(listener => listener.Start())
          from client in Observable.FromAsync(listener.AcceptTcpClientAsync).Repeat().Finally(listener.Stop)
+         let number = Interlocked.Increment(ref lastServerClientNumber)
          from result in Observable.StartAsync(async cancel =>
-          {
-            prepareSocket(client.Client);
+         {
+           prepareSocket(client.Client);
 
-            var watch = Stopwatch.StartNew();
+           var watch = Stopwatch.StartNew();
 
-            var localEndPoint = client.Client.LocalEndPoint;
-            var remoteEndPoint = client.Client.RemoteEndPoint;
+           var localEndPoint = client.Client.LocalEndPoint;
+           var remoteEndPoint = client.Client.RemoteEndPoint;
 
-            var exceptions = new List<ExceptionDispatchInfo>();
-            var shutdownReason = QbservableProtocolShutdownReason.None;
+           var exceptions = new List<ExceptionDispatchInfo>();
+           var shutdownReason = QbservableProtocolShutdownReason.None;
 
-            try
-            {
-              using (var stream = client.GetStream())
-              using (var protocol = await QbservableProtocol.NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false))
-              {
-                var provider = providerFactory(protocol);
+           try
+           {
+             using (var stream = client.GetStream())
+             using (var protocol = await QbservableProtocol.NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false))
+             {
+               var provider = providerFactory(protocol);
 
-                try
-                {
-                  await protocol.ExecuteServerAsync(provider).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception ex)
-                {
-                  exceptions.Add(ExceptionDispatchInfo.Capture(ex));
-                }
+               try
+               {
+                 await protocol.ExecuteServerAsync(Id + " C" + number + " " + remoteEndPoint, provider).ConfigureAwait(false);
+               }
+               catch (OperationCanceledException)
+               {
+               }
+               catch (Exception ex)
+               {
+                 exceptions.Add(ExceptionDispatchInfo.Capture(ex));
+               }
 
-                var protocolExceptions = protocol.Exceptions;
+               var protocolExceptions = protocol.Exceptions;
 
-                if (protocolExceptions != null)
-                {
-                  foreach (var exception in protocolExceptions)
-                  {
-                    exceptions.Add(exception);
-                  }
-                }
+               if (protocolExceptions != null)
+               {
+                 foreach (var exception in protocolExceptions)
+                 {
+                   exceptions.Add(exception);
+                 }
+               }
 
-                shutdownReason = protocol.ShutdownReason;
-              }
-            }
-            catch (OperationCanceledException)
-            {
-              shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationCanceled;
-            }
-            catch (Exception ex)
-            {
-              shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationError;
+               shutdownReason = protocol.ShutdownReason;
+             }
+           }
+           catch (OperationCanceledException)
+           {
+             shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationCanceled;
+           }
+           catch (Exception ex)
+           {
+             shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationError;
 
-              exceptions.Add(ExceptionDispatchInfo.Capture(ex));
-            }
+             exceptions.Add(ExceptionDispatchInfo.Capture(ex));
+           }
 
-            return new ClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
-          })
-          .Finally(client.Close)
+           return new ClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
+         })
+         .Finally(client.Close)
          select result;
   }
 }

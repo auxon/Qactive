@@ -7,14 +7,22 @@ namespace Qactive
 {
   internal sealed class ClientQuery<TResult> : QbservableBase<TResult, QactiveProvider>
   {
-    public ClientQuery(QactiveProvider provider)
+    private readonly object clientId;
+
+    public ClientQuery(object clientId, QactiveProvider provider)
       : base(provider)
     {
+      Contract.Requires(clientId != null);
+
+      this.clientId = clientId;
     }
 
-    public ClientQuery(QactiveProvider provider, Expression expression)
+    public ClientQuery(object clientId, QactiveProvider provider, Expression expression)
       : base(provider, expression)
     {
+      Contract.Requires(clientId != null);
+
+      this.clientId = clientId;
     }
 
     protected override IDisposable SubscribeCore(IObserver<TResult> observer)
@@ -27,7 +35,7 @@ namespace Qactive
       Contract.Requires(protocol != null);
       Contract.Ensures(Contract.Result<Expression>() != null);
 
-      Log.DebugPrint(Expression, "ClientQuery Original Expression");
+      Log.ClientSendingExpression(clientId, Expression);
 
       if (!Expression.Type.IsGenericType
         || (Expression.Type.GetGenericTypeDefinition() != typeof(IQbservable<>)
@@ -59,7 +67,7 @@ namespace Qactive
 
       var preparedExpression = evaluationVisitor.Visit(result);
 
-      Log.DebugPrint(preparedExpression, "ClientQuery Rewritten Expression");
+      Log.ClientRewrittenExpression(clientId, preparedExpression);
 
       return preparedExpression;
     }

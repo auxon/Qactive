@@ -133,9 +133,9 @@ namespace Qactive
       }
 
       /* It's acceptable for the callbacks to be missing due to a race condition between the
-			 * client sending notifications and the server disposing of the subscription, which causes
-			 * the callbacks to be removed.
-			 */
+       * client sending notifications and the server disposing of the subscription, which causes
+       * the callbacks to be removed.
+       */
     }
 
     public abstract object Invoke(int clientId, object[] arguments);

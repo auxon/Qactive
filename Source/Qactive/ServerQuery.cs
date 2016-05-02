@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Security;
@@ -8,11 +9,15 @@ namespace Qactive
 {
   internal sealed class ServerQuery<TSource, TResult> : QbservableBase<TResult, ServerQbservableProvider<TSource>>
   {
+    private readonly object clientId;
     private readonly object argument;
 
-    public ServerQuery(ServerQbservableProvider<TSource> provider, Expression expression, object argument)
+    public ServerQuery(object clientId, ServerQbservableProvider<TSource> provider, Expression expression, object argument)
       : base(provider, expression)
     {
+      Contract.Requires(clientId != null);
+
+      this.clientId = clientId;
       this.argument = argument;
     }
 
@@ -66,7 +71,7 @@ namespace Qactive
 
     private Expression PrepareExpression(out IQbservableProvider realProvider)
     {
-      Log.DebugPrint(Expression, "ServerQuery Received Expression");
+      Log.ServerReceivingExpression(clientId, Expression);
 
       var source = Provider.GetSource(argument);
 
@@ -109,7 +114,7 @@ namespace Qactive
 
       preparedExpression = visitor.Visit(preparedExpression);
 
-      Log.DebugPrint(preparedExpression, "ServerQuery Rewritten Expression");
+      Log.ServerRewrittenExpression(clientId, preparedExpression);
 
       return preparedExpression;
     }

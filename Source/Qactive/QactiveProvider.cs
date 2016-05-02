@@ -12,6 +12,11 @@ namespace Qactive
 
     public object Argument { get; }
 
+    /// <summary>
+    /// This is purely for diagnostic purposes only. The value returned may be used to identify clients in logs. It's called immediatley before the provider's <c>CreateQuery</c> method is invoked.
+    /// </summary>
+    protected abstract object Id { get; }
+
     protected QactiveProvider()
     {
     }
@@ -28,9 +33,9 @@ namespace Qactive
       Argument = argument;
     }
 
-    public IQbservable<TResult> CreateQuery<TResult>() => new ClientQuery<TResult>(this);
+    public IQbservable<TResult> CreateQuery<TResult>() => new ClientQuery<TResult>(Id, this);
 
-    public IQbservable<TResult> CreateQuery<TResult>(Expression expression) => new ClientQuery<TResult>(this, expression);
+    public IQbservable<TResult> CreateQuery<TResult>(Expression expression) => new ClientQuery<TResult>(Id, this, expression);
 
     public abstract IObservable<TResult> Connect<TResult>(Func<QbservableProtocol, Expression> prepareExpression);
 
