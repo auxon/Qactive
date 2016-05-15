@@ -56,10 +56,10 @@ namespace Qactive
 
       private readonly int enumeratorId;
       private readonly IServerDuplexQbservableProtocolSink sink;
-      private readonly QbservableProtocol protocol;
+      private readonly IQbservableProtocol protocol;
       private object current;
 
-      public DuplexCallbackEnumerator(int enumeratorId, QbservableProtocol protocol, IServerDuplexQbservableProtocolSink sink)
+      public DuplexCallbackEnumerator(int enumeratorId, IQbservableProtocol protocol, IServerDuplexQbservableProtocolSink sink)
       {
         this.enumeratorId = enumeratorId;
         this.protocol = protocol;

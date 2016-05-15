@@ -11,7 +11,11 @@ namespace Qactive
   {
     public IPEndPoint EndPoint { get; }
 
-    public override IEnumerable<StrongName> FullTrustAssemblies => new[] { typeof(TcpQactiveProvider).Assembly.Evidence.GetHostEvidence<StrongName>() };
+    public override IEnumerable<StrongName> FullTrustAssemblies => new[]
+    {
+      typeof(TcpQactiveProvider).Assembly.Evidence.GetHostEvidence<StrongName>(),
+      typeof(StreamQbservableProtocolFactory).Assembly.Evidence.GetHostEvidence<StrongName>()
+    };
 
     public override IEnumerable<IPermission> MinimumServerPermissions => new[] { new SocketPermission(NetworkAccess.Accept, TransportType.Tcp, EndPoint.Address.ToString(), EndPoint.Port) };
 

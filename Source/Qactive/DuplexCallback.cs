@@ -17,7 +17,7 @@ namespace Qactive
 
     protected IServerDuplexQbservableProtocolSink Sink => sink;
 
-    protected QbservableProtocol Protocol => protocol;
+    protected IQbservableProtocol Protocol => protocol;
 
     protected int Id => id;
 
@@ -34,7 +34,7 @@ namespace Qactive
     [NonSerialized]
     private IServerDuplexQbservableProtocolSink sink;
     [NonSerialized]
-    private QbservableProtocol protocol;
+    private IQbservableProtocol protocol;
     private readonly int id;
 
     protected DuplexCallback(int id)
@@ -42,28 +42,28 @@ namespace Qactive
       this.id = id;
     }
 
-    private DuplexCallback(QbservableProtocol protocol, Func<int, object[], object> callback)
+    private DuplexCallback(IQbservableProtocol protocol, Func<int, object[], object> callback)
     {
       this.id = protocol
-        .GetOrAddSink(protocol.CreateClientDuplexSinkInternal)
+        .GetOrAddSink(protocol.CreateClientDuplexSink)
         .RegisterInvokeCallback(arguments => callback(this.id, arguments));
     }
 
-    public static Expression Create(QbservableProtocol protocol, object instance, PropertyInfo property)
+    public static Expression Create(IQbservableProtocol protocol, object instance, PropertyInfo property)
     {
       return CreateInvoke(
         new DuplexCallback(protocol, (_, __) => ConvertIfSequence(protocol, property.GetValue(instance))),
         property.PropertyType);
     }
 
-    public static Expression Create(QbservableProtocol protocol, object instance, FieldInfo field)
+    public static Expression Create(IQbservableProtocol protocol, object instance, FieldInfo field)
     {
       return CreateInvoke(
         new DuplexCallback(protocol, (_, __) => ConvertIfSequence(protocol, field.GetValue(instance))),
         field.FieldType);
     }
 
-    public static Expression Create(QbservableProtocol protocol, object instance, MethodInfo method, IEnumerable<Expression> argExpressions)
+    public static Expression Create(IQbservableProtocol protocol, object instance, MethodInfo method, IEnumerable<Expression> argExpressions)
     {
       return CreateInvoke(
         new DuplexCallback(protocol, (_, arguments) => ConvertIfSequence(protocol, method.Invoke(instance, arguments))),
@@ -71,14 +71,14 @@ namespace Qactive
         argExpressions);
     }
 
-    public static Expression CreateEnumerable(QbservableProtocol protocol, object instance, Type dataType, Type type)
+    public static Expression CreateEnumerable(IQbservableProtocol protocol, object instance, Type dataType, Type type)
     {
       return Expression.Constant(
         CreateRemoteEnumerable(protocol, (IEnumerable)instance, dataType),
         type);
     }
 
-    public static Expression CreateObservable(QbservableProtocol protocol, object instance, Type dataType, Type type)
+    public static Expression CreateObservable(IQbservableProtocol protocol, object instance, Type dataType, Type type)
     {
       return Expression.Constant(
         CreateRemoteObservable(protocol, instance, dataType),
@@ -95,7 +95,7 @@ namespace Qactive
           (arguments == null ? new Expression[0] : arguments.Select(a => (Expression)Expression.Convert(a, typeof(object))))));
     }
 
-    private static object ConvertIfSequence(QbservableProtocol protocol, object instance)
+    private static object ConvertIfSequence(IQbservableProtocol protocol, object instance)
     {
       if (instance != null)
       {
@@ -127,9 +127,9 @@ namespace Qactive
       return instance;
     }
 
-    private static object CreateRemoteEnumerable(QbservableProtocol protocol, IEnumerable instance, Type dataType)
+    private static object CreateRemoteEnumerable(IQbservableProtocol protocol, IEnumerable instance, Type dataType)
     {
-      var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSinkInternal);
+      var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSink);
 
       int id = 0;
       id = sink.RegisterEnumerableCallback(instance.GetEnumerator);
@@ -137,9 +137,9 @@ namespace Qactive
       return Activator.CreateInstance(typeof(DuplexCallbackEnumerable<>).MakeGenericType(dataType), id);
     }
 
-    private static object CreateRemoteObservable(QbservableProtocol protocol, object instance, Type dataType)
+    private static object CreateRemoteObservable(IQbservableProtocol protocol, object instance, Type dataType)
     {
-      var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSinkInternal);
+      var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSink);
 
       int id = 0;
       id = sink.RegisterObservableCallback(serverId => Subscribe(sink, new DuplexCallbackId(id, serverId), instance, dataType));
@@ -151,12 +151,12 @@ namespace Qactive
     {
       return dataType.UpCast(instance).Subscribe(
         value => sink.SendOnNext(id, value),
-        ex => sink.SendOnError(id, ex),
+        ex => sink.SendOnError(id, ExceptionDispatchInfo.Capture(ex)),
         () => sink.SendOnCompleted(id));
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", MessageId = "protocol", Justification = "It's setting the field.")]
-    public void SetServerProtocol(QbservableProtocol protocol)
+    public void SetServerProtocol(IQbservableProtocol protocol)
     {
       Contract.Requires(protocol != null);
 

@@ -1,8 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
@@ -10,7 +9,6 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
-using System.Runtime.Remoting.Messaging;
 using System.Security;
 using System.Security.Permissions;
 using System.Threading;
@@ -18,125 +16,65 @@ using System.Threading.Tasks;
 
 namespace Qactive
 {
-  /// <summary>
-  /// Provides the basic algorithm for a single observable communication channel between a client and server.
-  /// </summary>
-  [ContractClass(typeof(QbservableProtocolContract))]
-  public abstract class QbservableProtocol : IDisposable
+  public abstract class QbservableProtocol : IQbservableProtocol, IDisposable
   {
     public bool IsClient { get; }
 
-    public IReadOnlyCollection<ExceptionDispatchInfo> Exceptions => errors;
-
     public QbservableServiceOptions ServiceOptions { get; }
 
-    public QbservableProtocolShutdownReason ShutdownReason { get; private set; }
+    public IReadOnlyCollection<ExceptionDispatchInfo> Exceptions => exceptions;
 
-    protected IRemotingFormatter Formatter { get; }
+    public QbservableProtocolShutdownReason ShutdownReason { get; internal set; }
 
-    protected CancellationToken Cancel { get; }
+    protected CancellationToken Cancel => protocolCancellation.Token;
 
     private readonly CancellationTokenSource protocolCancellation = new CancellationTokenSource();
-    private readonly AsyncConsumerQueue sendQ = new AsyncConsumerQueue();
-    private readonly AsyncConsumerQueue receiveQ = new AsyncConsumerQueue();
-    private readonly ConcurrentBag<ExceptionDispatchInfo> errors = new ConcurrentBag<ExceptionDispatchInfo>();
-    private readonly Stream stream;
+    private readonly ConcurrentBag<ExceptionDispatchInfo> exceptions = new ConcurrentBag<ExceptionDispatchInfo>();
 
-    private object currentClientId;
+    public object CurrentClientId { get; internal set; }
 
-    internal QbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
+    public QbservableProtocol(CancellationToken cancel)
     {
       Contract.Ensures(IsClient);
 
       IsClient = true;
-      this.stream = stream;
-      Formatter = formatter;
-      Cancel = protocolCancellation.Token;
-
       cancel.Register(protocolCancellation.Cancel, useSynchronizationContext: false);
-
-      sendQ.UnhandledExceptions.Subscribe(errors.Add);
-      receiveQ.UnhandledExceptions.Subscribe(errors.Add);
     }
 
-    internal QbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
-      : this(stream, formatter, cancel)
+    public QbservableProtocol(QbservableServiceOptions serviceOptions, CancellationToken cancel)
     {
       Contract.Ensures(!IsClient);
 
       ServiceOptions = serviceOptions;
-      IsClient = false;
+      cancel.Register(protocolCancellation.Cancel, useSynchronizationContext: false);
     }
-
-    public static async Task<QbservableProtocol> NegotiateClientAsync(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
-    {
-      // TODO: Enable protocol registration and implement actual protocol negotiation
-
-      var protocol = new DefaultQbservableProtocol(stream, formatter, cancel);
-
-      const int ping = 123;
-
-      var buffer = BitConverter.GetBytes(ping);
-
-      await protocol.SendAsync(buffer, 0, 4).ConfigureAwait(false);
-      await protocol.ReceiveAsync(buffer, 0, 4).ConfigureAwait(false);
-
-      Contract.Assume(BitConverter.ToInt32(buffer, 0) == ping);
-
-      return protocol;
-    }
-
-    public static async Task<QbservableProtocol> NegotiateServerAsync(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
-    {
-      // TODO: Enable protocol registration and implement actual protocol negotiation
-
-      var protocol = new DefaultQbservableProtocol(stream, formatter, serviceOptions, cancel);
-
-      var buffer = new byte[4];
-
-      await protocol.ReceiveAsync(buffer, 0, 4).ConfigureAwait(false);
-      await protocol.SendAsync(buffer, 0, 4).ConfigureAwait(false);
-
-      return protocol;
-    }
-
-    internal abstract IClientDuplexQbservableProtocolSink CreateClientDuplexSinkInternal();
-
-    internal abstract IServerDuplexQbservableProtocolSink CreateServerDuplexSinkInternal();
 
     public abstract TSink FindSink<TSink>();
 
     public abstract TSink GetOrAddSink<TSink>(Func<TSink> createSink);
 
-    public void CancelAllCommunication()
-    {
-      try
-      {
-        protocolCancellation.Cancel();
-      }
-      catch (AggregateException ex)
-      {
-        errors.Add(ExceptionDispatchInfo.Capture(ex));
-      }
-      catch (OperationCanceledException)
-      {
-      }
-    }
+    IClientDuplexQbservableProtocolSink IQbservableProtocol.CreateClientDuplexSink()
+      => CreateClientDuplexSinkInternal();
 
-    public void CancelAllCommunication(ExceptionDispatchInfo exception)
-    {
-      errors.Add(exception);
+    IServerDuplexQbservableProtocolSink IQbservableProtocol.CreateServerDuplexSink()
+      => CreateServerDuplexSinkInternal();
 
-      if (!protocolCancellation.IsCancellationRequested)
-      {
-        if (ShutdownReason == QbservableProtocolShutdownReason.None)
-        {
-          ShutdownReason = QbservableProtocolShutdownReason.ServerError;
-        }
+    internal abstract IClientDuplexQbservableProtocolSink CreateClientDuplexSinkInternal();
 
-        CancelAllCommunication();
-      }
-    }
+    internal abstract IServerDuplexQbservableProtocolSink CreateServerDuplexSinkInternal();
+
+    internal abstract Task InitializeSinksAsync();
+
+    internal abstract Task ServerReceiveAsync();
+
+    protected abstract Task ServerSendAsync(NotificationKind kind, object data);
+
+    protected abstract IObservable<TResult> ClientReceive<TResult>();
+
+    protected abstract Task ClientSendQueryAsync(Expression expression, object argument);
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Not worth refactoring into a discrete type just yet.")]
+    protected abstract Task<Tuple<Expression, object>> ServerReceiveQueryAsync();
 
     public IObservable<TResult> ExecuteClient<TResult>(Expression expression, object argument)
     {
@@ -146,24 +84,8 @@ namespace Qactive
               from __ in ClientSendQueryAsync(expression, argument).ToObservable()
               from result in ClientReceive<TResult>()
               select result)
-             .Catch<TResult, OperationCanceledException>(
-               ex =>
-               {
-                 ExceptionDispatchInfo error;
-                 if (errors.Count == 1 && errors.TryTake(out error))
-                 {
-                   return Observable.Throw<TResult>(error.SourceException);
-                 }
-                 else if (errors.Count > 1)
-                 {
-                   return Observable.Throw<TResult>(new AggregateException(errors.Select(e => e.SourceException)));
-                 }
-                 else
-                 {
-                   return Observable.Throw<TResult>(ex);
-                 }
-               })
-              .Catch<TResult, Exception>(
+             .Catch<TResult, OperationCanceledException>(ex => ThrowFor<TResult>(ex))
+             .Catch<TResult, Exception>(
                 ex =>
                 {
                   // Cancellation is required in case client-side code is awaiting socket communication in the background; e.g., via a sink
@@ -210,24 +132,16 @@ namespace Qactive
       }
       catch (OperationCanceledException ex)
       {
-        ExceptionDispatchInfo error;
-        if (errors.Count == 1 && errors.TryTake(out error))
+        var exception = TryRollupExceptions();
+
+        if (exception != null)
         {
           if (ShutdownReason == QbservableProtocolShutdownReason.None)
           {
             ShutdownReason = QbservableProtocolShutdownReason.ServerError;
           }
 
-          fatalException = error;
-        }
-        else if (errors.Count > 1)
-        {
-          if (ShutdownReason == QbservableProtocolShutdownReason.None)
-          {
-            ShutdownReason = QbservableProtocolShutdownReason.ServerError;
-          }
-
-          fatalException = ExceptionDispatchInfo.Capture(new AggregateException(errors.Select(e => e.SourceException)));
+          fatalException = exception;
         }
 
         if (ShutdownReason == QbservableProtocolShutdownReason.None)
@@ -255,7 +169,7 @@ namespace Qactive
         }
         catch (Exception ex)
         {
-          errors.Add(ExceptionDispatchInfo.Capture(ex));
+          AddError(ExceptionDispatchInfo.Capture(ex));
         }
       }
 
@@ -264,8 +178,6 @@ namespace Qactive
         fatalException.Throw();
       }
     }
-
-    internal abstract Task ServerReceiveAsync();
 
     private async Task ExecuteServerQueryAsync(object clientId, Tuple<Expression, object> input, IQbservableProvider provider)
     {
@@ -293,7 +205,7 @@ namespace Qactive
 
           try
           {
-            currentClientId = clientId;
+            CurrentClientId = clientId;
 
             observable = CreateQuery(provider, expression, argument, out dataType);
           }
@@ -505,20 +417,11 @@ namespace Qactive
       }
     }
 
-    protected abstract Task ClientSendQueryAsync(Expression expression, object argument);
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Not worth refactoring into a discrete type just yet.")]
-    protected abstract Task<Tuple<Expression, object>> ServerReceiveQueryAsync();
-
-    protected abstract Task ServerSendAsync(NotificationKind kind, object data);
-
-    protected abstract IObservable<TResult> ClientReceive<TResult>();
-
-    protected async Task ShutdownAsync(QbservableProtocolShutdownReason reason)
+    protected Task ShutdownAsync(QbservableProtocolShutdownReason reason)
     {
       ShutdownReason = reason;
 
-      await ShutdownCoreAsync().ConfigureAwait(false);
+      return ShutdownCoreAsync();
     }
 
     protected void ShutdownWithoutResponse(QbservableProtocolShutdownReason reason)
@@ -530,122 +433,51 @@ namespace Qactive
 
     protected abstract Task ShutdownCoreAsync();
 
-    protected Task SendAsync(byte[] buffer, int offset, int count)
+    public void CancelAllCommunication()
     {
-      return sendQ.EnqueueAsync(async () =>
-        {
-          try
-          {
-            await stream.WriteAsync(buffer, offset, count, Cancel).ConfigureAwait(false);
-            await stream.FlushAsync(Cancel).ConfigureAwait(false);
-          }
-          catch (ObjectDisposedException ex)    // Occurred sometimes during testing upon cancellation
-          {
-            throw new OperationCanceledException(ex.Message, ex);
-          }
-        });
-    }
-
-    protected Task ReceiveAsync(byte[] buffer, int offset, int count)
-    {
-      return receiveQ.EnqueueAsync(async () =>
-        {
-          try
-          {
-            int read = await stream.ReadAsync(buffer, offset, count, Cancel).ConfigureAwait(false);
-
-            if (read != count)
-            {
-              throw new InvalidOperationException("The connection was closed without sending all of the data.");
-            }
-          }
-          catch (ObjectDisposedException ex)    // Occurred sometimes during testing upon cancellation
-          {
-            throw new OperationCanceledException(ex.Message, ex);
-          }
-        });
-    }
-
-    protected internal object GetCurrentClientId()
-      => currentClientId;
-
-    internal abstract Task InitializeSinksAsync();
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "Reviewed")]
-    public byte[] Serialize(object data, out long length)
-    {
-      using (var memory = new MemoryStream())
+      try
       {
-        if (data == null)
-        {
-          memory.WriteByte(1);
-        }
-        else
-        {
-          memory.WriteByte(0);
-
-          new SecurityPermission(SecurityPermissionFlag.SerializationFormatter).Assert();
-
-          try
-          {
-            Formatter.Serialize(memory, data);
-          }
-          finally
-          {
-            CodeAccessPermission.RevertAssert();
-          }
-        }
-
-        length = memory.Length;
-
-        return memory.GetBuffer();
+        protocolCancellation.Cancel();
+      }
+      catch (AggregateException ex)
+      {
+        exceptions.Add(ExceptionDispatchInfo.Capture(ex));
+      }
+      catch (OperationCanceledException)
+      {
       }
     }
 
-    public T Deserialize<T>(byte[] data)
+    public void CancelAllCommunication(ExceptionDispatchInfo exception)
     {
-      return Deserialize<T>(data, offset: 0);
-    }
+      exceptions.Add(exception);
 
-    public T Deserialize<T>(byte[] data, int offset)
-    {
-      if (data == null || data.Length == 0)
+      if (!protocolCancellation.IsCancellationRequested)
       {
-        if (offset > 0)
+        if (ShutdownReason == QbservableProtocolShutdownReason.None)
         {
-          throw new InvalidOperationException();
+          ShutdownReason = QbservableProtocolShutdownReason.ServerError;
         }
 
-        return (T)(object)null;
-      }
-
-      using (var memory = new MemoryStream(data))
-      {
-        memory.Position = offset;
-
-        var isNullDataFlag = memory.ReadByte();
-
-        Contract.Assume(isNullDataFlag == 0 || isNullDataFlag == 1);
-
-        if (isNullDataFlag == 1)
-        {
-          return (T)(object)null;
-        }
-        else
-        {
-          new SecurityPermission(SecurityPermissionFlag.SerializationFormatter).Assert();
-
-          try
-          {
-            return (T)Formatter.Deserialize(memory);
-          }
-          finally
-          {
-            CodeAccessPermission.RevertAssert();
-          }
-        }
+        CancelAllCommunication();
       }
     }
+
+    protected void AddError(ExceptionDispatchInfo exception)
+      => exceptions.Add(exception);
+
+    internal ExceptionDispatchInfo TryRollupExceptions()
+    {
+      ExceptionDispatchInfo info;
+      return exceptions.Count == 1 && exceptions.TryTake(out info)
+           ? info
+           : exceptions.Count > 1
+           ? ExceptionDispatchInfo.Capture(new AggregateException(exceptions.Select(e => e.SourceException)))
+           : null;
+    }
+
+    internal IObservable<TResult> ThrowFor<TResult>(OperationCanceledException ex)
+      => Observable.Throw<TResult>(TryRollupExceptions()?.SourceException ?? ex);
 
     public void Dispose()
     {
@@ -657,79 +489,6 @@ namespace Qactive
       Justification = "Async usage causes ObjectDisposedExceptions to occur in unexpected places that should simply respect cancellation and stop silently.")]
     protected virtual void Dispose(bool disposing)
     {
-      if (disposing)
-      {
-        sendQ.Dispose();
-        receiveQ.Dispose();
-      }
-    }
-  }
-
-  [ContractClassFor(typeof(QbservableProtocol))]
-  internal abstract class QbservableProtocolContract : QbservableProtocol
-  {
-    protected QbservableProtocolContract()
-      : base(null, null, CancellationToken.None)
-    {
-    }
-
-    public override TSink FindSink<TSink>()
-    {
-      throw new NotImplementedException();
-    }
-
-    public override TSink GetOrAddSink<TSink>(Func<TSink> createSink)
-    {
-      Contract.Requires(createSink != null);
-      return default(TSink);
-    }
-
-    protected override IObservable<TResult> ClientReceive<TResult>()
-    {
-      Contract.Ensures(Contract.Result<IObservable<TResult>>() != null);
-      return null;
-    }
-
-    protected override Task ClientSendQueryAsync(Expression expression, object argument)
-    {
-      // expression can be null
-      return null;
-    }
-
-    protected override Task<Tuple<Expression, object>> ServerReceiveQueryAsync()
-    {
-      throw new NotImplementedException();
-    }
-
-    protected override Task ServerSendAsync(NotificationKind kind, object data)
-    {
-      throw new NotImplementedException();
-    }
-
-    protected override Task ShutdownCoreAsync()
-    {
-      throw new NotImplementedException();
-    }
-
-    internal override IClientDuplexQbservableProtocolSink CreateClientDuplexSinkInternal()
-    {
-      throw new NotImplementedException();
-    }
-
-    internal override IServerDuplexQbservableProtocolSink CreateServerDuplexSinkInternal()
-    {
-      throw new NotImplementedException();
-    }
-
-    internal override Task InitializeSinksAsync()
-    {
-      throw new NotImplementedException();
-    }
-
-    internal override Task ServerReceiveAsync()
-    {
-      Contract.Requires(!IsClient);
-      return null;
     }
   }
 }

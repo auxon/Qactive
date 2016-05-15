@@ -30,7 +30,7 @@ namespace Qactive
       return Provider.Connect<TResult>(PrepareExpression).Subscribe(observer);
     }
 
-    public Expression PrepareExpression(QbservableProtocol protocol)
+    public Expression PrepareExpression(IQbservableProtocol protocol)
     {
       Contract.Requires(protocol != null);
       Contract.Ensures(Contract.Result<Expression>() != null);

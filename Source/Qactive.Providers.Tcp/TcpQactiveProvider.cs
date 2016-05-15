@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq.Expressions;
 using System.Net;
@@ -12,6 +13,7 @@ using System.Reactive.Threading.Tasks;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Remoting.Messaging;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Qactive
 {
@@ -77,7 +79,7 @@ namespace Qactive
       => new TcpQactiveProvider(endPoint, transportInitializer);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The SocketAsyncEventArgs instance is either disposed before returning or by the observable's Finally operator.")]
-    public override IObservable<TResult> Connect<TResult>(Func<QbservableProtocol, Expression> prepareExpression)
+    public override IObservable<TResult> Connect<TResult>(Func<IQbservableProtocol, Expression> prepareExpression)
     {
       SocketAsyncEventArgs e = null;
       Socket socket = null;
@@ -150,8 +152,8 @@ namespace Qactive
       }
     }
 
-    private IObservable<TResult> ReadObservable<TResult>(Stream stream, Func<QbservableProtocol, Expression> prepareExpression, CancellationToken cancel)
-      => from protocol in QbservableProtocol.NegotiateClientAsync(stream, formatterFactory(), cancel).ToObservable()
+    private IObservable<TResult> ReadObservable<TResult>(Stream stream, Func<IQbservableProtocol, Expression> prepareExpression, CancellationToken cancel)
+      => from protocol in NegotiateClientAsync(stream, formatterFactory(), cancel).ToObservable()
          from result in protocol
           .ExecuteClient<TResult>(prepareExpression(protocol), Argument)
           .Finally(protocol.Dispose)
@@ -159,7 +161,7 @@ namespace Qactive
 
     public override IObservable<ClientTermination> Listen(
       QbservableServiceOptions options,
-      Func<QbservableProtocol, IParameterizedQbservableProvider> providerFactory)
+      Func<IQbservableProtocol, IParameterizedQbservableProvider> providerFactory)
       => from listener in Observable.Return(new TcpListener(EndPoint))
          .Do(listener => listener.Start())
          from client in Observable.FromAsync(listener.AcceptTcpClientAsync).Repeat().Finally(listener.Stop)
@@ -179,7 +181,7 @@ namespace Qactive
            try
            {
              using (var stream = client.GetStream())
-             using (var protocol = await QbservableProtocol.NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false))
+             using (var protocol = await NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false))
              {
                var provider = providerFactory(protocol);
 
@@ -223,5 +225,37 @@ namespace Qactive
          })
          .Finally(client.Close)
          select result;
+
+    private static async Task<IStreamQbservableProtocol> NegotiateClientAsync(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
+    {
+      // TODO: Implement actual protocol negotiation
+
+      var protocol = StreamQbservableProtocolFactory.CreateClient(stream, formatter, cancel);
+
+      const int ping = 123;
+
+      var buffer = BitConverter.GetBytes(ping);
+
+      await protocol.SendAsync(buffer, 0, 4).ConfigureAwait(false);
+      await protocol.ReceiveAsync(buffer, 0, 4).ConfigureAwait(false);
+
+      Contract.Assume(BitConverter.ToInt32(buffer, 0) == ping);
+
+      return protocol;
+    }
+
+    private static async Task<IStreamQbservableProtocol> NegotiateServerAsync(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    {
+      // TODO: Implement actual protocol negotiation
+
+      var protocol = StreamQbservableProtocolFactory.CreateServer(stream, formatter, serviceOptions, cancel);
+
+      var buffer = new byte[4];
+
+      await protocol.ReceiveAsync(buffer, 0, 4).ConfigureAwait(false);
+      await protocol.SendAsync(buffer, 0, 4).ConfigureAwait(false);
+
+      return protocol;
+    }
   }
 }

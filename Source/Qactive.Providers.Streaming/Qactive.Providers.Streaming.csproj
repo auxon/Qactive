@@ -6,11 +6,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{33525618-7ED6-4B4E-A4B7-945BEAA372FF}</ProjectGuid>
+    <ProjectGuid>{C83A5841-A1ED-454C-9C66-238AD217EE83}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Qactive</RootNamespace>
-    <AssemblyName>Qactive.Providers.Tcp</AssemblyName>
+    <AssemblyName>Qactive.Providers.Streaming</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -81,8 +81,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>Properties\ReactiveQ.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
@@ -115,18 +113,30 @@
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Nop.cs" />
+    <Compile Include="AsyncConsumerQueue.cs" />
+    <Compile Include="IStreamQbservableProtocol.cs" />
+    <Compile Include="Properties\Errors.Designer.cs">
+      <DependentUpon>Errors.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="StreamClientDuplexQbservableProtocolSink.cs" />
+    <Compile Include="StreamQbservableProtocol.cs" />
+    <Compile Include="StreamServerDuplexQbservableProtocolSink.cs" />
+    <Compile Include="DuplexStreamMessage.cs" />
+    <Compile Include="StreamMessage.cs" />
+    <Compile Include="StreamQbservableProtocolFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TcpQactiveDefaults.cs" />
-    <Compile Include="TcpQactiveProviderFactory.cs" />
-    <Compile Include="TcpQactiveProviderFactory{TTransportInitializer}.cs" />
-    <Compile Include="ITcpQactiveProviderTransportInitializer.cs" />
-    <Compile Include="TcpQbservable.cs" />
-    <Compile Include="TcpQbservableClient.cs" />
-    <Compile Include="TcpQactiveProvider.cs" />
-    <Compile Include="TcpQbservableServer - Secure.cs" />
-    <Compile Include="TcpQbservableServer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Qactive.Expressions\Qactive.Expressions.csproj">
+      <Project>{63f23287-b0d8-408e-995d-bf15a85cee48}</Project>
+      <Name>Qactive.Expressions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Qactive\Qactive.csproj">
+      <Project>{9b68408d-1974-4f76-9c89-eccd466a25e0}</Project>
+      <Name>Qactive</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\Build\Properties\CodeAnalysisDictionary.xml">
@@ -137,14 +147,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Qactive.Providers.Streaming\Qactive.Providers.Streaming.csproj">
-      <Project>{c83a5841-a1ed-454c-9c66-238ad217ee83}</Project>
-      <Name>Qactive.Providers.Streaming</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Qactive\Qactive.csproj">
-      <Project>{9b68408d-1974-4f76-9c89-eccd466a25e0}</Project>
-      <Name>Qactive</Name>
-    </ProjectReference>
+    <EmbeddedResource Include="Properties\Errors.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Errors.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

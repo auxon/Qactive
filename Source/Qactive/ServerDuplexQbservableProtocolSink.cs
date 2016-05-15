@@ -2,24 +2,84 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Reactive.Disposables;
+using System.Runtime.ExceptionServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Qactive.Properties;
 
 namespace Qactive
 {
-  public abstract class ServerDuplexQbservableProtocolSink<TMessage> : QbservableProtocolSink<TMessage>, IServerDuplexQbservableProtocolSink
+  public abstract class ServerDuplexQbservableProtocolSink<TSource, TMessage> : QbservableProtocolSink<TSource, TMessage>, IServerDuplexQbservableProtocolSink
     where TMessage : IProtocolMessage
   {
-    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>>> invokeCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>>>();
-    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>>> enumeratorCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>>>();
-    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>, Action, Action<int>>> observableCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>, Action, Action<int>>>();
+    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>> invokeCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>>();
+    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>> enumeratorCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>>();
+    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>>> observableCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>>>();
     private readonly Dictionary<DuplexCallbackId, int?> subscriptions = new Dictionary<DuplexCallbackId, int?>();
     private int lastCallbackId;
     private int lastEnumeratorId;
     private int lastObservableId;
 
-    public DuplexCallbackId RegisterInvokeCallback(int clientId, Action<object> callback, Action<Exception> onError)
+    protected abstract QbservableProtocol<TSource, TMessage> Protocol { get; }
+
+    public override Task<TMessage> SendingAsync(TMessage message, CancellationToken cancel)
+      => Task.FromResult(message);
+
+    public override Task<TMessage> ReceivingAsync(TMessage message, CancellationToken cancel)
+    {
+      var duplexMessage = TryParseDuplexMessage(message);
+
+      if (duplexMessage != null && duplexMessage is TMessage)
+      {
+        message = (TMessage)duplexMessage;
+
+        switch (duplexMessage.Kind)
+        {
+          case QbservableProtocolMessageKind.DuplexResponse:
+            HandleResponse(duplexMessage.Id, duplexMessage.Value);
+            break;
+          case QbservableProtocolMessageKind.DuplexErrorResponse:
+            HandleErrorResponse(duplexMessage.Id, duplexMessage.Error);
+            break;
+          case QbservableProtocolMessageKind.DuplexSubscribeResponse:
+            HandleSubscribeResponse(duplexMessage.Id, (int)duplexMessage.Value);
+            break;
+          case QbservableProtocolMessageKind.DuplexGetEnumeratorResponse:
+            HandleGetEnumeratorResponse(duplexMessage.Id, (int)duplexMessage.Value);
+            break;
+          case QbservableProtocolMessageKind.DuplexGetEnumeratorErrorResponse:
+            HandleGetEnumeratorErrorResponse(duplexMessage.Id, duplexMessage.Error);
+            break;
+          case QbservableProtocolMessageKind.DuplexEnumeratorResponse:
+            HandleEnumeratorResponse(duplexMessage.Id, (Tuple<bool, object>)duplexMessage.Value);
+            break;
+          case QbservableProtocolMessageKind.DuplexEnumeratorErrorResponse:
+            HandleEnumeratorErrorResponse(duplexMessage.Id, duplexMessage.Error);
+            break;
+          case QbservableProtocolMessageKind.DuplexOnNext:
+            HandleOnNext(duplexMessage.Id, duplexMessage.Value);
+            break;
+          case QbservableProtocolMessageKind.DuplexOnCompleted:
+            HandleOnCompleted(duplexMessage.Id);
+            break;
+          case QbservableProtocolMessageKind.DuplexOnError:
+            HandleOnError(duplexMessage.Id, duplexMessage.Error);
+            break;
+          default:
+            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Errors.ProtocolUnknownMessageKindFormat, duplexMessage.Kind));
+        }
+
+        duplexMessage.Handled = true;
+      }
+
+      return Task.FromResult(message);
+    }
+
+    protected abstract IDuplexProtocolMessage TryParseDuplexMessage(TMessage message);
+
+    public DuplexCallbackId RegisterInvokeCallback(int clientId, Action<object> callback, Action<ExceptionDispatchInfo> onError)
     {
       var serverId = Interlocked.Increment(ref lastCallbackId);
 
@@ -33,7 +93,7 @@ namespace Qactive
       return id;
     }
 
-    public DuplexCallbackId RegisterEnumeratorCallback(int clientId, Action<object> callback, Action<Exception> onError)
+    public DuplexCallbackId RegisterEnumeratorCallback(int clientId, Action<object> callback, Action<ExceptionDispatchInfo> onError)
     {
       var serverId = Interlocked.Increment(ref lastEnumeratorId);
 
@@ -48,7 +108,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Returned to caller.")]
-    public Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<object> onNext, Action<Exception> onError, Action onCompleted, Action<int> dispose)
+    public Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted, Action<int> dispose)
     {
       var serverId = Interlocked.Increment(ref lastObservableId);
 
@@ -79,9 +139,9 @@ namespace Qactive
         }));
     }
 
-    private Tuple<Action<object>, Action<Exception>> GetInvokeCallbacks(DuplexCallbackId id)
+    private Tuple<Action<object>, Action<ExceptionDispatchInfo>> GetInvokeCallbacks(DuplexCallbackId id)
     {
-      Tuple<Action<object>, Action<Exception>> actions;
+      Tuple<Action<object>, Action<ExceptionDispatchInfo>> actions;
 
       if (!invokeCallbacks.TryGetValue(id, out actions))
       {
@@ -91,9 +151,9 @@ namespace Qactive
       return actions;
     }
 
-    private Tuple<Action<object>, Action<Exception>> GetEnumeratorCallbacks(DuplexCallbackId id)
+    private Tuple<Action<object>, Action<ExceptionDispatchInfo>> GetEnumeratorCallbacks(DuplexCallbackId id)
     {
-      Tuple<Action<object>, Action<Exception>> actions;
+      Tuple<Action<object>, Action<ExceptionDispatchInfo>> actions;
 
       if (!enumeratorCallbacks.TryGetValue(id, out actions))
       {
@@ -123,9 +183,9 @@ namespace Qactive
 
     private void TryInvokeObservableCallback(
       DuplexCallbackId id,
-      Action<Tuple<Action<object>, Action<Exception>, Action, Action<int>>> action)
+      Action<Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>>> action)
     {
-      Tuple<Action<object>, Action<Exception>, Action, Action<int>> callbacks;
+      Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>> callbacks;
 
       if (observableCallbacks.TryGetValue(id, out callbacks))
       {
@@ -138,51 +198,62 @@ namespace Qactive
        */
     }
 
-    public abstract object Invoke(int clientId, object[] arguments);
+    public virtual IDisposable Subscribe(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted)
+      => Protocol.ServerSendSubscribeDuplexMessage(
+        clientId,
+        onNext,
+        onError,
+        onCompleted,
+        async subscriptionId => await Protocol.SendMessageSafeAsync(CreateDisposeSubscription(subscriptionId)).ConfigureAwait(false));
 
-    public abstract IDisposable Subscribe(int clientId, Action<object> onNext, Action<Exception> onError, Action onCompleted);
+    public virtual object Invoke(int clientId, object[] arguments)
+      => Protocol.ServerSendDuplexMessage(clientId, id => CreateInvoke(id, arguments));
 
-    public abstract int GetEnumerator(int clientId);
+    public virtual int GetEnumerator(int clientId)
+      => (int)Protocol.ServerSendDuplexMessage(clientId, CreateGetEnumerator);
 
-    public abstract Tuple<bool, object> MoveNext(int enumeratorId);
+    public virtual Tuple<bool, object> MoveNext(int enumeratorId)
+      => (Tuple<bool, object>)Protocol.ServerSendEnumeratorDuplexMessage(enumeratorId, CreateMoveNext);
 
-    public abstract void ResetEnumerator(int enumeratorId);
+    public virtual void ResetEnumerator(int enumeratorId)
+      => Protocol.ServerSendEnumeratorDuplexMessage(enumeratorId, CreateResetEnumerator);
 
-    public abstract void DisposeEnumerator(int enumeratorId);
+    public virtual async void DisposeEnumerator(int enumeratorId)
+      => await Protocol.SendMessageSafeAsync(CreateDisposeEnumerator(enumeratorId)).ConfigureAwait(false);
+
+    protected abstract TMessage CreateDisposeSubscription(int subscriptionId);
+
+    protected abstract TMessage CreateInvoke(DuplexCallbackId clientId, object[] arguments);
+
+    protected abstract TMessage CreateGetEnumerator(DuplexCallbackId enumeratorId);
+
+    protected abstract TMessage CreateMoveNext(DuplexCallbackId enumeratorId);
+
+    protected abstract TMessage CreateResetEnumerator(DuplexCallbackId enumeratorId);
+
+    protected abstract TMessage CreateDisposeEnumerator(int enumeratorId);
 
     protected void HandleResponse(DuplexCallbackId id, object value)
-    {
-      GetInvokeCallbacks(id).Item1(value);
-    }
+      => GetInvokeCallbacks(id).Item1(value);
 
-    protected void HandleErrorResponse(DuplexCallbackId id, Exception error)
-    {
-      GetInvokeCallbacks(id).Item2(error);
-    }
+    protected void HandleErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error)
+      => GetInvokeCallbacks(id).Item2(error);
 
     protected void HandleGetEnumeratorResponse(DuplexCallbackId id, int clientEnumeratorId)
-    {
-      HandleResponse(id, clientEnumeratorId);
-    }
+      => HandleResponse(id, clientEnumeratorId);
 
-    protected void HandleGetEnumeratorErrorResponse(DuplexCallbackId id, Exception error)
-    {
-      HandleErrorResponse(id, error);
-    }
+    protected void HandleGetEnumeratorErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error)
+      => HandleErrorResponse(id, error);
 
     protected void HandleEnumeratorResponse(DuplexCallbackId id, Tuple<bool, object> result)
-    {
-      GetEnumeratorCallbacks(id).Item1(result);
-    }
+      => GetEnumeratorCallbacks(id).Item1(result);
 
-    protected void HandleEnumeratorErrorResponse(DuplexCallbackId id, Exception error)
-    {
-      GetEnumeratorCallbacks(id).Item2(error);
-    }
+    protected void HandleEnumeratorErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error)
+      => GetEnumeratorCallbacks(id).Item2(error);
 
     protected void HandleSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId)
     {
-      Tuple<Action<object>, Action<Exception>, Action, Action<int>> actions;
+      Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>> actions;
 
       if (!observableCallbacks.TryGetValue(id, out actions))
       {
@@ -196,7 +267,7 @@ namespace Qactive
         {
           subscriptions.Remove(id);
 
-          Tuple<Action<object>, Action<Exception>, Action, Action<int>> ignored;
+          Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>> ignored;
           observableCallbacks.TryRemove(id, out ignored);
 
           actions.Item4(clientSubscriptionId);
@@ -205,18 +276,12 @@ namespace Qactive
     }
 
     protected void HandleOnNext(DuplexCallbackId id, object result)
-    {
-      TryInvokeObservableCallback(id, actions => actions.Item1(result));
-    }
+      => TryInvokeObservableCallback(id, actions => actions.Item1(result));
 
     protected void HandleOnCompleted(DuplexCallbackId id)
-    {
-      TryInvokeObservableCallback(id, actions => actions.Item3());
-    }
+      => TryInvokeObservableCallback(id, actions => actions.Item3());
 
-    protected void HandleOnError(DuplexCallbackId id, Exception error)
-    {
-      TryInvokeObservableCallback(id, actions => actions.Item2(error));
-    }
+    protected void HandleOnError(DuplexCallbackId id, ExceptionDispatchInfo error)
+      => TryInvokeObservableCallback(id, actions => actions.Item2(error));
   }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Qactive
 {
-  internal enum QbservableProtocolMessageKind : byte
+  public enum QbservableProtocolMessageKind : byte
   {
     Unknown,
     OnNext,
