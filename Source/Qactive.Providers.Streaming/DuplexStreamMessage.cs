@@ -3,7 +3,7 @@ using System.Runtime.ExceptionServices;
 
 namespace Qactive
 {
-  internal sealed class DuplexStreamMessage : StreamMessage
+  internal sealed class DuplexStreamMessage : StreamMessage, IDuplexProtocolMessage
   {
     public DuplexCallbackId Id { get; }
 

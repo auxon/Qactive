@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.IO;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Qactive.Properties;
 
 namespace Qactive
 {
   internal sealed class StreamServerDuplexQbservableProtocolSink : ServerDuplexQbservableProtocolSink<Stream, StreamMessage>
   {
     private readonly StreamQbservableProtocol protocol;
+
+    protected override QbservableProtocol<Stream, StreamMessage> Protocol => protocol;
 
     public StreamServerDuplexQbservableProtocolSink(StreamQbservableProtocol protocol)
     {
@@ -23,92 +25,58 @@ namespace Qactive
     {
       Contract.Assume(this.protocol == protocol);
 
-      return Task.FromResult(false);
+      return Task.CompletedTask;
     }
 
-    public override Task<StreamMessage> SendingAsync(StreamMessage message, CancellationToken cancel)
-    {
-      return Task.FromResult(message);
-    }
-
-    public override Task<StreamMessage> ReceivingAsync(StreamMessage message, CancellationToken cancel)
+    protected override IDuplexProtocolMessage TryParseDuplexMessage(StreamMessage message)
     {
       DuplexStreamMessage duplexMessage;
-
-      if (DuplexStreamMessage.TryParse(message, protocol, out duplexMessage))
-      {
-        message = duplexMessage;
-
-        switch (duplexMessage.Kind)
-        {
-          case QbservableProtocolMessageKind.DuplexResponse:
-            HandleResponse(duplexMessage.Id, duplexMessage.Value);
-            break;
-          case QbservableProtocolMessageKind.DuplexErrorResponse:
-            HandleErrorResponse(duplexMessage.Id, duplexMessage.Error);
-            break;
-          case QbservableProtocolMessageKind.DuplexSubscribeResponse:
-            HandleSubscribeResponse(duplexMessage.Id, (int)duplexMessage.Value);
-            break;
-          case QbservableProtocolMessageKind.DuplexGetEnumeratorResponse:
-            HandleGetEnumeratorResponse(duplexMessage.Id, (int)duplexMessage.Value);
-            break;
-          case QbservableProtocolMessageKind.DuplexGetEnumeratorErrorResponse:
-            HandleGetEnumeratorErrorResponse(duplexMessage.Id, duplexMessage.Error);
-            break;
-          case QbservableProtocolMessageKind.DuplexEnumeratorResponse:
-            HandleEnumeratorResponse(duplexMessage.Id, (Tuple<bool, object>)duplexMessage.Value);
-            break;
-          case QbservableProtocolMessageKind.DuplexEnumeratorErrorResponse:
-            HandleEnumeratorErrorResponse(duplexMessage.Id, duplexMessage.Error);
-            break;
-          case QbservableProtocolMessageKind.DuplexOnNext:
-            HandleOnNext(duplexMessage.Id, duplexMessage.Value);
-            break;
-          case QbservableProtocolMessageKind.DuplexOnCompleted:
-            HandleOnCompleted(duplexMessage.Id);
-            break;
-          case QbservableProtocolMessageKind.DuplexOnError:
-            HandleOnError(duplexMessage.Id, duplexMessage.Error);
-            break;
-          default:
-            throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Errors.ProtocolUnknownMessageKindFormat, duplexMessage.Kind));
-        }
-
-        duplexMessage.Handled = true;
-      }
-
-      return Task.FromResult(message);
-    }
-
-    public override object Invoke(int clientId, object[] arguments)
-    {
-      return protocol.ServerSendDuplexMessage(clientId, id => DuplexStreamMessage.CreateInvoke(id, arguments, protocol));
+      return DuplexStreamMessage.TryParse(message, protocol, out duplexMessage)
+           ? duplexMessage
+           : null;
     }
 
     public override IDisposable Subscribe(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted)
     {
-      return protocol.ServerSendSubscribeDuplexMessage(clientId, onNext, onError, onCompleted);
+      /*
+      In testing, the observer permanently blocked incoming data from the client unless concurrency was introduced.
+      The order of events were as follows: 
+
+      1. The server received an OnNext notification from an I/O completion port.
+      2. The server pushed the value to the observer passed into DuplexCallbackObservable.Subscribe, without introducing concurrency.
+      3. The query provider continued executing the serialized query on the current thread.
+      4. The query at this point required a synchronous invocation to a client-side member (i.e., duplex enabled).
+      5. The server sent the new invocation to the client and then blocked the current thread waiting for an async response.
+      
+      Since the current thread was an I/O completion port (received for OnNext), it seems that blocking it prevented any 
+      further data from being received, even via the Stream.AsyncRead method. Apparently the only solution is to ensure 
+      that observable callbacks occur on pooled threads to prevent I/O completion ports from inadvertantly being blocked.
+      */
+      var scheduler = TaskPoolScheduler.Default;
+
+      return base.Subscribe(
+        clientId,
+        value => scheduler.Schedule(value, (_, v) => { onNext(v); return Disposable.Empty; }),
+        ex => scheduler.Schedule(ex, (_, e) => { onError(e); return Disposable.Empty; }),
+        () => scheduler.Schedule(onCompleted));
     }
 
-    public override int GetEnumerator(int clientId)
-    {
-      return (int)protocol.ServerSendDuplexMessage(clientId, id => DuplexStreamMessage.CreateGetEnumerator(id, protocol));
-    }
+    protected override StreamMessage CreateDisposeSubscription(int subscriptionId)
+      => DuplexStreamMessage.CreateDisposeSubscription(subscriptionId, protocol);
 
-    public override Tuple<bool, object> MoveNext(int enumeratorId)
-    {
-      return (Tuple<bool, object>)protocol.ServerSendEnumeratorDuplexMessage(enumeratorId, id => DuplexStreamMessage.CreateMoveNext(id, protocol));
-    }
+    protected override StreamMessage CreateInvoke(DuplexCallbackId clientId, object[] arguments)
+      => DuplexStreamMessage.CreateInvoke(clientId, arguments, protocol);
 
-    public override void ResetEnumerator(int enumeratorId)
-    {
-      protocol.ServerSendEnumeratorDuplexMessage(enumeratorId, id => DuplexStreamMessage.CreateResetEnumerator(id, protocol));
-    }
+    protected override StreamMessage CreateGetEnumerator(DuplexCallbackId enumeratorId)
+      => DuplexStreamMessage.CreateGetEnumerator(enumeratorId, protocol);
 
-    public override void DisposeEnumerator(int enumeratorId)
-    {
-      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateDisposeEnumerator(enumeratorId, protocol));
-    }
+    protected override StreamMessage CreateMoveNext(DuplexCallbackId enumeratorId)
+      => DuplexStreamMessage.CreateMoveNext(enumeratorId, protocol);
+
+    protected override StreamMessage CreateResetEnumerator(DuplexCallbackId enumeratorId)
+      => DuplexStreamMessage.CreateResetEnumerator(enumeratorId, protocol);
+
+    protected override StreamMessage CreateDisposeEnumerator(int enumeratorId)
+      => DuplexStreamMessage.CreateDisposeEnumerator(enumeratorId, protocol);
   }
 }
