@@ -2,6 +2,7 @@
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Qactive.Properties;
@@ -85,7 +86,7 @@ namespace Qactive
       return protocol.ServerSendDuplexMessage(clientId, id => DuplexStreamMessage.CreateInvoke(id, arguments, protocol));
     }
 
-    public override IDisposable Subscribe(int clientId, Action<object> onNext, Action<Exception> onError, Action onCompleted)
+    public override IDisposable Subscribe(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted)
     {
       return protocol.ServerSendSubscribeDuplexMessage(clientId, onNext, onError, onCompleted);
     }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Reactive.Disposables;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using Qactive.Properties;
 
@@ -123,7 +124,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        SendError(id, ex);
+        SendError(id, ExceptionDispatchInfo.Capture(ex));
         return;
       }
 
@@ -151,7 +152,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        SendOnError(id, ex);
+        SendOnError(id, ExceptionDispatchInfo.Capture(ex));
         return;
       }
 
@@ -182,7 +183,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        SendGetEnumeratorError(id, ex);
+        SendGetEnumeratorError(id, ExceptionDispatchInfo.Capture(ex));
         return;
       }
 
@@ -214,7 +215,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        SendEnumeratorError(id, ex);
+        SendEnumeratorError(id, ExceptionDispatchInfo.Capture(ex));
         return;
       }
 
@@ -232,7 +233,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        SendEnumeratorError(id, ex);
+        SendEnumeratorError(id, ExceptionDispatchInfo.Capture(ex));
       }
     }
 
@@ -248,25 +249,25 @@ namespace Qactive
 
     public abstract void SendOnNext(DuplexCallbackId id, object value);
 
-    public abstract void SendOnError(DuplexCallbackId id, Exception error);
+    public abstract void SendOnError(DuplexCallbackId id, ExceptionDispatchInfo error);
 
     public abstract void SendOnCompleted(DuplexCallbackId id);
 
     protected abstract void SendResponse(DuplexCallbackId id, object result);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
-    protected abstract void SendError(DuplexCallbackId id, Exception error);
+    protected abstract void SendError(DuplexCallbackId id, ExceptionDispatchInfo error);
 
     protected abstract void SendSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId);
 
     protected abstract void SendGetEnumeratorResponse(DuplexCallbackId id, int clientEnumeratorId);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
-    protected abstract void SendGetEnumeratorError(DuplexCallbackId id, Exception error);
+    protected abstract void SendGetEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error);
 
     protected abstract void SendEnumeratorResponse(DuplexCallbackId id, bool result, object current);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
-    protected abstract void SendEnumeratorError(DuplexCallbackId id, Exception error);
+    protected abstract void SendEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error);
   }
 }

@@ -2,6 +2,7 @@
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Qactive.Properties;
@@ -76,7 +77,7 @@ namespace Qactive
       protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateResponse(id, result, protocol));
     }
 
-    protected override void SendError(DuplexCallbackId id, Exception error)
+    protected override void SendError(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateErrorResponse(id, error, protocol));
     }
@@ -91,7 +92,7 @@ namespace Qactive
       protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateOnNext(id, value, protocol));
     }
 
-    public override void SendOnError(DuplexCallbackId id, Exception error)
+    public override void SendOnError(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateOnError(id, error, protocol));
     }
@@ -106,7 +107,7 @@ namespace Qactive
       protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateGetEnumeratorResponse(id, clientEnumeratorId, protocol));
     }
 
-    protected override void SendGetEnumeratorError(DuplexCallbackId id, Exception error)
+    protected override void SendGetEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateGetEnumeratorError(id, error, protocol));
     }
@@ -116,7 +117,7 @@ namespace Qactive
       protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateEnumeratorResponse(id, result, current, protocol));
     }
 
-    protected override void SendEnumeratorError(DuplexCallbackId id, Exception error)
+    protected override void SendEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateEnumeratorError(id, error, protocol));
     }

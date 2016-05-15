@@ -47,7 +47,7 @@ namespace Qactive
           Sink.Subscribe(
             Id,
             value => tryExecute(() => observer.OnNext((T)value)),
-            ex => tryExecute(() => observer.OnError(ex)),
+            ex => tryExecute(() => observer.OnError(ex.SourceException)),
             () => tryExecute(observer.OnCompleted)));
 
         return disposables;

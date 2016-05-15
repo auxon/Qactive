@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.ExceptionServices;
 
 namespace Qactive
 {
@@ -8,7 +9,7 @@ namespace Qactive
 
     public object Value { get; }
 
-    public Exception Error { get; }
+    public ExceptionDispatchInfo Error { get; }
 
     private DuplexStreamMessage(QbservableProtocolMessageKind kind, DuplexCallbackId id, object value, byte[] data)
       : base(kind, data, data.Length)
@@ -17,7 +18,7 @@ namespace Qactive
       Value = value;
     }
 
-    private DuplexStreamMessage(QbservableProtocolMessageKind kind, DuplexCallbackId id, Exception error, byte[] data)
+    private DuplexStreamMessage(QbservableProtocolMessageKind kind, DuplexCallbackId id, ExceptionDispatchInfo error, byte[] data)
       : base(kind, data, data.Length)
     {
       Id = id;
@@ -31,7 +32,7 @@ namespace Qactive
       Value = value;
     }
 
-    private DuplexStreamMessage(QbservableProtocolMessageKind kind, DuplexCallbackId id, Exception error, byte[] data, long length)
+    private DuplexStreamMessage(QbservableProtocolMessageKind kind, DuplexCallbackId id, ExceptionDispatchInfo error, byte[] data, long length)
       : base(kind, data, length)
     {
       Id = id;
@@ -105,9 +106,9 @@ namespace Qactive
       return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexGetEnumeratorResponse, id, clientEnumeratorId, Serialize(id, clientEnumeratorId, protocol));
     }
 
-    public static DuplexStreamMessage CreateGetEnumeratorError(DuplexCallbackId id, Exception error, StreamQbservableProtocol protocol)
+    public static DuplexStreamMessage CreateGetEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error, StreamQbservableProtocol protocol)
     {
-      return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexGetEnumeratorErrorResponse, id, error, Serialize(id, error, protocol));
+      return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexGetEnumeratorErrorResponse, id, error, Serialize(id, error.SourceException, protocol));
     }
 
     public static DuplexStreamMessage CreateEnumeratorResponse(DuplexCallbackId id, bool result, object current, StreamQbservableProtocol protocol)
@@ -117,9 +118,9 @@ namespace Qactive
       return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexEnumeratorResponse, id, value, Serialize(id, value, protocol));
     }
 
-    public static DuplexStreamMessage CreateEnumeratorError(DuplexCallbackId id, Exception error, StreamQbservableProtocol protocol)
+    public static DuplexStreamMessage CreateEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error, StreamQbservableProtocol protocol)
     {
-      return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexEnumeratorErrorResponse, id, error, Serialize(id, error, protocol));
+      return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexEnumeratorErrorResponse, id, error, Serialize(id, error.SourceException, protocol));
     }
 
     public static DuplexStreamMessage CreateMoveNext(DuplexCallbackId id, StreamQbservableProtocol protocol)
@@ -142,9 +143,9 @@ namespace Qactive
       return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexResponse, id, value, Serialize(id, value, protocol));
     }
 
-    public static DuplexStreamMessage CreateErrorResponse(DuplexCallbackId id, Exception error, StreamQbservableProtocol protocol)
+    public static DuplexStreamMessage CreateErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error, StreamQbservableProtocol protocol)
     {
-      return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexErrorResponse, id, error, Serialize(id, error, protocol));
+      return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexErrorResponse, id, error, Serialize(id, error.SourceException, protocol));
     }
 
     public static DuplexStreamMessage CreateSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId, StreamQbservableProtocol protocol)
@@ -162,9 +163,9 @@ namespace Qactive
       return CreateWithoutValue(QbservableProtocolMessageKind.DuplexOnCompleted, id, protocol);
     }
 
-    public static DuplexStreamMessage CreateOnError(DuplexCallbackId id, Exception error, StreamQbservableProtocol protocol)
+    public static DuplexStreamMessage CreateOnError(DuplexCallbackId id, ExceptionDispatchInfo error, StreamQbservableProtocol protocol)
     {
-      return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexOnError, id, error, Serialize(id, error, protocol));
+      return new DuplexStreamMessage(QbservableProtocolMessageKind.DuplexOnError, id, error, Serialize(id, error.SourceException, protocol));
     }
 
     private static DuplexStreamMessage CreateWithoutValue(QbservableProtocolMessageKind kind, DuplexCallbackId id, StreamQbservableProtocol protocol)

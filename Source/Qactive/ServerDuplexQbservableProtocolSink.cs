@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Reactive.Disposables;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using Qactive.Properties;
 
@@ -11,15 +12,15 @@ namespace Qactive
   public abstract class ServerDuplexQbservableProtocolSink<TSource, TMessage> : QbservableProtocolSink<TSource, TMessage>, IServerDuplexQbservableProtocolSink
     where TMessage : IProtocolMessage
   {
-    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>>> invokeCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>>>();
-    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>>> enumeratorCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>>>();
-    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>, Action, Action<int>>> observableCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<Exception>, Action, Action<int>>>();
+    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>> invokeCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>>();
+    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>> enumeratorCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>>();
+    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>>> observableCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>>>();
     private readonly Dictionary<DuplexCallbackId, int?> subscriptions = new Dictionary<DuplexCallbackId, int?>();
     private int lastCallbackId;
     private int lastEnumeratorId;
     private int lastObservableId;
 
-    public DuplexCallbackId RegisterInvokeCallback(int clientId, Action<object> callback, Action<Exception> onError)
+    public DuplexCallbackId RegisterInvokeCallback(int clientId, Action<object> callback, Action<ExceptionDispatchInfo> onError)
     {
       var serverId = Interlocked.Increment(ref lastCallbackId);
 
@@ -33,7 +34,7 @@ namespace Qactive
       return id;
     }
 
-    public DuplexCallbackId RegisterEnumeratorCallback(int clientId, Action<object> callback, Action<Exception> onError)
+    public DuplexCallbackId RegisterEnumeratorCallback(int clientId, Action<object> callback, Action<ExceptionDispatchInfo> onError)
     {
       var serverId = Interlocked.Increment(ref lastEnumeratorId);
 
@@ -48,7 +49,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Returned to caller.")]
-    public Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<object> onNext, Action<Exception> onError, Action onCompleted, Action<int> dispose)
+    public Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted, Action<int> dispose)
     {
       var serverId = Interlocked.Increment(ref lastObservableId);
 
@@ -79,9 +80,9 @@ namespace Qactive
         }));
     }
 
-    private Tuple<Action<object>, Action<Exception>> GetInvokeCallbacks(DuplexCallbackId id)
+    private Tuple<Action<object>, Action<ExceptionDispatchInfo>> GetInvokeCallbacks(DuplexCallbackId id)
     {
-      Tuple<Action<object>, Action<Exception>> actions;
+      Tuple<Action<object>, Action<ExceptionDispatchInfo>> actions;
 
       if (!invokeCallbacks.TryGetValue(id, out actions))
       {
@@ -91,9 +92,9 @@ namespace Qactive
       return actions;
     }
 
-    private Tuple<Action<object>, Action<Exception>> GetEnumeratorCallbacks(DuplexCallbackId id)
+    private Tuple<Action<object>, Action<ExceptionDispatchInfo>> GetEnumeratorCallbacks(DuplexCallbackId id)
     {
-      Tuple<Action<object>, Action<Exception>> actions;
+      Tuple<Action<object>, Action<ExceptionDispatchInfo>> actions;
 
       if (!enumeratorCallbacks.TryGetValue(id, out actions))
       {
@@ -123,9 +124,9 @@ namespace Qactive
 
     private void TryInvokeObservableCallback(
       DuplexCallbackId id,
-      Action<Tuple<Action<object>, Action<Exception>, Action, Action<int>>> action)
+      Action<Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>>> action)
     {
-      Tuple<Action<object>, Action<Exception>, Action, Action<int>> callbacks;
+      Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>> callbacks;
 
       if (observableCallbacks.TryGetValue(id, out callbacks))
       {
@@ -140,7 +141,7 @@ namespace Qactive
 
     public abstract object Invoke(int clientId, object[] arguments);
 
-    public abstract IDisposable Subscribe(int clientId, Action<object> onNext, Action<Exception> onError, Action onCompleted);
+    public abstract IDisposable Subscribe(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted);
 
     public abstract int GetEnumerator(int clientId);
 
@@ -155,7 +156,7 @@ namespace Qactive
       GetInvokeCallbacks(id).Item1(value);
     }
 
-    protected void HandleErrorResponse(DuplexCallbackId id, Exception error)
+    protected void HandleErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       GetInvokeCallbacks(id).Item2(error);
     }
@@ -165,7 +166,7 @@ namespace Qactive
       HandleResponse(id, clientEnumeratorId);
     }
 
-    protected void HandleGetEnumeratorErrorResponse(DuplexCallbackId id, Exception error)
+    protected void HandleGetEnumeratorErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       HandleErrorResponse(id, error);
     }
@@ -175,14 +176,14 @@ namespace Qactive
       GetEnumeratorCallbacks(id).Item1(result);
     }
 
-    protected void HandleEnumeratorErrorResponse(DuplexCallbackId id, Exception error)
+    protected void HandleEnumeratorErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       GetEnumeratorCallbacks(id).Item2(error);
     }
 
     protected void HandleSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId)
     {
-      Tuple<Action<object>, Action<Exception>, Action, Action<int>> actions;
+      Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>> actions;
 
       if (!observableCallbacks.TryGetValue(id, out actions))
       {
@@ -196,7 +197,7 @@ namespace Qactive
         {
           subscriptions.Remove(id);
 
-          Tuple<Action<object>, Action<Exception>, Action, Action<int>> ignored;
+          Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>> ignored;
           observableCallbacks.TryRemove(id, out ignored);
 
           actions.Item4(clientSubscriptionId);
@@ -214,7 +215,7 @@ namespace Qactive
       TryInvokeObservableCallback(id, actions => actions.Item3());
     }
 
-    protected void HandleOnError(DuplexCallbackId id, Exception error)
+    protected void HandleOnError(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       TryInvokeObservableCallback(id, actions => actions.Item2(error));
     }

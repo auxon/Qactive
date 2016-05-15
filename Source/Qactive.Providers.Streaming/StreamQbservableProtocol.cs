@@ -342,7 +342,7 @@ namespace Qactive
     private object ServerSendDuplexMessage(
       int clientId,
       Func<DuplexCallbackId, DuplexStreamMessage> messageFactory,
-      Func<IServerDuplexQbservableProtocolSink, Func<int, Action<object>, Action<Exception>, DuplexCallbackId>> registrationSelector)
+      Func<IServerDuplexQbservableProtocolSink, Func<int, Action<object>, Action<ExceptionDispatchInfo>, DuplexCallbackId>> registrationSelector)
     {
       var waitForResponse = new ManualResetEventSlim(false);
 
@@ -360,7 +360,7 @@ namespace Qactive
         },
         ex =>
         {
-          error = ExceptionDispatchInfo.Capture(ex);
+          error = ex;
           waitForResponse.Set();
         });
 
@@ -381,7 +381,7 @@ namespace Qactive
     internal IDisposable ServerSendSubscribeDuplexMessage(
       int clientId,
       Action<object> onNext,
-      Action<Exception> onError,
+      Action<ExceptionDispatchInfo> onError,
       Action onCompleted)
     {
       var duplexSink = FindSink<IServerDuplexQbservableProtocolSink>();

@@ -152,7 +152,7 @@ namespace Qactive
     {
       return dataType.UpCast(instance).Subscribe(
         value => sink.SendOnNext(id, value),
-        ex => sink.SendOnError(id, ex),
+        ex => sink.SendOnError(id, ExceptionDispatchInfo.Capture(ex)),
         () => sink.SendOnCompleted(id));
     }
 
