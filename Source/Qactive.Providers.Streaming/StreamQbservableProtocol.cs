@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.ExceptionServices;
@@ -384,13 +385,29 @@ namespace Qactive
       Action<ExceptionDispatchInfo> onError,
       Action onCompleted)
     {
+      /*
+      In testing, the observer permanently blocked incoming data from the client unless concurrency was introduced.
+      The order of events were as follows: 
+
+      1. The server received an OnNext notification from an I/O completion port.
+      2. The server pushed the value to the observer passed into DuplexCallbackObservable.Subscribe, without introducing concurrency.
+      3. The query provider continued executing the serialized query on the current thread.
+      4. The query at this point required a synchronous invocation to a client-side member (i.e., duplex enabled).
+      5. The server sent the new invocation to the client and then blocked the current thread waiting for an async response.
+      
+      Since the current thread was an I/O completion port (received for OnNext), it seems that blocking it prevented any 
+      further data from being received, even via the Stream.AsyncRead method. Apparently the only solution is to ensure 
+      that observable callbacks occur on pooled threads to prevent I/O completion ports from inadvertantly being blocked.
+      */
+      var scheduler = TaskPoolScheduler.Default;
+
       var duplexSink = FindSink<IServerDuplexQbservableProtocolSink>();
 
       var registration = duplexSink.RegisterObservableCallbacks(
         clientId,
-        onNext,
-        onError,
-        onCompleted,
+        value => scheduler.Schedule(value, (_, v) => { onNext(v); return Disposable.Empty; }),
+        ex => scheduler.Schedule(ex, (_, e) => { onError(e); return Disposable.Empty; }),
+        () => scheduler.Schedule(onCompleted),
         subscriptionId => SendDuplexMessageAsync(DuplexStreamMessage.CreateDisposeSubscription(subscriptionId, this)));
 
       var id = registration.Item1;

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics.Contracts;
-using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Runtime.ExceptionServices;
 
@@ -9,14 +7,9 @@ namespace Qactive
   [Serializable]
   internal sealed class DuplexCallbackObservable<T> : DuplexCallback, IObservable<T>
   {
-    private readonly IScheduler scheduler;
-
-    public DuplexCallbackObservable(int id, IScheduler scheduler)
+    public DuplexCallbackObservable(int id)
       : base(id)
     {
-      Contract.Requires(scheduler != null);
-
-      this.scheduler = scheduler;
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave their contexts because they will be missed.")]
@@ -27,18 +20,14 @@ namespace Qactive
       Action<Action> tryExecute =
         action =>
         {
-          disposables.Add(
-            scheduler.Schedule(() =>
-            {
-              try
-              {
-                action();
-              }
-              catch (Exception ex)
-              {
-                Protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
-              }
-            }));
+          try
+          {
+            action();
+          }
+          catch (Exception ex)
+          {
+            Protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
+          }
         };
 
       try
