@@ -37,9 +37,9 @@ namespace Qactive
 
     public IQbservable<TResult> CreateQuery<TResult>(Expression expression) => new ClientQuery<TResult>(Id, this, expression);
 
-    public abstract IObservable<TResult> Connect<TResult>(Func<QbservableProtocol, Expression> prepareExpression);
+    public abstract IObservable<TResult> Connect<TResult>(Func<IQbservableProtocol, Expression> prepareExpression);
 
-    public abstract IObservable<ClientTermination> Listen(QbservableServiceOptions options, Func<QbservableProtocol, IParameterizedQbservableProvider> providerFactory);
+    public abstract IObservable<ClientTermination> Listen(QbservableServiceOptions options, Func<IQbservableProtocol, IParameterizedQbservableProvider> providerFactory);
 
     void IQactiveProvider.InitializeSecureServer() => InitializeSecureServer();
 

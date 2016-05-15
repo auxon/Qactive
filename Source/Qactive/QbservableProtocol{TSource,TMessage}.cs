@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Threading;
@@ -11,53 +10,49 @@ using Qactive.Properties;
 
 namespace Qactive
 {
-  public abstract class QbservableProtocol<TMessage> : QbservableProtocol
+  public abstract class QbservableProtocol<TSource, TMessage> : QbservableProtocol<TSource>
     where TMessage : IProtocolMessage
   {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    protected IList<QbservableProtocolSink<TMessage>> Sinks => sinks;
+    protected IList<QbservableProtocolSink<TSource, TMessage>> Sinks => sinks;
 
-    private readonly List<QbservableProtocolSink<TMessage>> sinks = new List<QbservableProtocolSink<TMessage>>();
+    private readonly List<QbservableProtocolSink<TSource, TMessage>> sinks = new List<QbservableProtocolSink<TSource, TMessage>>();
 
-    protected QbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
-      : base(stream, formatter, cancel)
+    protected QbservableProtocol(TSource source, IRemotingFormatter formatter, CancellationToken cancel)
+      : base(source, formatter, cancel)
     {
       Contract.Ensures(IsClient);
     }
 
-    protected QbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
-      : base(stream, formatter, serviceOptions, cancel)
+    protected QbservableProtocol(TSource source, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+      : base(source, formatter, serviceOptions, cancel)
     {
       Contract.Ensures(!IsClient);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    protected virtual IEnumerable<QbservableProtocolSink<TMessage>> CreateClientSinks()
+    protected virtual IEnumerable<QbservableProtocolSink<TSource, TMessage>> CreateClientSinks()
     {
       // for derived types
       yield break;
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    protected virtual IEnumerable<QbservableProtocolSink<TMessage>> CreateServerSinks()
+    protected virtual IEnumerable<QbservableProtocolSink<TSource, TMessage>> CreateServerSinks()
     {
       // for derived types
       yield break;
     }
 
-    protected abstract ClientDuplexQbservableProtocolSink<TMessage> CreateClientDuplexSink();
+    protected abstract ClientDuplexQbservableProtocolSink<TSource, TMessage> CreateClientDuplexSink();
 
-    protected abstract ServerDuplexQbservableProtocolSink<TMessage> CreateServerDuplexSink();
+    protected abstract ServerDuplexQbservableProtocolSink<TSource, TMessage> CreateServerDuplexSink();
 
     internal sealed override IClientDuplexQbservableProtocolSink CreateClientDuplexSinkInternal()
-    {
-      return CreateClientDuplexSink();
-    }
+      => CreateClientDuplexSink();
 
     internal sealed override IServerDuplexQbservableProtocolSink CreateServerDuplexSinkInternal()
-    {
-      return CreateServerDuplexSink();
-    }
+      => CreateServerDuplexSink();
 
     internal sealed override async Task ServerReceiveAsync()
     {
@@ -150,7 +145,7 @@ namespace Qactive
       if (sink == null)
       {
         sink = createSink();
-        sinks.Add((QbservableProtocolSink<TMessage>)(object)sink);
+        sinks.Add((QbservableProtocolSink<TSource, TMessage>)(object)sink);
       }
 
       return sink;

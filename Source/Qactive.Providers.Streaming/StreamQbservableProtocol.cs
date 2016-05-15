@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.IO;
 using System.Linq.Expressions;
@@ -7,6 +8,8 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Remoting.Messaging;
+using System.Security;
+using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using Qactive.Expressions;
@@ -14,26 +17,69 @@ using Qactive.Properties;
 
 namespace Qactive
 {
-  internal sealed class DefaultQbservableProtocol : QbservableProtocol<QbservableMessage>
+  internal sealed class StreamQbservableProtocol : QbservableProtocol<Stream, StreamMessage>, IStreamQbservableProtocol
   {
-    public DefaultQbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
-      : base(stream, formatter, cancel)
+    private readonly AsyncConsumerQueue sendQ = new AsyncConsumerQueue();
+    private readonly AsyncConsumerQueue receiveQ = new AsyncConsumerQueue();
+
+    public StreamQbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
+    : base(stream, formatter, cancel)
     {
+      sendQ.UnhandledExceptions.Subscribe(AddError);
+      receiveQ.UnhandledExceptions.Subscribe(AddError);
     }
 
-    public DefaultQbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
-      : base(stream, formatter, serviceOptions, cancel)
+    public StreamQbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    : base(stream, formatter, serviceOptions, cancel)
     {
+      sendQ.UnhandledExceptions.Subscribe(AddError);
+      receiveQ.UnhandledExceptions.Subscribe(AddError);
     }
 
-    protected sealed override ClientDuplexQbservableProtocolSink<QbservableMessage> CreateClientDuplexSink()
+    public Task SendAsync(byte[] buffer, int offset, int count)
     {
-      return new DefaultClientDuplexQbservableProtocolSink(this);
+      return sendQ.EnqueueAsync(async () =>
+      {
+        try
+        {
+          await Source.WriteAsync(buffer, offset, count, Cancel).ConfigureAwait(false);
+          await Source.FlushAsync(Cancel).ConfigureAwait(false);
+        }
+        catch (ObjectDisposedException ex)    // Occurred sometimes during testing upon cancellation
+        {
+          throw new OperationCanceledException(ex.Message, ex);
+        }
+      });
     }
 
-    protected sealed override ServerDuplexQbservableProtocolSink<QbservableMessage> CreateServerDuplexSink()
+    public Task ReceiveAsync(byte[] buffer, int offset, int count)
     {
-      return new DefaultServerDuplexQbservableProtocolSink(this);
+      return receiveQ.EnqueueAsync(async () =>
+      {
+        try
+        {
+          int read = await Source.ReadAsync(buffer, offset, count, Cancel).ConfigureAwait(false);
+
+          if (read != count)
+          {
+            throw new InvalidOperationException("The connection was closed without sending all of the data.");
+          }
+        }
+        catch (ObjectDisposedException ex)    // Occurred sometimes during testing upon cancellation
+        {
+          throw new OperationCanceledException(ex.Message, ex);
+        }
+      });
+    }
+
+    protected override ClientDuplexQbservableProtocolSink<Stream, StreamMessage> CreateClientDuplexSink()
+    {
+      return new StreamClientDuplexQbservableProtocolSink(this);
+    }
+
+    protected override ServerDuplexQbservableProtocolSink<Stream, StreamMessage> CreateServerDuplexSink()
+    {
+      return new StreamServerDuplexQbservableProtocolSink(this);
     }
 
     protected override async Task ClientSendQueryAsync(Expression expression, object argument)
@@ -151,7 +197,7 @@ namespace Qactive
 
       if (messageKind == QbservableProtocolMessageKind.OnCompleted)
       {
-        return SendMessageAsync(new QbservableMessage(messageKind));
+        return SendMessageAsync(new StreamMessage(messageKind));
       }
       else
       {
@@ -159,7 +205,7 @@ namespace Qactive
       }
     }
 
-    private static QbservableProtocolShutdownReason GetShutdownReason(QbservableMessage message, QbservableProtocolShutdownReason defaultReason)
+    private static QbservableProtocolShutdownReason GetShutdownReason(StreamMessage message, QbservableProtocolShutdownReason defaultReason)
     {
       if (message.Data.Length > 0)
       {
@@ -171,7 +217,7 @@ namespace Qactive
       }
     }
 
-    protected override bool ServerHandleClientShutdown(QbservableMessage message)
+    protected override bool ServerHandleClientShutdown(StreamMessage message)
     {
       if (message.Kind == QbservableProtocolMessageKind.Shutdown)
       {
@@ -187,16 +233,16 @@ namespace Qactive
 
     protected override Task ShutdownCoreAsync()
     {
-      return SendMessageAsync(new QbservableMessage(QbservableProtocolMessageKind.Shutdown, (byte)ShutdownReason));
+      return SendMessageAsync(new StreamMessage(QbservableProtocolMessageKind.Shutdown, (byte)ShutdownReason));
     }
 
     private Task SendMessageAsync(QbservableProtocolMessageKind kind, object data)
     {
       long length;
-      return SendMessageAsync(new QbservableMessage(kind, Serialize(data, out length), length));
+      return SendMessageAsync(new StreamMessage(kind, Serialize(data, out length), length));
     }
 
-    protected override Task SendMessageCoreAsync(QbservableMessage message)
+    protected override Task SendMessageCoreAsync(StreamMessage message)
     {
       var lengthBytes = BitConverter.GetBytes(message.Length);
 
@@ -214,7 +260,7 @@ namespace Qactive
       return SendAsync(buffer, 0, buffer.Length);
     }
 
-    protected override async Task<QbservableMessage> ReceiveMessageCoreAsync()
+    protected override async Task<StreamMessage> ReceiveMessageCoreAsync()
     {
       var buffer = new byte[1024];
 
@@ -241,11 +287,11 @@ namespace Qactive
           }
           while (remainder > 0);
 
-          return new QbservableMessage(messageKind, stream.ToArray());
+          return new StreamMessage(messageKind, stream.ToArray());
         }
       }
 
-      return new QbservableMessage(messageKind, new byte[0]);
+      return new StreamMessage(messageKind, new byte[0]);
     }
 
     private static QbservableProtocolMessageKind GetMessageKind(NotificationKind kind)
@@ -263,12 +309,12 @@ namespace Qactive
       }
     }
 
-    private void SendDuplexMessage(DuplexQbservableMessage message)
+    private void SendDuplexMessage(DuplexStreamMessage message)
     {
       SendMessageAsync(message).Wait(Cancel);
     }
 
-    internal async void SendDuplexMessageAsync(DuplexQbservableMessage message)
+    internal async void SendDuplexMessageAsync(DuplexStreamMessage message)
     {
       try
       {
@@ -283,19 +329,19 @@ namespace Qactive
       }
     }
 
-    internal object ServerSendDuplexMessage(int clientId, Func<DuplexCallbackId, DuplexQbservableMessage> messageFactory)
+    internal object ServerSendDuplexMessage(int clientId, Func<DuplexCallbackId, DuplexStreamMessage> messageFactory)
     {
       return ServerSendDuplexMessage(clientId, messageFactory, sink => sink.RegisterInvokeCallback);
     }
 
-    internal object ServerSendEnumeratorDuplexMessage(int clientId, Func<DuplexCallbackId, DuplexQbservableMessage> messageFactory)
+    internal object ServerSendEnumeratorDuplexMessage(int clientId, Func<DuplexCallbackId, DuplexStreamMessage> messageFactory)
     {
       return ServerSendDuplexMessage(clientId, messageFactory, sink => sink.RegisterEnumeratorCallback);
     }
 
     private object ServerSendDuplexMessage(
       int clientId,
-      Func<DuplexCallbackId, DuplexQbservableMessage> messageFactory,
+      Func<DuplexCallbackId, DuplexStreamMessage> messageFactory,
       Func<IServerDuplexQbservableProtocolSink, Func<int, Action<object>, Action<Exception>, DuplexCallbackId>> registrationSelector)
     {
       var waitForResponse = new ManualResetEventSlim(false);
@@ -345,16 +391,103 @@ namespace Qactive
         onNext,
         onError,
         onCompleted,
-        subscriptionId => SendDuplexMessageAsync(DuplexQbservableMessage.CreateDisposeSubscription(subscriptionId, this)));
+        subscriptionId => SendDuplexMessageAsync(DuplexStreamMessage.CreateDisposeSubscription(subscriptionId, this)));
 
       var id = registration.Item1;
       var subscription = registration.Item2;
 
-      var message = DuplexQbservableMessage.CreateSubscribe(id, this);
+      var message = DuplexStreamMessage.CreateSubscribe(id, this);
 
       SendDuplexMessage(message);
 
       return subscription;
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "Reviewed")]
+    public byte[] Serialize(object data, out long length)
+    {
+      using (var memory = new MemoryStream())
+      {
+        if (data == null)
+        {
+          memory.WriteByte(1);
+        }
+        else
+        {
+          memory.WriteByte(0);
+
+          new SecurityPermission(SecurityPermissionFlag.SerializationFormatter).Assert();
+
+          try
+          {
+            Formatter.Serialize(memory, data);
+          }
+          finally
+          {
+            CodeAccessPermission.RevertAssert();
+          }
+        }
+
+        length = memory.Length;
+
+        return memory.GetBuffer();
+      }
+    }
+
+    public T Deserialize<T>(byte[] data)
+    {
+      return Deserialize<T>(data, offset: 0);
+    }
+
+    public T Deserialize<T>(byte[] data, int offset)
+    {
+      if (data == null || data.Length == 0)
+      {
+        if (offset > 0)
+        {
+          throw new InvalidOperationException();
+        }
+
+        return (T)(object)null;
+      }
+
+      using (var memory = new MemoryStream(data))
+      {
+        memory.Position = offset;
+
+        var isNullDataFlag = memory.ReadByte();
+
+        Contract.Assume(isNullDataFlag == 0 || isNullDataFlag == 1);
+
+        if (isNullDataFlag == 1)
+        {
+          return (T)(object)null;
+        }
+        else
+        {
+          new SecurityPermission(SecurityPermissionFlag.SerializationFormatter).Assert();
+
+          try
+          {
+            return (T)Formatter.Deserialize(memory);
+          }
+          finally
+          {
+            CodeAccessPermission.RevertAssert();
+          }
+        }
+      }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        sendQ.Dispose();
+        receiveQ.Dispose();
+      }
+
+      base.Dispose(disposing);
     }
   }
 }

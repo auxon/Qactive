@@ -12,9 +12,9 @@ namespace Qactive
 
     object Argument { get; }
 
-    IObservable<TResult> Connect<TResult>(Func<QbservableProtocol, Expression> prepareExpression);
+    IObservable<TResult> Connect<TResult>(Func<IQbservableProtocol, Expression> prepareExpression);
 
-    IObservable<ClientTermination> Listen(QbservableServiceOptions options, Func<QbservableProtocol, IParameterizedQbservableProvider> providerFactory);
+    IObservable<ClientTermination> Listen(QbservableServiceOptions options, Func<IQbservableProtocol, IParameterizedQbservableProvider> providerFactory);
 
     void InitializeSecureServer();
   }

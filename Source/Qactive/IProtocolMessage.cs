@@ -2,10 +2,8 @@
 {
   public interface IProtocolMessage
   {
-    bool Handled
-    {
-      get;
-      set;
-    }
+    QbservableProtocolMessageKind Kind { get; }
+
+    bool Handled { get; set; }
   }
 }

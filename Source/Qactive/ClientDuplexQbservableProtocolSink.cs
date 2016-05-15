@@ -7,7 +7,7 @@ using Qactive.Properties;
 
 namespace Qactive
 {
-  public abstract class ClientDuplexQbservableProtocolSink<TMessage> : QbservableProtocolSink<TMessage>, IClientDuplexQbservableProtocolSink
+  public abstract class ClientDuplexQbservableProtocolSink<TSource, TMessage> : QbservableProtocolSink<TSource, TMessage>, IClientDuplexQbservableProtocolSink
     where TMessage : IProtocolMessage
   {
     private readonly ConcurrentDictionary<int, Func<object[], object>> invokeCallbacks = new ConcurrentDictionary<int, Func<object[], object>>();

@@ -13,7 +13,7 @@ namespace Qactive
     {
     }
 
-    public Expression EvaluateCompilerGenerated(MemberExpression member, QbservableProtocol protocol)
+    public Expression EvaluateCompilerGenerated(MemberExpression member, IQbservableProtocol protocol)
     {
       var closure = member.Expression as ConstantExpression;
 
@@ -51,7 +51,7 @@ namespace Qactive
           : result.Right;
     }
 
-    internal Expression GetValue(MemberExpression member, ExpressionVisitor visitor, QbservableProtocol protocol)
+    internal Expression GetValue(MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
     {
       var property = member.Member as PropertyInfo;
 
@@ -66,14 +66,14 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Property", Justification = "Reviewed")]
-    public abstract Expression GetValue(PropertyInfo property, MemberExpression member, ExpressionVisitor visitor, QbservableProtocol protocol);
+    public abstract Expression GetValue(PropertyInfo property, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol);
 
-    public abstract Expression GetValue(FieldInfo field, MemberExpression member, ExpressionVisitor visitor, QbservableProtocol protocol);
+    public abstract Expression GetValue(FieldInfo field, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Call", Justification = "Reviewed")]
-    public abstract Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, QbservableProtocol protocol);
+    public abstract Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, IQbservableProtocol protocol);
 
-    protected Either<object, Expression> TryEvaluateSequences(object value, Type type, QbservableProtocol protocol)
+    protected Either<object, Expression> TryEvaluateSequences(object value, Type type, IQbservableProtocol protocol)
     {
       if (value != null)
       {
@@ -105,8 +105,8 @@ namespace Qactive
       return null;
     }
 
-    protected abstract Either<object, Expression> TryEvaluateEnumerable(object value, Type type, QbservableProtocol protocol);
+    protected abstract Either<object, Expression> TryEvaluateEnumerable(object value, Type type, IQbservableProtocol protocol);
 
-    protected abstract Expression TryEvaluateObservable(object value, Type type, QbservableProtocol protocol);
+    protected abstract Expression TryEvaluateObservable(object value, Type type, IQbservableProtocol protocol);
   }
 }

@@ -17,7 +17,7 @@ namespace Qactive
     {
     }
 
-    public override Expression GetValue(PropertyInfo property, MemberExpression member, ExpressionVisitor visitor, QbservableProtocol protocol)
+    public override Expression GetValue(PropertyInfo property, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
     {
       object instance = Evaluate(member.Expression, visitor, Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member);
 
@@ -32,7 +32,7 @@ namespace Qactive
           : either.Right;
     }
 
-    public override Expression GetValue(FieldInfo field, MemberExpression member, ExpressionVisitor visitor, QbservableProtocol protocol)
+    public override Expression GetValue(FieldInfo field, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
     {
       object instance = Evaluate(member.Expression, visitor, Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member);
 
@@ -47,7 +47,7 @@ namespace Qactive
           : either.Right;
     }
 
-    public override Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, QbservableProtocol protocol)
+    public override Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, IQbservableProtocol protocol)
     {
       if (call.Method.ReturnType == typeof(void))
       {
@@ -81,7 +81,7 @@ namespace Qactive
       }
     }
 
-    protected override Either<object, Expression> TryEvaluateEnumerable(object value, Type type, QbservableProtocol protocol)
+    protected override Either<object, Expression> TryEvaluateEnumerable(object value, Type type, IQbservableProtocol protocol)
     {
       var iterator = value as IEnumerable;
 

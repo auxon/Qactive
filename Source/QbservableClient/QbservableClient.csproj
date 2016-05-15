@@ -90,6 +90,10 @@
       <Project>{63f23287-b0d8-408e-995d-bf15a85cee48}</Project>
       <Name>Qactive.Expressions</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Qactive.Providers.Streaming\Qactive.Providers.Streaming.csproj">
+      <Project>{c83a5841-a1ed-454c-9c66-238ad217ee83}</Project>
+      <Name>Qactive.Providers.Streaming</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Qactive.Providers.Tcp\Qactive.Providers.Tcp.csproj">
       <Project>{33525618-7ed6-4b4e-a4b7-945beaa372ff}</Project>
       <Name>Qactive.Providers.Tcp</Name>

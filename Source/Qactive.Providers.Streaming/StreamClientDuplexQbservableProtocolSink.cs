@@ -1,39 +1,40 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Qactive.Properties;
 
 namespace Qactive
 {
-  internal sealed class DefaultClientDuplexQbservableProtocolSink : ClientDuplexQbservableProtocolSink<QbservableMessage>
+  internal sealed class StreamClientDuplexQbservableProtocolSink : ClientDuplexQbservableProtocolSink<Stream, StreamMessage>
   {
-    private readonly DefaultQbservableProtocol protocol;
+    private readonly StreamQbservableProtocol protocol;
 
-    public DefaultClientDuplexQbservableProtocolSink(DefaultQbservableProtocol protocol)
+    public StreamClientDuplexQbservableProtocolSink(StreamQbservableProtocol protocol)
     {
       this.protocol = protocol;
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", MessageId = "protocol", Justification = "It's the same reference as the field.")]
-    public override Task InitializeAsync(QbservableProtocol<QbservableMessage> protocol, CancellationToken cancel)
+    public override Task InitializeAsync(QbservableProtocol<Stream, StreamMessage> protocol, CancellationToken cancel)
     {
       Contract.Assume(this.protocol == protocol);
 
       return Task.FromResult(false);
     }
 
-    public override Task<QbservableMessage> SendingAsync(QbservableMessage message, CancellationToken cancel)
+    public override Task<StreamMessage> SendingAsync(StreamMessage message, CancellationToken cancel)
     {
       return Task.FromResult(message);
     }
 
-    public override Task<QbservableMessage> ReceivingAsync(QbservableMessage message, CancellationToken cancel)
+    public override Task<StreamMessage> ReceivingAsync(StreamMessage message, CancellationToken cancel)
     {
-      DuplexQbservableMessage duplexMessage;
+      DuplexStreamMessage duplexMessage;
 
-      if (DuplexQbservableMessage.TryParse(message, protocol, out duplexMessage))
+      if (DuplexStreamMessage.TryParse(message, protocol, out duplexMessage))
       {
         message = duplexMessage;
 
@@ -72,52 +73,52 @@ namespace Qactive
 
     protected override void SendResponse(DuplexCallbackId id, object result)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateResponse(id, result, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateResponse(id, result, protocol));
     }
 
     protected override void SendError(DuplexCallbackId id, Exception error)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateErrorResponse(id, error, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateErrorResponse(id, error, protocol));
     }
 
     protected override void SendSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateSubscribeResponse(id, clientSubscriptionId, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateSubscribeResponse(id, clientSubscriptionId, protocol));
     }
 
     public override void SendOnNext(DuplexCallbackId id, object value)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateOnNext(id, value, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateOnNext(id, value, protocol));
     }
 
     public override void SendOnError(DuplexCallbackId id, Exception error)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateOnError(id, error, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateOnError(id, error, protocol));
     }
 
     public override void SendOnCompleted(DuplexCallbackId id)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateOnCompleted(id, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateOnCompleted(id, protocol));
     }
 
     protected override void SendGetEnumeratorResponse(DuplexCallbackId id, int clientEnumeratorId)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateGetEnumeratorResponse(id, clientEnumeratorId, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateGetEnumeratorResponse(id, clientEnumeratorId, protocol));
     }
 
     protected override void SendGetEnumeratorError(DuplexCallbackId id, Exception error)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateGetEnumeratorError(id, error, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateGetEnumeratorError(id, error, protocol));
     }
 
     protected override void SendEnumeratorResponse(DuplexCallbackId id, bool result, object current)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateEnumeratorResponse(id, result, current, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateEnumeratorResponse(id, result, current, protocol));
     }
 
     protected override void SendEnumeratorError(DuplexCallbackId id, Exception error)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateEnumeratorError(id, error, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateEnumeratorError(id, error, protocol));
     }
   }
 }

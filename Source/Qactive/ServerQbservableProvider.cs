@@ -6,14 +6,14 @@ namespace Qactive
 {
   internal sealed class ServerQbservableProvider<TSource> : IParameterizedQbservableProvider
   {
-    public QbservableProtocol Protocol { get; }
+    public IQbservableProtocol Protocol { get; }
 
     public QbservableServiceOptions Options { get; }
 
     private readonly Func<object, IQbservable<TSource>> sourceSelector;
 
     public ServerQbservableProvider(
-      QbservableProtocol protocol,
+      IQbservableProtocol protocol,
       QbservableServiceOptions options,
       Func<object, IQbservable<TSource>> sourceSelector)
     {
@@ -24,8 +24,8 @@ namespace Qactive
 
     public IQbservable<TSource> GetSource(object argument) => sourceSelector(argument);
 
-    public IQbservable<TResult> CreateQuery<TResult>(Expression expression) => new ServerQuery<TSource, TResult>(Protocol.GetCurrentClientId(), this, expression, null);
+    public IQbservable<TResult> CreateQuery<TResult>(Expression expression) => new ServerQuery<TSource, TResult>(Protocol.CurrentClientId, this, expression, null);
 
-    public IQbservable<TResult> CreateQuery<TResult>(Expression expression, object argument) => new ServerQuery<TSource, TResult>(Protocol.GetCurrentClientId(), this, expression, argument);
+    public IQbservable<TResult> CreateQuery<TResult>(Expression expression, object argument) => new ServerQuery<TSource, TResult>(Protocol.CurrentClientId, this, expression, argument);
   }
 }

@@ -1,39 +1,40 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Qactive.Properties;
 
 namespace Qactive
 {
-  internal sealed class DefaultServerDuplexQbservableProtocolSink : ServerDuplexQbservableProtocolSink<QbservableMessage>
+  internal sealed class StreamServerDuplexQbservableProtocolSink : ServerDuplexQbservableProtocolSink<Stream, StreamMessage>
   {
-    private readonly DefaultQbservableProtocol protocol;
+    private readonly StreamQbservableProtocol protocol;
 
-    public DefaultServerDuplexQbservableProtocolSink(DefaultQbservableProtocol protocol)
+    public StreamServerDuplexQbservableProtocolSink(StreamQbservableProtocol protocol)
     {
       this.protocol = protocol;
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", MessageId = "protocol", Justification = "It's the same reference as the field.")]
-    public override Task InitializeAsync(QbservableProtocol<QbservableMessage> protocol, CancellationToken cancel)
+    public override Task InitializeAsync(QbservableProtocol<Stream, StreamMessage> protocol, CancellationToken cancel)
     {
       Contract.Assume(this.protocol == protocol);
 
       return Task.FromResult(false);
     }
 
-    public override Task<QbservableMessage> SendingAsync(QbservableMessage message, CancellationToken cancel)
+    public override Task<StreamMessage> SendingAsync(StreamMessage message, CancellationToken cancel)
     {
       return Task.FromResult(message);
     }
 
-    public override Task<QbservableMessage> ReceivingAsync(QbservableMessage message, CancellationToken cancel)
+    public override Task<StreamMessage> ReceivingAsync(StreamMessage message, CancellationToken cancel)
     {
-      DuplexQbservableMessage duplexMessage;
+      DuplexStreamMessage duplexMessage;
 
-      if (DuplexQbservableMessage.TryParse(message, protocol, out duplexMessage))
+      if (DuplexStreamMessage.TryParse(message, protocol, out duplexMessage))
       {
         message = duplexMessage;
 
@@ -81,7 +82,7 @@ namespace Qactive
 
     public override object Invoke(int clientId, object[] arguments)
     {
-      return protocol.ServerSendDuplexMessage(clientId, id => DuplexQbservableMessage.CreateInvoke(id, arguments, protocol));
+      return protocol.ServerSendDuplexMessage(clientId, id => DuplexStreamMessage.CreateInvoke(id, arguments, protocol));
     }
 
     public override IDisposable Subscribe(int clientId, Action<object> onNext, Action<Exception> onError, Action onCompleted)
@@ -91,22 +92,22 @@ namespace Qactive
 
     public override int GetEnumerator(int clientId)
     {
-      return (int)protocol.ServerSendDuplexMessage(clientId, id => DuplexQbservableMessage.CreateGetEnumerator(id, protocol));
+      return (int)protocol.ServerSendDuplexMessage(clientId, id => DuplexStreamMessage.CreateGetEnumerator(id, protocol));
     }
 
     public override Tuple<bool, object> MoveNext(int enumeratorId)
     {
-      return (Tuple<bool, object>)protocol.ServerSendEnumeratorDuplexMessage(enumeratorId, id => DuplexQbservableMessage.CreateMoveNext(id, protocol));
+      return (Tuple<bool, object>)protocol.ServerSendEnumeratorDuplexMessage(enumeratorId, id => DuplexStreamMessage.CreateMoveNext(id, protocol));
     }
 
     public override void ResetEnumerator(int enumeratorId)
     {
-      protocol.ServerSendEnumeratorDuplexMessage(enumeratorId, id => DuplexQbservableMessage.CreateResetEnumerator(id, protocol));
+      protocol.ServerSendEnumeratorDuplexMessage(enumeratorId, id => DuplexStreamMessage.CreateResetEnumerator(id, protocol));
     }
 
     public override void DisposeEnumerator(int enumeratorId)
     {
-      protocol.SendDuplexMessageAsync(DuplexQbservableMessage.CreateDisposeEnumerator(enumeratorId, protocol));
+      protocol.SendDuplexMessageAsync(DuplexStreamMessage.CreateDisposeEnumerator(enumeratorId, protocol));
     }
   }
 }

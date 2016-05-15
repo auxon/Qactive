@@ -10,9 +10,9 @@ namespace Qactive
   internal sealed class LocalEvaluationVisitor : ExpressionVisitor
   {
     private readonly LocalEvaluator evaluator;
-    private readonly QbservableProtocol protocol;
+    private readonly IQbservableProtocol protocol;
 
-    public LocalEvaluationVisitor(LocalEvaluator evaluator, QbservableProtocol protocol)
+    public LocalEvaluationVisitor(LocalEvaluator evaluator, IQbservableProtocol protocol)
     {
       this.evaluator = evaluator;
       this.protocol = protocol;

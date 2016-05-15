@@ -4,7 +4,7 @@ namespace Qactive
 {
   public struct DuplexCallbackId : IEquatable<DuplexCallbackId>
   {
-    internal const int Size = 8;
+    public const int Size = 8;
 
     public int ClientId
     {
