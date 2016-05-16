@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -16,9 +17,12 @@ namespace Qactive.Expressions
     public SerializableNewExpression(NewExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Arguments = converter.Convert(expression.Arguments);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Arguments = converter.TryConvert(expression.Arguments);
       Constructor = expression.Constructor;
-      Members = converter.Convert(expression.Members);
+      Members = converter.TryConvert(expression.Members);
     }
 
     internal override Expression Convert() => Members.Count == 0

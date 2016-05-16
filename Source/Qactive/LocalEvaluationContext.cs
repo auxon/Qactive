@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -28,19 +29,18 @@ namespace Qactive
       }
       .AsReadOnly();
 
-    internal IDictionary<string, ParameterExpression> ReplacedParameters
-    {
-      get
-      {
-        return replacedParameters;
-      }
-    }
-
-    private readonly Dictionary<string, ParameterExpression> replacedParameters = new Dictionary<string, ParameterExpression>();
+    internal IDictionary<string, ParameterExpression> ReplacedParameters { get; } = new Dictionary<string, ParameterExpression>();
 
     public LocalEvaluationContext(params Type[] knownTypes)
       : base(defaultKnownAssemblies, knownTypes)
     {
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(ReplacedParameters != null);
     }
 
     internal bool EnsureKnownTypes(IEnumerable<MemberInfo> members)
@@ -58,57 +58,31 @@ namespace Qactive
       return processedAny;
     }
 
+    // return value indicates whether the type has been processed, not whether it's serializable.
     internal bool EnsureKnownType(MemberInfo member, Action<Type> replaceCompilerGeneratedType = null, Action<Type, Type> unknownType = null, Action<Type> genericArgumentsUpdated = null)
-    {
-      if (member != null)
-      {
-        return EnsureKnownType(member.DeclaringType, replaceCompilerGeneratedType, unknownType, genericArgumentsUpdated);
-      }
-      else
-      {
-        return false;   // return value indicates whether the type has been processed, not whether it's serializable.
-      }
-    }
+      => member != null && EnsureKnownType(member.DeclaringType, replaceCompilerGeneratedType, unknownType, genericArgumentsUpdated);
 
+    // return value indicates whether the type has been processed, not whether it's serializable.
     internal bool EnsureKnownType(MethodInfo method, Action<Type> replaceCompilerGeneratedType = null, Action<Type, Type> unknownType = null, Action<MethodInfo> genericMethodArgumentsUpdated = null)
-    {
-      if (method != null)
-      {
-        return EnsureKnownType(method.DeclaringType, replaceCompilerGeneratedType, unknownType)
-            || EnsureGenericTypeArgumentsSerializable(method, genericMethodArgumentsUpdated);
-      }
-      else
-      {
-        return false;   // return value indicates whether the type has been processed, not whether it's serializable.
-      }
-    }
+      => method != null
+      && (EnsureKnownType(method.DeclaringType, replaceCompilerGeneratedType, unknownType)
+        || EnsureGenericTypeArgumentsSerializable(method, genericMethodArgumentsUpdated));
 
+    // return value indicates whether the type has been processed, not whether it's serializable.
     internal bool EnsureKnownType(LabelTarget target, Action<Type> replaceCompilerGeneratedType = null, Action<Type, Type> unknownType = null, Action<Type> genericArgumentsUpdated = null)
-    {
-      if (target != null)
-      {
-        return EnsureKnownType(target.Type, replaceCompilerGeneratedType, unknownType, genericArgumentsUpdated);
-      }
-      else
-      {
-        return false;   // return value indicates whether the type has been processed, not whether it's serializable.
-      }
-    }
+      => target != null && EnsureKnownType(target.Type, replaceCompilerGeneratedType, unknownType, genericArgumentsUpdated);
 
+    // return value indicates whether the type has been processed, not whether it's serializable.
     internal bool EnsureKnownType(Type type, Action<Type> replaceCompilerGeneratedType = null, Action<Type, Type> unknownType = null, Action<Type> genericArgumentsUpdated = null)
-    {
-      if (type == null)
-      {
-        return false;   // return value indicates whether the type has been processed, not whether it's serializable.
-      }
-
-      return EnsureCompilerGeneratedTypeIsReplaced(type, replaceCompilerGeneratedType)
-          || EnsureKnownTypeHierarchy(type, unknownType)
-          || EnsureGenericTypeArgumentsSerializable(type, genericArgumentsUpdated);
-    }
+      => type != null
+      && (EnsureCompilerGeneratedTypeIsReplaced(type, replaceCompilerGeneratedType)
+        || EnsureKnownTypeHierarchy(type, unknownType)
+        || EnsureGenericTypeArgumentsSerializable(type, genericArgumentsUpdated));
 
     private static bool EnsureCompilerGeneratedTypeIsReplaced(Type type, Action<Type> replaceCompilerGeneratedType = null)
     {
+      Contract.Requires(type != null);
+
       if (type == typeof(CompilerGenerated))
       {
         throw new InvalidOperationException(Errors.ExpressionVisitedCompilerTypeTwice);
@@ -133,7 +107,9 @@ namespace Qactive
 
     private bool EnsureKnownTypeHierarchy(Type type, Action<Type, Type> unknownType = null)
     {
-      Type current = type;
+      Contract.Requires(type != null);
+
+      var current = type;
 
       do
       {
@@ -162,6 +138,8 @@ namespace Qactive
 
     private bool EnsureGenericTypeArgumentsSerializable(Type type, Action<Type> genericArgumentsUpdated = null)
     {
+      Contract.Requires(type != null);
+
       if (type.IsGenericType)
       {
         if (EnsureGenericTypeArgumentsSerializable(ref type))
@@ -184,6 +162,8 @@ namespace Qactive
 
     private bool EnsureGenericTypeArgumentsSerializable(MethodInfo method, Action<MethodInfo> genericArgumentsUpdated = null)
     {
+      Contract.Requires(method != null);
+
       if (method.IsGenericMethod)
       {
         if (EnsureGenericTypeArgumentsSerializable(ref method))
@@ -206,6 +186,8 @@ namespace Qactive
 
     private bool EnsureGenericTypeArgumentsSerializable(ref Type type)
     {
+      Contract.Requires(type != null);
+
       var genericTypeArguments = type.GetGenericArguments();
 
       Type oldType = type;
@@ -227,6 +209,8 @@ namespace Qactive
 
     private bool EnsureGenericTypeArgumentsSerializable(ref MethodInfo method)
     {
+      Contract.Requires(method != null);
+
       var genericTypeArguments = method.GetGenericArguments();
 
       MethodInfo oldMethodInfo = method;
@@ -248,6 +232,9 @@ namespace Qactive
 
     private void EnsureGenericTypeArgumentsSerializable(IList<Type> genericTypeArguments, Action updateType)
     {
+      Contract.Requires(genericTypeArguments != null);
+      Contract.Requires(updateType != null);
+
       var replacedAny = false;
 
       for (int i = 0; i < genericTypeArguments.Count; i++)

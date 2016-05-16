@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -13,8 +14,11 @@ namespace Qactive.Expressions
     public SerializableInvocationExpression(InvocationExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Arguments = converter.Convert(expression.Arguments);
-      Expr = converter.Convert(expression.Expression);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Arguments = converter.TryConvert(expression.Arguments);
+      Expr = converter.TryConvert(expression.Expression);
     }
 
     internal override Expression Convert() => Expression.Invoke(

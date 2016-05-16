@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -12,7 +13,10 @@ namespace Qactive.Expressions
     public SerializableNewArrayExpression(NewArrayExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Expressions = converter.Convert(expression.Expressions);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Expressions = converter.TryConvert(expression.Expressions);
     }
 
     internal override Expression Convert() => Expression.NewArrayInit(

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -11,6 +12,8 @@ namespace Qactive.Expressions
     public SerializableParameterExpression(ParameterExpression expression)
       : base(expression)
     {
+      Contract.Requires(expression != null);
+
       Name = expression.Name;
     }
 

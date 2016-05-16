@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -15,7 +16,10 @@ namespace Qactive.Expressions
     public SerializableLoopExpression(LoopExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Body = converter.Convert(expression.Body);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Body = converter.TryConvert(expression.Body);
       BreakLabelType = expression.BreakLabel.Type;
       BreakLabelName = expression.BreakLabel.Name;
       ContinueLabelType = expression.ContinueLabel.Type;

@@ -15,9 +15,9 @@ namespace Qactive
   {
     public bool CanInvoke => sink != null && protocol != null;
 
-    protected IServerDuplexQbservableProtocolSink Sink => sink;
+    public IQbservableProtocol Protocol => protocol;
 
-    protected IQbservableProtocol Protocol => protocol;
+    protected IServerDuplexQbservableProtocolSink Sink => sink;
 
     protected int Id => id;
 
@@ -44,13 +44,19 @@ namespace Qactive
 
     private DuplexCallback(IQbservableProtocol protocol, Func<int, object[], object> callback)
     {
-      this.id = protocol
-        .GetOrAddSink(protocol.CreateClientDuplexSink)
-        .RegisterInvokeCallback(arguments => callback(this.id, arguments));
+      Contract.Requires(protocol != null);
+      Contract.Requires(callback != null);
+
+      id = protocol.GetOrAddSink(protocol.CreateClientDuplexSink)
+                   .RegisterInvokeCallback(arguments => callback(this.id, arguments));
     }
 
     public static Expression Create(IQbservableProtocol protocol, object instance, PropertyInfo property)
     {
+      Contract.Requires(protocol != null);
+      Contract.Requires(property != null);
+      Contract.Ensures(Contract.Result<Expression>() != null);
+
       return CreateInvoke(
         new DuplexCallback(protocol, (_, __) => ConvertIfSequence(protocol, property.GetValue(instance))),
         property.PropertyType);
@@ -58,6 +64,10 @@ namespace Qactive
 
     public static Expression Create(IQbservableProtocol protocol, object instance, FieldInfo field)
     {
+      Contract.Requires(protocol != null);
+      Contract.Requires(field != null);
+      Contract.Ensures(Contract.Result<Expression>() != null);
+
       return CreateInvoke(
         new DuplexCallback(protocol, (_, __) => ConvertIfSequence(protocol, field.GetValue(instance))),
         field.FieldType);
@@ -65,6 +75,11 @@ namespace Qactive
 
     public static Expression Create(IQbservableProtocol protocol, object instance, MethodInfo method, IEnumerable<Expression> argExpressions)
     {
+      Contract.Requires(protocol != null);
+      Contract.Requires(method != null);
+      Contract.Requires(argExpressions != null);
+      Contract.Ensures(Contract.Result<Expression>() != null);
+
       return CreateInvoke(
         new DuplexCallback(protocol, (_, arguments) => ConvertIfSequence(protocol, method.Invoke(instance, arguments))),
         method.ReturnType,
@@ -73,6 +88,11 @@ namespace Qactive
 
     public static Expression CreateEnumerable(IQbservableProtocol protocol, object instance, Type dataType, Type type)
     {
+      Contract.Requires(protocol != null);
+      Contract.Requires(dataType != null);
+      Contract.Requires(type != null);
+      Contract.Ensures(Contract.Result<Expression>() != null);
+
       return Expression.Constant(
         CreateRemoteEnumerable(protocol, (IEnumerable)instance, dataType),
         type);
@@ -80,6 +100,11 @@ namespace Qactive
 
     public static Expression CreateObservable(IQbservableProtocol protocol, object instance, Type dataType, Type type)
     {
+      Contract.Requires(protocol != null);
+      Contract.Requires(dataType != null);
+      Contract.Requires(type != null);
+      Contract.Ensures(Contract.Result<Expression>() != null);
+
       return Expression.Constant(
         CreateRemoteObservable(protocol, instance, dataType),
         type);
@@ -87,6 +112,10 @@ namespace Qactive
 
     private static Expression CreateInvoke(DuplexCallback callback, Type returnType, IEnumerable<Expression> arguments = null)
     {
+      Contract.Requires(callback != null);
+      Contract.Requires(returnType != null);
+      Contract.Ensures(Contract.Result<Expression>() != null);
+
       return Expression.Call(
         Expression.Constant(callback),
         returnType == typeof(void) ? DuplexCallback.serverInvokeVoidMethod : DuplexCallback.serverInvokeMethod.MakeGenericMethod(returnType),
@@ -97,6 +126,8 @@ namespace Qactive
 
     private static object ConvertIfSequence(IQbservableProtocol protocol, object instance)
     {
+      Contract.Requires(protocol != null);
+
       if (instance != null)
       {
         var type = instance.GetType();
@@ -129,6 +160,11 @@ namespace Qactive
 
     private static object CreateRemoteEnumerable(IQbservableProtocol protocol, IEnumerable instance, Type dataType)
     {
+      Contract.Requires(protocol != null);
+      Contract.Requires(instance != null);
+      Contract.Requires(dataType != null);
+      Contract.Ensures(Contract.Result<object>() != null);
+
       var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSink);
 
       int id = 0;
@@ -139,6 +175,11 @@ namespace Qactive
 
     private static object CreateRemoteObservable(IQbservableProtocol protocol, object instance, Type dataType)
     {
+      Contract.Requires(protocol != null);
+      Contract.Requires(instance != null);
+      Contract.Requires(dataType != null);
+      Contract.Ensures(Contract.Result<object>() != null);
+
       var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSink);
 
       int id = 0;
@@ -149,6 +190,11 @@ namespace Qactive
 
     private static IDisposable Subscribe(IClientDuplexQbservableProtocolSink sink, DuplexCallbackId id, object instance, Type dataType)
     {
+      Contract.Requires(sink != null);
+      Contract.Requires(instance != null);
+      Contract.Requires(dataType != null);
+      Contract.Ensures(Contract.Result<IDisposable>() != null);
+
       return dataType.UpCast(instance).Subscribe(
         value => sink.SendOnNext(id, value),
         ex => sink.SendOnError(id, ExceptionDispatchInfo.Capture(ex)),
@@ -156,8 +202,18 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", MessageId = "protocol", Justification = "It's setting the field.")]
+    public void SetClientProtocol(IQbservableProtocol protocol)
+    {
+      Contract.Requires(Protocol == null);
+      Contract.Requires(protocol != null);
+
+      this.protocol = protocol;
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", MessageId = "protocol", Justification = "It's setting the field.")]
     public void SetServerProtocol(IQbservableProtocol protocol)
     {
+      Contract.Requires(Protocol == null);
       Contract.Requires(protocol != null);
 
       this.protocol = protocol;

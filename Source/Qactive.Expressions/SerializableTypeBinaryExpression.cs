@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -12,7 +13,10 @@ namespace Qactive.Expressions
     public SerializableTypeBinaryExpression(TypeBinaryExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Expr = converter.Convert(expression.Expression);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Expr = converter.TryConvert(expression.Expression);
       TypeOperand = expression.TypeOperand;
     }
 

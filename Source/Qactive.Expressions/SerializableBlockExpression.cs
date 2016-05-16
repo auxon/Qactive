@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -14,9 +15,12 @@ namespace Qactive.Expressions
     public SerializableBlockExpression(BlockExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Expressions = converter.Convert(expression.Expressions);
-      Result = converter.Convert(expression.Result);
-      Variables = converter.Convert<SerializableParameterExpression>(expression.Variables);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Expressions = converter.TryConvert(expression.Expressions);
+      Result = converter.TryConvert(expression.Result);
+      Variables = converter.TryConvert<SerializableParameterExpression>(expression.Variables);
     }
 
     internal override Expression Convert() => Expression.Block(

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -16,11 +17,14 @@ namespace Qactive.Expressions
     public SerializableBinaryExpression(BinaryExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Conversion = converter.Convert<SerializableLambdaExpression>(expression.Conversion);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Conversion = converter.TryConvert<SerializableLambdaExpression>(expression.Conversion);
       IsLiftedToNull = expression.IsLiftedToNull;
-      Left = converter.Convert(expression.Left);
+      Left = converter.TryConvert(expression.Left);
       Method = SerializableExpressionConverter.Convert(expression.Method);
-      Right = converter.Convert(expression.Right);
+      Right = converter.TryConvert(expression.Right);
     }
 
     internal override Expression Convert() => Expression.MakeBinary(

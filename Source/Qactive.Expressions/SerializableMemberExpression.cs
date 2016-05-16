@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -13,7 +14,10 @@ namespace Qactive.Expressions
     public SerializableMemberExpression(MemberExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Expr = converter.Convert(expression.Expression);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Expr = converter.TryConvert(expression.Expression);
       Member = converter.Convert(expression.Member);
     }
 

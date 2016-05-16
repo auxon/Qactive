@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.Contracts;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.ExceptionServices;
@@ -14,10 +15,31 @@ namespace Qactive
     private readonly Subject<ExceptionDispatchInfo> unhandledExceptions = new Subject<ExceptionDispatchInfo>();
     private int isDequeueing;
 
-    public IObservable<ExceptionDispatchInfo> UnhandledExceptions => unhandledExceptions.AsObservable();
+    public IObservable<ExceptionDispatchInfo> UnhandledExceptions
+    {
+      get
+      {
+        Contract.Ensures(Contract.Result<IObservable<ExceptionDispatchInfo>>() != null);
+
+        return unhandledExceptions.AsObservable();
+      }
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(q != null);
+      Contract.Invariant(unhandledExceptions != null);
+      Contract.Invariant(isDequeueing >= 0);
+      Contract.Invariant(isDequeueing <= 1);
+    }
 
     public Task EnqueueAsync(Func<Task> actionAsync)
     {
+      Contract.Requires(actionAsync != null);
+      Contract.Ensures(Contract.Result<Task>() != null);
+
       var task = new TaskCompletionSource<bool>();
 
       q.Enqueue(Tuple.Create(actionAsync, task));

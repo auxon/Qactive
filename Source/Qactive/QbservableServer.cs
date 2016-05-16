@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Reactive.Linq;
 
 namespace Qactive
@@ -10,6 +11,10 @@ namespace Qactive
       IQactiveProvider provider,
       Func<IObservable<TSource>, IObservable<TResult>> service)
     {
+      Contract.Requires(provider != null);
+      Contract.Requires(service != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
       return CreateService<TSource, TResult>(provider, request => service(request).AsQbservable());
     }
 
@@ -19,6 +24,11 @@ namespace Qactive
       QbservableServiceOptions options,
       Func<IObservable<TSource>, IObservable<TResult>> service)
     {
+      Contract.Requires(provider != null);
+      Contract.Requires(options != null);
+      Contract.Requires(service != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
       return CreateService<TSource, TResult>(provider, options, request => service(request).AsQbservable());
     }
 
@@ -27,6 +37,10 @@ namespace Qactive
       IQactiveProvider provider,
       Func<IObservable<TSource>, IQbservable<TResult>> service)
     {
+      Contract.Requires(provider != null);
+      Contract.Requires(service != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
       return CreateService(provider, QbservableServiceOptions.Default, service);
     }
 
@@ -36,6 +50,11 @@ namespace Qactive
       QbservableServiceOptions options,
       Func<IObservable<TSource>, IQbservable<TResult>> service)
     {
+      Contract.Requires(provider != null);
+      Contract.Requires(options != null);
+      Contract.Requires(service != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
       return provider.Listen(
         options,
         protocol => new ServerQbservableProvider<TResult>(

@@ -14,13 +14,15 @@ namespace Qactive
   [ContractClass(typeof(QbservableProtocolContract<>))]
   public abstract class QbservableProtocol<TSource> : QbservableProtocol
   {
-    protected IRemotingFormatter Formatter { get; }
-
     protected TSource Source { get; }
+
+    protected IRemotingFormatter Formatter { get; }
 
     internal QbservableProtocol(TSource source, IRemotingFormatter formatter, CancellationToken cancel)
       : base(cancel)
     {
+      Contract.Requires(source != null);
+      Contract.Requires(formatter != null);
       Contract.Ensures(IsClient);
 
       Source = source;
@@ -30,10 +32,21 @@ namespace Qactive
     internal QbservableProtocol(TSource source, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
       : base(serviceOptions, cancel)
     {
+      Contract.Requires(source != null);
+      Contract.Requires(formatter != null);
+      Contract.Requires(serviceOptions != null);
       Contract.Ensures(!IsClient);
 
       Source = source;
       Formatter = formatter;
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(Source != null);
+      Contract.Invariant(Formatter != null);
     }
   }
 
@@ -56,11 +69,7 @@ namespace Qactive
       return default(TSink);
     }
 
-    protected override IObservable<TResult> ClientReceive<TResult>()
-    {
-      Contract.Ensures(Contract.Result<IObservable<TResult>>() != null);
-      return null;
-    }
+    protected override IObservable<TResult> ClientReceive<TResult>() => null;
 
     protected override Task ClientSendQueryAsync(Expression expression, object argument)
     {
@@ -98,10 +107,6 @@ namespace Qactive
       throw new NotImplementedException();
     }
 
-    internal override Task ServerReceiveAsync()
-    {
-      Contract.Requires(!IsClient);
-      return null;
-    }
+    internal override Task ServerReceiveAsync() => null;
   }
 }

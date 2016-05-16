@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
 {
   [Serializable]
+  [ContractClass(typeof(SerializableExpressionContract))]
   public abstract class SerializableExpression
   {
     public ExpressionType NodeType { get; }
@@ -16,8 +18,17 @@ namespace Qactive.Expressions
 
     protected SerializableExpression(Expression expression)
     {
+      Contract.Requires(expression != null);
+
       NodeType = expression.NodeType;
       Type = expression.Type;
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(Type != null);
     }
 
     /* Caching is required to ensure that expressions referring to the same objects actually refer to the same
@@ -27,8 +38,28 @@ namespace Qactive.Expressions
      * 
      * Expression variable 'p' of type 'System.Int32' referenced from scope '', but it is not defined
      */
-    internal Expression ConvertWithCache() => converted ?? (converted = Convert());
+    internal Expression ConvertWithCache()
+    {
+      Contract.Ensures(Contract.Result<Expression>() != null);
+
+      return converted ?? (converted = Convert());
+    }
 
     internal abstract Expression Convert();
+  }
+
+  [ContractClassFor(typeof(SerializableExpression))]
+  internal abstract class SerializableExpressionContract : SerializableExpression
+  {
+    public SerializableExpressionContract(Expression expression)
+      : base(expression)
+    {
+    }
+
+    internal override Expression Convert()
+    {
+      Contract.Ensures(Contract.Result<Expression>() != null);
+      return null;
+    }
   }
 }

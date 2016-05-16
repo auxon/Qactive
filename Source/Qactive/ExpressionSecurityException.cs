@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using System.Security;
 
@@ -19,6 +20,7 @@ namespace Qactive
     private ExpressionSecurityException(SerializationInfo info, StreamingContext context)
       : base(info, context)
     {
+      Contract.Requires(info != null);
     }
   }
 }

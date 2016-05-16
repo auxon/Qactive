@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -9,6 +10,7 @@ namespace Qactive.Expressions
     public SerializableDefaultExpression(DefaultExpression expression)
       : base(expression)
     {
+      Contract.Requires(expression != null);
     }
 
     internal override Expression Convert() => Expression.Default(Type);

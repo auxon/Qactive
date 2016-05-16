@@ -36,6 +36,8 @@ namespace Qactive
 
     private TcpQactiveProvider(IPEndPoint endPoint, ITcpQactiveProviderTransportInitializer transportInitializer)
     {
+      Contract.Requires(endPoint != null);
+
       EndPoint = endPoint;
       serverNumber = Interlocked.Increment(ref lastServerNumber);
 
@@ -54,29 +56,73 @@ namespace Qactive
     private TcpQactiveProvider(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator)
       : base(sourceType, localEvaluator)
     {
+      Contract.Requires(sourceType != null);
+      Contract.Requires(endPoint != null);
+      Contract.Requires(prepareSocket != null);
+      Contract.Requires(formatter != null);
+      Contract.Requires(localEvaluator != null);
+
       EndPoint = endPoint;
       clientNumber = Interlocked.Increment(ref lastClientNumber);
       this.prepareSocket = prepareSocket;
-      formatterFactory = () => formatter;
+      formatterFactory = new ConstantFormatterFactory(formatter).GetFormatter;
     }
 
     private TcpQactiveProvider(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator, object argument)
       : base(sourceType, localEvaluator, argument)
     {
+      Contract.Requires(sourceType != null);
+      Contract.Requires(endPoint != null);
+      Contract.Requires(prepareSocket != null);
+      Contract.Requires(formatter != null);
+      Contract.Requires(localEvaluator != null);
+
       EndPoint = endPoint;
       clientNumber = Interlocked.Increment(ref lastClientNumber);
       this.prepareSocket = prepareSocket;
-      formatterFactory = () => formatter;
+      formatterFactory = new ConstantFormatterFactory(formatter).GetFormatter;
     }
 
     public static TcpQactiveProvider Client(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator)
-      => new TcpQactiveProvider(sourceType, endPoint, prepareSocket, formatter, localEvaluator);
+    {
+      Contract.Requires(sourceType != null);
+      Contract.Requires(endPoint != null);
+      Contract.Requires(prepareSocket != null);
+      Contract.Requires(formatter != null);
+      Contract.Requires(localEvaluator != null);
+      Contract.Ensures(Contract.Result<TcpQactiveProvider>() != null);
+
+      return new TcpQactiveProvider(sourceType, endPoint, prepareSocket, formatter, localEvaluator);
+    }
 
     public static TcpQactiveProvider Client(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator, object argument)
-      => new TcpQactiveProvider(sourceType, endPoint, prepareSocket, formatter, localEvaluator, argument);
+    {
+      Contract.Requires(sourceType != null);
+      Contract.Requires(endPoint != null);
+      Contract.Requires(prepareSocket != null);
+      Contract.Requires(formatter != null);
+      Contract.Requires(localEvaluator != null);
+      Contract.Ensures(Contract.Result<TcpQactiveProvider>() != null);
+
+      return new TcpQactiveProvider(sourceType, endPoint, prepareSocket, formatter, localEvaluator, argument);
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(EndPoint != null);
+      Contract.Invariant(formatterFactory != null);
+      Contract.Invariant(prepareSocket != null);
+    }
 
     public static TcpQactiveProvider Server(IPEndPoint endPoint, ITcpQactiveProviderTransportInitializer transportInitializer = null)
-      => new TcpQactiveProvider(endPoint, transportInitializer);
+    {
+      Contract.Requires(endPoint != null);
+      Contract.Ensures(Contract.Result<TcpQactiveProvider>() != null);
+
+      return new TcpQactiveProvider(endPoint, transportInitializer);
+    }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The SocketAsyncEventArgs instance is either disposed before returning or by the observable's Finally operator.")]
     public override IObservable<TResult> Connect<TResult>(Func<IQbservableProtocol, Expression> prepareExpression)
@@ -153,81 +199,90 @@ namespace Qactive
     }
 
     private IObservable<TResult> ReadObservable<TResult>(Stream stream, Func<IQbservableProtocol, Expression> prepareExpression, CancellationToken cancel)
-      => from protocol in NegotiateClientAsync(stream, formatterFactory(), cancel).ToObservable()
-         from result in protocol
-          .ExecuteClient<TResult>(prepareExpression(protocol), Argument)
-          .Finally(protocol.Dispose)
-         select result;
+    {
+      Contract.Requires(stream != null);
+      Contract.Requires(prepareExpression != null);
+      Contract.Ensures(Contract.Result<IObservable<TResult>>() != null);
 
-    public override IObservable<ClientTermination> Listen(
-      QbservableServiceOptions options,
-      Func<IQbservableProtocol, IParameterizedQbservableProvider> providerFactory)
-      => from listener in Observable.Return(new TcpListener(EndPoint))
-         .Do(listener => listener.Start())
-         from client in Observable.FromAsync(listener.AcceptTcpClientAsync).Repeat().Finally(listener.Stop)
-         let number = Interlocked.Increment(ref lastServerClientNumber)
-         from result in Observable.StartAsync(async cancel =>
-         {
-           prepareSocket(client.Client);
+      return from protocol in NegotiateClientAsync(stream, formatterFactory(), cancel).ToObservable()
+             from result in protocol
+              .ExecuteClient<TResult>(prepareExpression(protocol), Argument)
+              .Finally(protocol.Dispose)
+             select result;
+    }
 
-           var watch = Stopwatch.StartNew();
-
-           var localEndPoint = client.Client.LocalEndPoint;
-           var remoteEndPoint = client.Client.RemoteEndPoint;
-
-           var exceptions = new List<ExceptionDispatchInfo>();
-           var shutdownReason = QbservableProtocolShutdownReason.None;
-
-           try
-           {
-             using (var stream = client.GetStream())
-             using (var protocol = await NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false))
+    public override IObservable<ClientTermination> Listen(QbservableServiceOptions options, Func<IQbservableProtocol, IParameterizedQbservableProvider> providerFactory)
+    {
+      return from listener in Observable.Return(new TcpListener(EndPoint))
+             .Do(listener => listener.Start())
+             from client in Observable.FromAsync(listener.AcceptTcpClientAsync).Repeat().Finally(listener.Stop)
+             let number = Interlocked.Increment(ref lastServerClientNumber)
+             from result in Observable.StartAsync(async cancel =>
              {
-               var provider = providerFactory(protocol);
+               prepareSocket(client.Client);
+
+               var watch = Stopwatch.StartNew();
+
+               var localEndPoint = client.Client.LocalEndPoint;
+               var remoteEndPoint = client.Client.RemoteEndPoint;
+
+               var exceptions = new List<ExceptionDispatchInfo>();
+               var shutdownReason = QbservableProtocolShutdownReason.None;
 
                try
                {
-                 await protocol.ExecuteServerAsync(Id + " C" + number + " " + remoteEndPoint, provider).ConfigureAwait(false);
+                 using (var stream = client.GetStream())
+                 using (var protocol = await NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false))
+                 {
+                   var provider = providerFactory(protocol);
+
+                   try
+                   {
+                     await protocol.ExecuteServerAsync(Id + " C" + number + " " + remoteEndPoint, provider).ConfigureAwait(false);
+                   }
+                   catch (OperationCanceledException)
+                   {
+                   }
+                   catch (Exception ex)
+                   {
+                     exceptions.Add(ExceptionDispatchInfo.Capture(ex));
+                   }
+
+                   var protocolExceptions = protocol.Exceptions;
+
+                   if (protocolExceptions != null)
+                   {
+                     foreach (var exception in protocolExceptions)
+                     {
+                       exceptions.Add(exception);
+                     }
+                   }
+
+                   shutdownReason = protocol.ShutdownReason;
+                 }
                }
                catch (OperationCanceledException)
                {
+                 shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationCanceled;
                }
                catch (Exception ex)
                {
+                 shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationError;
+
                  exceptions.Add(ExceptionDispatchInfo.Capture(ex));
                }
 
-               var protocolExceptions = protocol.Exceptions;
-
-               if (protocolExceptions != null)
-               {
-                 foreach (var exception in protocolExceptions)
-                 {
-                   exceptions.Add(exception);
-                 }
-               }
-
-               shutdownReason = protocol.ShutdownReason;
-             }
-           }
-           catch (OperationCanceledException)
-           {
-             shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationCanceled;
-           }
-           catch (Exception ex)
-           {
-             shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationError;
-
-             exceptions.Add(ExceptionDispatchInfo.Capture(ex));
-           }
-
-           return new ClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
-         })
-         .Finally(client.Close)
-         select result;
+               return new ClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
+             })
+             .Finally(client.Close)
+             select result;
+    }
 
     private static async Task<IStreamQbservableProtocol> NegotiateClientAsync(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
     {
+      Contract.Requires(stream != null);
+      Contract.Requires(formatter != null);
+
       // TODO: Implement actual protocol negotiation
 
       var protocol = StreamQbservableProtocolFactory.CreateClient(stream, formatter, cancel);
@@ -246,6 +301,10 @@ namespace Qactive
 
     private static async Task<IStreamQbservableProtocol> NegotiateServerAsync(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
     {
+      Contract.Requires(stream != null);
+      Contract.Requires(formatter != null);
+      Contract.Requires(serviceOptions != null);
+
       // TODO: Implement actual protocol negotiation
 
       var protocol = StreamQbservableProtocolFactory.CreateServer(stream, formatter, serviceOptions, cancel);
@@ -256,6 +315,28 @@ namespace Qactive
       await protocol.SendAsync(buffer, 0, 4).ConfigureAwait(false);
 
       return protocol;
+    }
+
+    // This class avoids a compiler-generated closure, which was causing the Code Contract rewriter to generate invalid code.
+    private sealed class ConstantFormatterFactory
+    {
+      private readonly IRemotingFormatter formatter;
+
+      public ConstantFormatterFactory(IRemotingFormatter formatter)
+      {
+        Contract.Requires(formatter != null);
+
+        this.formatter = formatter;
+      }
+
+      [ContractInvariantMethod]
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+      private void ObjectInvariant()
+      {
+        Contract.Invariant(formatter != null);
+      }
+
+      public IRemotingFormatter GetFormatter() => formatter;
     }
   }
 }

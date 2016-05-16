@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -15,9 +16,12 @@ namespace Qactive.Expressions
     public SerializableLambdaExpression(LambdaExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Body = converter.Convert(expression.Body);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Body = converter.TryConvert(expression.Body);
       Name = expression.Name;
-      Parameters = converter.Convert<SerializableParameterExpression>(expression.Parameters);
+      Parameters = converter.TryConvert<SerializableParameterExpression>(expression.Parameters);
       TailCall = expression.TailCall;
     }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -16,15 +17,18 @@ namespace Qactive.Expressions
     public SerializableTryExpression(TryExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Body = converter.Convert(expression.Body);
-      Fault = converter.Convert(expression.Fault);
-      Finally = converter.Convert(expression.Finally);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Body = converter.TryConvert(expression.Body);
+      Fault = converter.TryConvert(expression.Fault);
+      Finally = converter.TryConvert(expression.Finally);
       Handlers = expression.Handlers
         .Select(h => Tuple.Create(
-          converter.Convert(h.Body),
-          converter.Convert(h.Filter),
+          converter.TryConvert(h.Body),
+          converter.TryConvert(h.Filter),
           h.Test,
-          converter.Convert<SerializableParameterExpression>(h.Variable)))
+          converter.TryConvert<SerializableParameterExpression>(h.Variable)))
         .ToList();
     }
 

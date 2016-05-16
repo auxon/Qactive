@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 
@@ -17,12 +18,30 @@ namespace Qactive
       QbservableServiceOptions options,
       Func<object, IQbservable<TSource>> sourceSelector)
     {
+      Contract.Requires(protocol != null);
+      Contract.Requires(options != null);
+      Contract.Requires(sourceSelector != null);
+
       Protocol = protocol;
       Options = options;
       this.sourceSelector = sourceSelector;
     }
 
-    public IQbservable<TSource> GetSource(object argument) => sourceSelector(argument);
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(Protocol != null);
+      Contract.Invariant(Options != null);
+      Contract.Invariant(sourceSelector != null);
+    }
+
+    public IQbservable<TSource> GetSource(object argument)
+    {
+      Contract.Ensures(Contract.Result<IQbservable<TSource>>() != null);
+
+      return sourceSelector(argument);
+    }
 
     public IQbservable<TResult> CreateQuery<TResult>(Expression expression) => new ServerQuery<TSource, TResult>(Protocol.CurrentClientId, this, expression, null);
 

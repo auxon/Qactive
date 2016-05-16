@@ -16,9 +16,18 @@ namespace Qactive
       : base(provider, expression)
     {
       Contract.Requires(clientId != null);
+      Contract.Requires(provider != null);
+      Contract.Requires(expression != null);
 
       this.clientId = clientId;
       this.argument = argument;
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(clientId != null);
     }
 
     protected override IDisposable SubscribeCore(IObserver<TResult> observer)
@@ -71,6 +80,9 @@ namespace Qactive
 
     private Expression PrepareExpression(out IQbservableProvider realProvider)
     {
+      Contract.Ensures(Contract.ValueAtReturn(out realProvider) != null);
+      Contract.Ensures(Contract.Result<Expression>() != null);
+
       Log.ServerReceivingExpression(clientId, Expression);
 
       var source = Provider.GetSource(argument);

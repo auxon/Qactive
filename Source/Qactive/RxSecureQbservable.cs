@@ -29,6 +29,13 @@ namespace Qactive
       this.original = original;
     }
 
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(original != null);
+    }
+
     public static bool IsRxQuery(IQbservable<TSource> query)
     {
       Contract.Requires(query != null);
@@ -55,13 +62,6 @@ namespace Qactive
 
         rxQuerySource.SetValue(original, compiled());
       }
-    }
-
-    [ContractInvariantMethod]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
-    private void ObjectInvariant()
-    {
-      Contract.Invariant(original != null);
     }
   }
 }

@@ -12,15 +12,11 @@ namespace Qactive
     }
 
     public bool Equals(ExceptionDispatchInfo x, ExceptionDispatchInfo y)
-    {
-      return x == null
-           ? y == null
-           : y != null && x.SourceException == y.SourceException;
-    }
+      => x == null
+       ? y == null
+       : y != null && x.SourceException == y.SourceException;
 
     public int GetHashCode(ExceptionDispatchInfo obj)
-    {
-      return obj == null ? 0 : obj.SourceException.GetHashCode();
-    }
+      => obj == null ? 0 : obj.SourceException.GetHashCode();
   }
 }

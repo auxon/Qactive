@@ -11,6 +11,7 @@ using Qactive.Properties;
 
 namespace Qactive
 {
+  [ContractClass(typeof(ServerDuplexQbservableProtocolSinkContract<,>))]
   public abstract class ServerDuplexQbservableProtocolSink<TSource, TMessage> : QbservableProtocolSink<TSource, TMessage>, IServerDuplexQbservableProtocolSink
     where TMessage : IProtocolMessage
   {
@@ -23,6 +24,19 @@ namespace Qactive
     private int lastObservableId;
 
     protected abstract QbservableProtocol<TSource, TMessage> Protocol { get; }
+
+    IQbservableProtocol IServerDuplexQbservableProtocolSink.Protocol => Protocol;
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(Protocol != null);
+      Contract.Invariant(invokeCallbacks != null);
+      Contract.Invariant(enumeratorCallbacks != null);
+      Contract.Invariant(observableCallbacks != null);
+      Contract.Invariant(subscriptions != null);
+    }
 
     public override Task<TMessage> SendingAsync(TMessage message, CancellationToken cancel)
       => Task.FromResult(message);
@@ -141,6 +155,8 @@ namespace Qactive
 
     private Tuple<Action<object>, Action<ExceptionDispatchInfo>> GetInvokeCallbacks(DuplexCallbackId id)
     {
+      Contract.Ensures(Contract.Result<Tuple<Action<object>, Action<ExceptionDispatchInfo>>>() != null);
+
       Tuple<Action<object>, Action<ExceptionDispatchInfo>> actions;
 
       if (!invokeCallbacks.TryGetValue(id, out actions))
@@ -153,6 +169,8 @@ namespace Qactive
 
     private Tuple<Action<object>, Action<ExceptionDispatchInfo>> GetEnumeratorCallbacks(DuplexCallbackId id)
     {
+      Contract.Ensures(Contract.Result<Tuple<Action<object>, Action<ExceptionDispatchInfo>>>() != null);
+
       Tuple<Action<object>, Action<ExceptionDispatchInfo>> actions;
 
       if (!enumeratorCallbacks.TryGetValue(id, out actions))
@@ -185,6 +203,8 @@ namespace Qactive
       DuplexCallbackId id,
       Action<Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>>> action)
     {
+      Contract.Requires(action != null);
+
       Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>> callbacks;
 
       if (observableCallbacks.TryGetValue(id, out callbacks))
@@ -199,12 +219,14 @@ namespace Qactive
     }
 
     public virtual IDisposable Subscribe(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted)
-      => Protocol.ServerSendSubscribeDuplexMessage(
+    {
+      return Protocol.ServerSendSubscribeDuplexMessage(
         clientId,
         onNext,
         onError,
         onCompleted,
         async subscriptionId => await Protocol.SendMessageSafeAsync(CreateDisposeSubscription(subscriptionId)).ConfigureAwait(false));
+    }
 
     public virtual object Invoke(int clientId, object[] arguments)
       => Protocol.ServerSendDuplexMessage(clientId, id => CreateInvoke(id, arguments));
@@ -237,19 +259,35 @@ namespace Qactive
       => GetInvokeCallbacks(id).Item1(value);
 
     protected void HandleErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error)
-      => GetInvokeCallbacks(id).Item2(error);
+    {
+      Contract.Requires(error != null);
+
+      GetInvokeCallbacks(id).Item2(error);
+    }
 
     protected void HandleGetEnumeratorResponse(DuplexCallbackId id, int clientEnumeratorId)
       => HandleResponse(id, clientEnumeratorId);
 
     protected void HandleGetEnumeratorErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error)
-      => HandleErrorResponse(id, error);
+    {
+      Contract.Requires(error != null);
+
+      HandleErrorResponse(id, error);
+    }
 
     protected void HandleEnumeratorResponse(DuplexCallbackId id, Tuple<bool, object> result)
-      => GetEnumeratorCallbacks(id).Item1(result);
+    {
+      Contract.Requires(result != null);
+
+      GetEnumeratorCallbacks(id).Item1(result);
+    }
 
     protected void HandleEnumeratorErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error)
-      => GetEnumeratorCallbacks(id).Item2(error);
+    {
+      Contract.Requires(error != null);
+
+      GetEnumeratorCallbacks(id).Item2(error);
+    }
 
     protected void HandleSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId)
     {
@@ -282,6 +320,66 @@ namespace Qactive
       => TryInvokeObservableCallback(id, actions => actions.Item3());
 
     protected void HandleOnError(DuplexCallbackId id, ExceptionDispatchInfo error)
-      => TryInvokeObservableCallback(id, actions => actions.Item2(error));
+    {
+      Contract.Requires(error != null);
+
+      TryInvokeObservableCallback(id, actions => actions.Item2(error));
+    }
+  }
+
+  [ContractClassFor(typeof(ServerDuplexQbservableProtocolSink<,>))]
+  internal abstract class ServerDuplexQbservableProtocolSinkContract<TSource, TMessage> : ServerDuplexQbservableProtocolSink<TSource, TMessage>
+    where TMessage : IProtocolMessage
+  {
+    protected override QbservableProtocol<TSource, TMessage> Protocol
+    {
+      get
+      {
+        Contract.Ensures(Contract.Result<QbservableProtocol<TSource, TMessage>>() != null);
+        return null;
+      }
+    }
+
+    protected override IDuplexProtocolMessage TryParseDuplexMessage(TMessage message)
+    {
+      Contract.Requires(message != null);
+      return null;
+    }
+
+    protected override TMessage CreateDisposeSubscription(int subscriptionId)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateInvoke(DuplexCallbackId clientId, object[] arguments)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateGetEnumerator(DuplexCallbackId enumeratorId)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateMoveNext(DuplexCallbackId enumeratorId)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateResetEnumerator(DuplexCallbackId enumeratorId)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateDisposeEnumerator(int enumeratorId)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
   }
 }

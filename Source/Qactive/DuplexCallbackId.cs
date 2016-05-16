@@ -6,21 +6,9 @@ namespace Qactive
   {
     public const int Size = 8;
 
-    public int ClientId
-    {
-      get
-      {
-        return (int)id;
-      }
-    }
+    public int ClientId => (int)id;
 
-    public int ServerId
-    {
-      get
-      {
-        return (int)(id >> 32);
-      }
-    }
+    public int ServerId => (int)(id >> 32);
 
     private readonly long id;
 

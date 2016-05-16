@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -69,16 +70,12 @@ namespace Qactive
 
     private static object[] EvaluateArguments(MethodCallExpression call, ExpressionVisitor visitor)
     {
-      if (call.Arguments == null)
-      {
-        return null;
-      }
-      else
-      {
-        return call.Arguments
-          .Select(e => Evaluate(e, visitor, Errors.ExpressionCallMissingLocalArgumentFormat, call.Method))
-          .ToArray();
-      }
+      Contract.Requires(call != null);
+      Contract.Requires(visitor != null);
+
+      return call.Arguments
+                ?.Select(e => Evaluate(e, visitor, Errors.ExpressionCallMissingLocalArgumentFormat, call.Method))
+                 .ToArray();
     }
 
     protected override Either<object, Expression> TryEvaluateEnumerable(object value, Type type, IQbservableProtocol protocol)
@@ -104,6 +101,9 @@ namespace Qactive
 
     private static object EvaluateIterator(IEnumerable iterator)
     {
+      Contract.Requires(iterator != null);
+      Contract.Ensures(Contract.Result<object>() != null);
+
       var genericIterator = iterator.GetType().GetGenericInterfaceFromDefinition(typeof(IEnumerable<>));
 
       var dataType = genericIterator == null ? typeof(object) : genericIterator.GetGenericArguments()[0];
