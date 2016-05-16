@@ -17,7 +17,16 @@ namespace Qactive
 
     public StreamServerDuplexQbservableProtocolSink(StreamQbservableProtocol protocol)
     {
+      Contract.Requires(protocol != null);
+
       this.protocol = protocol;
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(protocol != null);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", MessageId = "protocol", Justification = "It's the same reference as the field.")]

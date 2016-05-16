@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -14,10 +15,13 @@ namespace Qactive.Expressions
     public SerializableGotoExpression(GotoExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
       Kind = expression.Kind;
       TargetName = expression.Target.Name;
       TargetType = expression.Target.Type;
-      Value = converter.Convert(expression.Value);
+      Value = converter.TryConvert(expression.Value);
     }
 
     internal override Expression Convert() => Expression.MakeGoto(

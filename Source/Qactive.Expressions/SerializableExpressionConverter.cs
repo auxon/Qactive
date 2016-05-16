@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -38,17 +39,35 @@ namespace Qactive.Expressions
     private TypeBinaryExpression typeBinary;
     private UnaryExpression unary;
 
-    public IList<TSerializableExpression> Convert<TSerializableExpression>(IEnumerable<Expression> expressions)
-      where TSerializableExpression : SerializableExpression => expressions?.Select(Convert).Cast<TSerializableExpression>().ToList() ?? new List<TSerializableExpression>(0);
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(serialized != null);
+    }
 
-    public IList<SerializableExpression> Convert(IEnumerable<Expression> expressions) => expressions?.Select(Convert).ToList() ?? new List<SerializableExpression>(0);
+    public IList<TSerializableExpression> TryConvert<TSerializableExpression>(IEnumerable<Expression> expressions)
+      where TSerializableExpression : SerializableExpression
+    {
+      Contract.Ensures(Contract.Result<IList<TSerializableExpression>>() != null);
 
-    public TSerializableExpression Convert<TSerializableExpression>(Expression expression)
-      where TSerializableExpression : SerializableExpression => (TSerializableExpression)Convert(expression);
+      return expressions?.Select(TryConvert).Cast<TSerializableExpression>().ToList() ?? new List<TSerializableExpression>(0);
+    }
+
+    public IList<SerializableExpression> TryConvert(IEnumerable<Expression> expressions)
+    {
+      Contract.Ensures(Contract.Result<IList<SerializableExpression>>() != null);
+
+      return expressions?.Select(TryConvert).ToList() ?? new List<SerializableExpression>(0);
+    }
+
+    public TSerializableExpression TryConvert<TSerializableExpression>(Expression expression)
+      where TSerializableExpression : SerializableExpression
+      => (TSerializableExpression)TryConvert(expression);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "It's not too complex; it's a simple factory method for a fixed number of concrete types.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "It's a factory method, so it must know about all concrete implementations.")]
-    public SerializableExpression Convert(Expression expression)
+    public SerializableExpression TryConvert(Expression expression)
     {
       if (expression == null)
       {
@@ -159,20 +178,25 @@ namespace Qactive.Expressions
       }
     }
 
-    public static Expression Convert(SerializableExpression expression) => expression.TryConvert();
+    public static Expression TryConvert(SerializableExpression expression)
+      => expression.TryConvert();
 
     // Workaround for a bug deserializing closed generic methods.
     // https://connect.microsoft.com/VisualStudio/feedback/details/736993/bound-generic-methodinfo-throws-argumentnullexception-on-deserialization
-    public static Tuple<MethodInfo, Type[]> Convert(MethodInfo method) => method != null && method.IsGenericMethod && !method.IsGenericMethodDefinition
-                                                                        ? Tuple.Create(method.GetGenericMethodDefinition(), method.GetGenericArguments())
-                                                                        : Tuple.Create(method, (Type[])null);
+    public static Tuple<MethodInfo, Type[]> Convert(MethodInfo method)
+      => method != null && method.IsGenericMethod && !method.IsGenericMethodDefinition
+       ? Tuple.Create(method.GetGenericMethodDefinition(), method.GetGenericArguments())
+       : Tuple.Create(method, (Type[])null);
 
     // Workaround for a bug deserializing closed generic methods.
     // https://connect.microsoft.com/VisualStudio/feedback/details/736993/bound-generic-methodinfo-throws-argumentnullexception-on-deserialization
-    public static MethodInfo Convert(Tuple<MethodInfo, Type[]> method) => method.Item2 == null ? method.Item1 : method.Item1.MakeGenericMethod(method.Item2);
+    public static MethodInfo Convert(Tuple<MethodInfo, Type[]> method)
+      => method.Item2 == null ? method.Item1 : method.Item1.MakeGenericMethod(method.Item2);
 
     public Tuple<MemberInfo, Type[]> Convert(MemberInfo source)
     {
+      Contract.Ensures(Contract.Result<Tuple<MemberInfo, Type[]>>() != null);
+
       var method = source as MethodInfo;
 
       if (method != null)
@@ -189,6 +213,9 @@ namespace Qactive.Expressions
 
     public static MemberInfo Convert(Tuple<MemberInfo, Type[]> member)
     {
+      Contract.Requires(member != null);
+      Contract.Ensures(Contract.Result<MemberInfo>() != null);
+
       var method = member.Item1 as MethodInfo;
 
       if (method != null)
@@ -202,11 +229,19 @@ namespace Qactive.Expressions
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Creating a custom type here would probably either require generics again or casting. It's fine as is.")]
-    public IList<Tuple<MemberInfo, Type[]>> Convert(IEnumerable<MemberInfo> members) => members?.Select(Convert).ToList() ?? new List<Tuple<MemberInfo, Type[]>>(0);
+    public IList<Tuple<MemberInfo, Type[]>> TryConvert(IEnumerable<MemberInfo> members)
+    {
+      Contract.Ensures(Contract.Result<IList<Tuple<MemberInfo, Type[]>>>() != null);
+
+      return members?.Select(Convert).ToList() ?? new List<Tuple<MemberInfo, Type[]>>(0);
+    }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Creating a custom type here would probably either require generics again or casting. It's fine as is.")]
     public Tuple<Tuple<MemberInfo, Type[]>, MemberBindingType, SerializableExpression, List<Tuple<Tuple<MethodInfo, Type[]>, IList<SerializableExpression>>>, IList<object>> Convert(MemberBinding binding)
     {
+      Contract.Requires(binding != null);
+      Contract.Ensures(Contract.Result<Tuple<Tuple<MemberInfo, Type[]>, MemberBindingType, SerializableExpression, List<Tuple<Tuple<MethodInfo, Type[]>, IList<SerializableExpression>>>, IList<object>>>() != null);
+
       switch (binding.BindingType)
       {
         case MemberBindingType.Assignment:
@@ -215,7 +250,7 @@ namespace Qactive.Expressions
           return Tuple.Create(
             Convert(binding.Member),
             binding.BindingType,
-            Convert(assign.Expression),
+            TryConvert(assign.Expression),
             noInitializers,
             noRecursion);
         case MemberBindingType.ListBinding:
@@ -225,7 +260,7 @@ namespace Qactive.Expressions
             Convert(binding.Member),
             binding.BindingType,
             noExpression,
-            list.Initializers.Select(i => Tuple.Create(Convert(i.AddMethod), Convert(i.Arguments))).ToList(),
+            list.Initializers.Select(i => Tuple.Create(Convert(i.AddMethod), TryConvert(i.Arguments))).ToList(),
             noRecursion);
         case MemberBindingType.MemberBinding:
           var m = (MemberMemberBinding)binding;
@@ -244,6 +279,9 @@ namespace Qactive.Expressions
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Creating a custom type here would probably either require generics again or casting. It's fine as is.")]
     public static MemberBinding Convert(Tuple<Tuple<MemberInfo, Type[]>, MemberBindingType, SerializableExpression, List<Tuple<Tuple<MethodInfo, Type[]>, IList<SerializableExpression>>>, IList<object>> data)
     {
+      Contract.Requires(data != null);
+      Contract.Ensures(Contract.Result<MemberBinding>() != null);
+
       switch (data.Item2)
       {
         case MemberBindingType.Assignment:

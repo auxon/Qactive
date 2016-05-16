@@ -18,6 +18,9 @@ namespace Qactive
     public StreamQbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
     : base(stream, formatter, cancel)
     {
+      Contract.Requires(stream != null);
+      Contract.Requires(formatter != null);
+
       sendQ.UnhandledExceptions.Subscribe(AddError);
       receiveQ.UnhandledExceptions.Subscribe(AddError);
     }
@@ -25,6 +28,10 @@ namespace Qactive
     public StreamQbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
     : base(stream, formatter, serviceOptions, cancel)
     {
+      Contract.Requires(stream != null);
+      Contract.Requires(formatter != null);
+      Contract.Requires(serviceOptions != null);
+
       sendQ.UnhandledExceptions.Subscribe(AddError);
       receiveQ.UnhandledExceptions.Subscribe(AddError);
     }
@@ -146,6 +153,9 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "Reviewed")]
     public byte[] Serialize(object data, out long length)
     {
+      Contract.Ensures(Contract.Result<byte[]>() != null);
+      Contract.Ensures(Contract.Result<byte[]>().Length >= Contract.ValueAtReturn(out length));
+
       using (var memory = new MemoryStream())
       {
         if (data == null)
@@ -184,6 +194,8 @@ namespace Qactive
 
     public T Deserialize<T>(byte[] data, int offset)
     {
+      Contract.Requires(offset == 0 || data == null || data.Length > offset);
+
       if (data == null || data.Length == 0)
       {
         if (offset > 0)

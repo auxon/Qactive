@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Reactive.Disposables;
 using System.Runtime.ExceptionServices;
@@ -10,6 +11,7 @@ using Qactive.Properties;
 
 namespace Qactive
 {
+  [ContractClass(typeof(ClientDuplexQbservableProtocolSinkContract<,>))]
   public abstract class ClientDuplexQbservableProtocolSink<TSource, TMessage> : QbservableProtocolSink<TSource, TMessage>, IClientDuplexQbservableProtocolSink
     where TMessage : IProtocolMessage
   {
@@ -25,6 +27,8 @@ namespace Qactive
     private int lastEnumeratorId;
 
     protected abstract QbservableProtocol<TSource, TMessage> Protocol { get; }
+
+    IQbservableProtocol IClientDuplexQbservableProtocolSink.Protocol => Protocol;
 
     public override Task<TMessage> SendingAsync(TMessage message, CancellationToken cancel)
     {
@@ -112,6 +116,9 @@ namespace Qactive
 
     private int RegisterSubscription(IDisposable subscription)
     {
+      Contract.Requires(subscription != null);
+      Contract.Ensures(Contract.Result<int>() >= 0);
+
       var id = Interlocked.Increment(ref lastSubscriptionId);
 
       if (!subscriptions.TryAdd(id, subscription))
@@ -124,6 +131,9 @@ namespace Qactive
 
     private int RegisterEnumerator(IEnumerator enumerator)
     {
+      Contract.Requires(enumerator != null);
+      Contract.Ensures(Contract.Result<int>() >= 0);
+
       var id = Interlocked.Increment(ref lastEnumeratorId);
 
       if (!enumerators.TryAdd(id, enumerator))
@@ -136,6 +146,8 @@ namespace Qactive
 
     private Func<IEnumerator> GetEnumerable(int clientId)
     {
+      Contract.Ensures(Contract.Result<Func<IEnumerator>>() != null);
+
       Func<IEnumerator> enumerable;
 
       if (!enumerableCallbacks.TryGetValue(clientId, out enumerable))
@@ -148,6 +160,8 @@ namespace Qactive
 
     private IEnumerator GetEnumerator(int enumeratorId)
     {
+      Contract.Ensures(Contract.Result<IEnumerator>() != null);
+
       IEnumerator enumerator;
 
       if (enumerators.TryGetValue(enumeratorId, out enumerator))
@@ -162,6 +176,8 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
     protected void Invoke(DuplexCallbackId id, object[] arguments)
     {
+      Contract.Requires(arguments != null);
+
       Func<object[], object> callback;
 
       if (!invokeCallbacks.TryGetValue(id.ClientId, out callback))
@@ -178,6 +194,13 @@ namespace Qactive
       {
         SendError(id, ExceptionDispatchInfo.Capture(ex));
         return;
+      }
+
+      var duplex = result as DuplexCallback;
+
+      if (duplex != null)
+      {
+        duplex.SetClientProtocol(Protocol);
       }
 
       SendResponse(id, result);
@@ -299,56 +322,43 @@ namespace Qactive
       }
     }
 
-    public virtual async void SendOnNext(DuplexCallbackId id, object value)
-    {
-      await Protocol.SendMessageSafeAsync(CreateOnNext(id, value)).ConfigureAwait(false);
-    }
+    public virtual async void SendOnNext(DuplexCallbackId id, object value) => await Protocol.SendMessageSafeAsync(CreateOnNext(id, value)).ConfigureAwait(false);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     public virtual async void SendOnError(DuplexCallbackId id, ExceptionDispatchInfo error)
-    {
-      await Protocol.SendMessageSafeAsync(CreateOnError(id, error)).ConfigureAwait(false);
-    }
+      => await Protocol.SendMessageSafeAsync(CreateOnError(id, error)).ConfigureAwait(false);
 
     public virtual async void SendOnCompleted(DuplexCallbackId id)
-    {
-      await Protocol.SendMessageSafeAsync(CreateOnCompleted(id)).ConfigureAwait(false);
-    }
+      => await Protocol.SendMessageSafeAsync(CreateOnCompleted(id)).ConfigureAwait(false);
 
     protected virtual async void SendResponse(DuplexCallbackId id, object result)
-    {
-      await Protocol.SendMessageSafeAsync(CreateResponse(id, result)).ConfigureAwait(false);
-    }
+      => await Protocol.SendMessageSafeAsync(CreateResponse(id, result)).ConfigureAwait(false);
 
     protected virtual async void SendError(DuplexCallbackId id, ExceptionDispatchInfo error)
-    {
-      await Protocol.SendMessageSafeAsync(CreateErrorResponse(id, error)).ConfigureAwait(false);
-    }
+      => await Protocol.SendMessageSafeAsync(CreateErrorResponse(id, error)).ConfigureAwait(false);
 
     protected virtual async void SendSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId)
-    {
-      await Protocol.SendMessageSafeAsync(CreateSubscribeResponse(id, clientSubscriptionId)).ConfigureAwait(false);
-    }
+      => await Protocol.SendMessageSafeAsync(CreateSubscribeResponse(id, clientSubscriptionId)).ConfigureAwait(false);
 
     protected virtual async void SendGetEnumeratorResponse(DuplexCallbackId id, int clientEnumeratorId)
-    {
-      await Protocol.SendMessageSafeAsync(CreateGetEnumeratorResponse(id, clientEnumeratorId)).ConfigureAwait(false);
-    }
+      => await Protocol.SendMessageSafeAsync(CreateGetEnumeratorResponse(id, clientEnumeratorId)).ConfigureAwait(false);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected virtual async void SendGetEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
+      Contract.Requires(error != null);
+
       await Protocol.SendMessageSafeAsync(CreateGetEnumeratorError(id, error)).ConfigureAwait(false);
     }
 
     protected virtual async void SendEnumeratorResponse(DuplexCallbackId id, bool result, object current)
-    {
-      await Protocol.SendMessageSafeAsync(CreateEnumeratorResponse(id, result, current)).ConfigureAwait(false);
-    }
+      => await Protocol.SendMessageSafeAsync(CreateEnumeratorResponse(id, result, current)).ConfigureAwait(false);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected virtual async void SendEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
+      Contract.Requires(error != null);
+
       await Protocol.SendMessageSafeAsync(CreateEnumeratorError(id, error)).ConfigureAwait(false);
     }
 
@@ -371,5 +381,89 @@ namespace Qactive
     protected abstract TMessage CreateEnumeratorResponse(DuplexCallbackId id, bool result, object current);
 
     protected abstract TMessage CreateEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error);
+  }
+
+  [ContractClassFor(typeof(ClientDuplexQbservableProtocolSink<,>))]
+  internal abstract class ClientDuplexQbservableProtocolSinkContract<TSource, TMessage> : ClientDuplexQbservableProtocolSink<TSource, TMessage>
+     where TMessage : IProtocolMessage
+  {
+    protected override QbservableProtocol<TSource, TMessage> Protocol
+    {
+      get
+      {
+        Contract.Ensures(Contract.Result<QbservableProtocol<TSource, TMessage>>() != null);
+        return null;
+      }
+    }
+
+    protected override IDuplexProtocolMessage TryParseDuplexMessage(TMessage message)
+    {
+      Contract.Requires(message != null);
+      return null;
+    }
+
+    protected override TMessage CreateOnNext(DuplexCallbackId id, object value)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateOnError(DuplexCallbackId id, ExceptionDispatchInfo error)
+    {
+      Contract.Requires(error != null);
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateOnCompleted(DuplexCallbackId id)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateResponse(DuplexCallbackId id, object result)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error)
+    {
+      Contract.Requires(error != null);
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateGetEnumeratorResponse(DuplexCallbackId id, int clientEnumeratorId)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateGetEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error)
+    {
+      Contract.Requires(error != null);
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateEnumeratorResponse(DuplexCallbackId id, bool result, object current)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error)
+    {
+      Contract.Requires(error != null);
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
   }
 }

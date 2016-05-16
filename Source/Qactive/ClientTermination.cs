@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
 using System.Runtime.ExceptionServices;
@@ -27,6 +28,10 @@ namespace Qactive
       QbservableProtocolShutdownReason reason,
       IEnumerable<ExceptionDispatchInfo> exceptions)
     {
+      Contract.Requires(localEndPoint != null);
+      Contract.Requires(remoteEndPoint != null);
+      Contract.Requires(duration >= TimeSpan.Zero);
+
       LocalEndPoint = localEndPoint;
       RemoteEndPoint = remoteEndPoint;
       Duration = duration;
@@ -39,6 +44,8 @@ namespace Qactive
 
     private ClientTermination(SerializationInfo info, StreamingContext context)
     {
+      Contract.Requires(info != null);
+
       LocalEndPoint = (EndPoint)info.GetValue("localEndPoint", typeof(EndPoint));
       RemoteEndPoint = (EndPoint)info.GetValue("remoteEndPoint", typeof(EndPoint));
       Duration = (TimeSpan)info.GetValue("duration", typeof(TimeSpan));
@@ -66,6 +73,16 @@ namespace Qactive
        * exists and whether it's a bug in .NET.
        */
       info.AddValue("ignored", Exceptions.Select(ex => ex.SourceException).FirstOrDefault());
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(LocalEndPoint != null);
+      Contract.Invariant(RemoteEndPoint != null);
+      Contract.Invariant(Duration >= TimeSpan.Zero);
+      Contract.Invariant(Exceptions != null);
     }
   }
 }

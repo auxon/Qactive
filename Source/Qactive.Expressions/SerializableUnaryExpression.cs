@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -13,8 +14,11 @@ namespace Qactive.Expressions
     public SerializableUnaryExpression(UnaryExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
       Method = SerializableExpressionConverter.Convert(expression.Method);
-      Operand = converter.Convert(expression.Operand);
+      Operand = converter.TryConvert(expression.Operand);
     }
 
     internal override Expression Convert() => Expression.MakeUnary(

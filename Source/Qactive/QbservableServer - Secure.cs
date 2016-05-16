@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -25,6 +26,12 @@ namespace Qactive
       [CallerMemberName] string appDomainBaseName = null,
       params Assembly[] fullTrustAssemblies)
     {
+      Contract.Requires(appDomainSetup != null);
+      Contract.Requires(providerFactory != null);
+      Contract.Requires(service != null);
+      Contract.Requires(fullTrustAssemblies != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
       return CreateService<TSource, TResult>(appDomainSetup, providerFactory, new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
     }
 
@@ -38,6 +45,13 @@ namespace Qactive
       [CallerMemberName] string appDomainBaseName = null,
       params Assembly[] fullTrustAssemblies)
     {
+      Contract.Requires(appDomainSetup != null);
+      Contract.Requires(providerFactory != null);
+      Contract.Requires(options != null);
+      Contract.Requires(service != null);
+      Contract.Requires(fullTrustAssemblies != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
       return CreateService<TSource, TResult>(appDomainSetup, providerFactory, options, new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
     }
 
@@ -50,6 +64,12 @@ namespace Qactive
       [CallerMemberName] string appDomainBaseName = null,
       params Assembly[] fullTrustAssemblies)
     {
+      Contract.Requires(appDomainSetup != null);
+      Contract.Requires(providerFactory != null);
+      Contract.Requires(service != null);
+      Contract.Requires(fullTrustAssemblies != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
       return CreateService(appDomainSetup, providerFactory, QbservableServiceOptions.Default, service, appDomainBaseName, fullTrustAssemblies);
     }
 
@@ -63,6 +83,13 @@ namespace Qactive
       [CallerMemberName] string appDomainBaseName = null,
       params Assembly[] fullTrustAssemblies)
     {
+      Contract.Requires(appDomainSetup != null);
+      Contract.Requires(providerFactory != null);
+      Contract.Requires(options != null);
+      Contract.Requires(service != null);
+      Contract.Requires(fullTrustAssemblies != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
       var permissions = new PermissionSet(PermissionState.None);
 
       return CreateService(appDomainSetup, permissions, providerFactory, options, service, appDomainBaseName, fullTrustAssemblies);
@@ -81,6 +108,14 @@ namespace Qactive
       [CallerMemberName] string appDomainBaseName = null,
       params Assembly[] fullTrustAssemblies)
     {
+      Contract.Requires(appDomainSetup != null);
+      Contract.Requires(permissions != null);
+      Contract.Requires(providerFactory != null);
+      Contract.Requires(options != null);
+      Contract.Requires(service != null);
+      Contract.Requires(fullTrustAssemblies != null);
+      Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
+
       var minimumPermissions = new PermissionSet(PermissionState.None);
 
       minimumPermissions.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution));
@@ -137,13 +172,19 @@ namespace Qactive
 
       public CreateServiceProxyDelegates(Func<IObservable<TSource>, IQbservable<TResult>> service)
       {
+        Contract.Requires(service != null);
+
         Service = service;
       }
 
-      public override object InitializeLifetimeService()
+      [ContractInvariantMethod]
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+      private void ObjectInvariant()
       {
-        return null;
+        Contract.Invariant(Service != null);
       }
+
+      public override object InitializeLifetimeService() => null;
     }
 
     private sealed class CreateServiceProxy<TSource, TResult> : MarshalByRefObject
@@ -153,6 +194,10 @@ namespace Qactive
         QbservableServiceOptions options,
         CreateServiceProxyDelegates<TSource, TResult> delegates)
       {
+        Contract.Requires(providerFactory != null);
+        Contract.Requires(options != null);
+        Contract.Requires(delegates != null);
+
         new PermissionSet(PermissionState.Unrestricted).Assert();
 
         QactiveProvider provider;
@@ -235,16 +280,15 @@ namespace Qactive
       [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
       private static void InitializeInFullTrust(IQactiveProvider provider)
       {
+        Contract.Requires(provider != null);
+
         // Rx demands full trust for the static initializer of the Observable class (as of v2.2.5)
         Observable.ToObservable(new string[0]);
 
         provider.InitializeSecureServer();
       }
 
-      public override object InitializeLifetimeService()
-      {
-        return null;
-      }
+      public override object InitializeLifetimeService() => null;
     }
   }
 }

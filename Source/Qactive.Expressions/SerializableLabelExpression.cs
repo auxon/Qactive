@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -13,7 +14,10 @@ namespace Qactive.Expressions
     public SerializableLabelExpression(LabelExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      DefaultValue = converter.Convert(expression.DefaultValue);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      DefaultValue = converter.TryConvert(expression.DefaultValue);
       TargetName = expression.Target.Name;
       TargetType = expression.Target.Type;
     }

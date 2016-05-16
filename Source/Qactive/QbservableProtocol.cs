@@ -16,9 +16,12 @@ using System.Threading.Tasks;
 
 namespace Qactive
 {
+  [ContractClass(typeof(QbservableProtocolContract))]
   public abstract class QbservableProtocol : IQbservableProtocol, IDisposable
   {
     public bool IsClient { get; }
+
+    public object CurrentClientId { get; internal set; }
 
     public QbservableServiceOptions ServiceOptions { get; }
 
@@ -31,22 +34,31 @@ namespace Qactive
     private readonly CancellationTokenSource protocolCancellation = new CancellationTokenSource();
     private readonly ConcurrentBag<ExceptionDispatchInfo> exceptions = new ConcurrentBag<ExceptionDispatchInfo>();
 
-    public object CurrentClientId { get; internal set; }
-
     public QbservableProtocol(CancellationToken cancel)
     {
       Contract.Ensures(IsClient);
 
       IsClient = true;
+      ServiceOptions = QbservableServiceOptions.Default;
       cancel.Register(protocolCancellation.Cancel, useSynchronizationContext: false);
     }
 
     public QbservableProtocol(QbservableServiceOptions serviceOptions, CancellationToken cancel)
     {
+      Contract.Requires(serviceOptions != null);
       Contract.Ensures(!IsClient);
 
       ServiceOptions = serviceOptions;
       cancel.Register(protocolCancellation.Cancel, useSynchronizationContext: false);
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(ServiceOptions != null);
+      Contract.Invariant(protocolCancellation != null);
+      Contract.Invariant(exceptions != null);
     }
 
     public abstract TSink FindSink<TSink>();
@@ -78,8 +90,6 @@ namespace Qactive
 
     public IObservable<TResult> ExecuteClient<TResult>(Expression expression, object argument)
     {
-      Contract.Requires(IsClient);
-
       return (from _ in InitializeSinksAsync().ToObservable()
               from __ in ClientSendQueryAsync(expression, argument).ToObservable()
               from result in ClientReceive<TResult>()
@@ -97,8 +107,6 @@ namespace Qactive
 
     public async Task ExecuteServerAsync(object clientId, IQbservableProvider provider)
     {
-      Contract.Requires(!IsClient);
-
       Task receivingAsync = null;
       ExceptionDispatchInfo fatalException = null;
 
@@ -181,6 +189,8 @@ namespace Qactive
 
     private async Task ExecuteServerQueryAsync(object clientId, Tuple<Expression, object> input, IQbservableProvider provider)
     {
+      Contract.Requires(provider != null);
+
       var shutdownReason = QbservableProtocolShutdownReason.ObservableTerminated;
 
       ExceptionDispatchInfo createQueryError = null;
@@ -236,6 +246,9 @@ namespace Qactive
 
     private async Task SendObservableAsync(object untypedObservable, Type dataType, bool sendServerErrorsToClients, CancellationToken cancel)
     {
+      Contract.Requires(untypedObservable != null);
+      Contract.Requires(dataType != null);
+
       var networkErrors = new ConcurrentBag<ExceptionDispatchInfo>();
 
       ExceptionDispatchInfo expressionSecurityError = null;
@@ -383,6 +396,8 @@ namespace Qactive
       Contract.Requires(expression.Type.IsGenericType);
       Contract.Requires(!expression.Type.IsGenericTypeDefinition);
       Contract.Requires(expression.Type.GetGenericTypeDefinition() == typeof(IQbservable<>));
+      Contract.Ensures(Contract.Result<object>() != null);
+      Contract.Ensures(Contract.ValueAtReturn(out type) != null);
 
       type = expression.Type.GetGenericArguments()[0];
 
@@ -419,6 +434,8 @@ namespace Qactive
 
     protected Task ShutdownAsync(QbservableProtocolShutdownReason reason)
     {
+      Contract.Ensures(Contract.Result<Task>() != null);
+
       ShutdownReason = reason;
 
       return ShutdownCoreAsync();
@@ -464,7 +481,11 @@ namespace Qactive
     }
 
     protected void AddError(ExceptionDispatchInfo exception)
-      => exceptions.Add(exception);
+    {
+      Contract.Requires(exception != null);
+
+      exceptions.Add(exception);
+    }
 
     internal ExceptionDispatchInfo TryRollupExceptions()
     {
@@ -477,7 +498,12 @@ namespace Qactive
     }
 
     internal IObservable<TResult> ThrowFor<TResult>(OperationCanceledException ex)
-      => Observable.Throw<TResult>(TryRollupExceptions()?.SourceException ?? ex);
+    {
+      Contract.Requires(ex != null);
+      Contract.Ensures(Contract.Result<IObservable<TResult>>() != null);
+
+      return Observable.Throw<TResult>(TryRollupExceptions()?.SourceException ?? ex);
+    }
 
     public void Dispose()
     {
@@ -489,6 +515,64 @@ namespace Qactive
       Justification = "Async usage causes ObjectDisposedExceptions to occur in unexpected places that should simply respect cancellation and stop silently.")]
     protected virtual void Dispose(bool disposing)
     {
+    }
+  }
+
+  [ContractClassFor(typeof(QbservableProtocol))]
+  internal abstract class QbservableProtocolContract : QbservableProtocol
+  {
+    public QbservableProtocolContract()
+      : base(CancellationToken.None)
+    {
+    }
+
+    internal override Task InitializeSinksAsync()
+    {
+      return null;
+    }
+
+    internal override Task ServerReceiveAsync()
+    {
+      return null;
+    }
+
+    internal override IClientDuplexQbservableProtocolSink CreateClientDuplexSinkInternal()
+    {
+      Contract.Ensures(Contract.Result<IClientDuplexQbservableProtocolSink>() != null);
+      return null;
+    }
+
+    internal override IServerDuplexQbservableProtocolSink CreateServerDuplexSinkInternal()
+    {
+      Contract.Ensures(Contract.Result<IServerDuplexQbservableProtocolSink>() != null);
+      return null;
+    }
+
+    protected override Task ServerSendAsync(NotificationKind kind, object data)
+    {
+      return null;
+    }
+
+    protected override IObservable<TResult> ClientReceive<TResult>()
+    {
+      Contract.Ensures(Contract.Result<IObservable<TResult>>() != null);
+      return null;
+    }
+
+    protected override Task ClientSendQueryAsync(Expression expression, object argument)
+    {
+      Contract.Requires(expression != null);
+      return null;
+    }
+
+    protected override Task<Tuple<Expression, object>> ServerReceiveQueryAsync()
+    {
+      return null;
+    }
+
+    protected override Task ShutdownCoreAsync()
+    {
+      return null;
     }
   }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
 namespace Qactive.Expressions
@@ -12,7 +13,10 @@ namespace Qactive.Expressions
     public SerializableRuntimeVariablesExpression(RuntimeVariablesExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Variables = converter.Convert<SerializableParameterExpression>(expression.Variables);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Variables = converter.TryConvert<SerializableParameterExpression>(expression.Variables);
     }
 
     internal override Expression Convert() => Expression.RuntimeVariables(

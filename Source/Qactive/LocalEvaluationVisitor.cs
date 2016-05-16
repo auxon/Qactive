@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -14,8 +15,19 @@ namespace Qactive
 
     public LocalEvaluationVisitor(LocalEvaluator evaluator, IQbservableProtocol protocol)
     {
+      Contract.Requires(evaluator != null);
+      Contract.Requires(protocol != null);
+
       this.evaluator = evaluator;
       this.protocol = protocol;
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(evaluator != null);
+      Contract.Invariant(protocol != null);
     }
 
     protected override Expression VisitBinary(BinaryExpression node)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -15,8 +16,11 @@ namespace Qactive.Expressions
     public SerializableListInitExpression(ListInitExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Initializers = expression.Initializers.Select(i => Tuple.Create(SerializableExpressionConverter.Convert(i.AddMethod), converter.Convert(i.Arguments))).ToList();
-      NewExpression = converter.Convert<SerializableNewExpression>(expression.NewExpression);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Initializers = expression.Initializers.Select(i => Tuple.Create(SerializableExpressionConverter.Convert(i.AddMethod), converter.TryConvert(i.Arguments))).ToList();
+      NewExpression = converter.TryConvert<SerializableNewExpression>(expression.NewExpression);
     }
 
     internal override Expression Convert() => Expression.ListInit(

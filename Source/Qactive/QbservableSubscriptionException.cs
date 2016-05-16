@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 
 namespace Qactive
@@ -22,6 +23,7 @@ namespace Qactive
     private QbservableSubscriptionException(SerializationInfo info, StreamingContext context)
       : base(info, context)
     {
+      Contract.Requires(info != null);
     }
   }
 }

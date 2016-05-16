@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -15,9 +16,12 @@ namespace Qactive.Expressions
     public SerializableMethodCallExpression(MethodCallExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Arguments = converter.Convert(expression.Arguments);
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Arguments = converter.TryConvert(expression.Arguments);
       Method = SerializableExpressionConverter.Convert(expression.Method);
-      Object = converter.Convert(expression.Object);
+      Object = converter.TryConvert(expression.Object);
     }
 
     internal override Expression Convert() => Expression.Call(

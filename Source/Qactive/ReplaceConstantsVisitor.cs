@@ -7,11 +7,7 @@ namespace Qactive
 {
   internal sealed class ReplaceConstantsVisitor : ExpressionVisitor
   {
-    public int ReplacedConstants
-    {
-      get;
-      private set;
-    }
+    public int ReplacedConstants { get; private set; }
 
     private readonly Type findType, findTypeDefinition;
     private readonly Func<object, Type, object> replacementSelector;
@@ -20,7 +16,10 @@ namespace Qactive
 
     private ReplaceConstantsVisitor(Type findTypeDefinition, Func<object, Type, object> replacementSelector, Func<Type, Type> replacementTypeSelector)
     {
+      Contract.Requires(findTypeDefinition != null);
       Contract.Requires(findTypeDefinition.IsGenericTypeDefinition);
+      Contract.Requires(replacementSelector != null);
+      Contract.Requires(replacementTypeSelector != null);
 
       this.findTypeDefinition = findTypeDefinition;
       this.replacementSelector = replacementSelector;
@@ -29,7 +28,10 @@ namespace Qactive
 
     private ReplaceConstantsVisitor(Type findType, Func<object, Type, object> replacementSelector, Func<Type, Type> replacementTypeSelector, Action<Type, Type> genericTypeArgumentMismatchAction)
     {
+      Contract.Requires(findType != null);
       Contract.Requires(!findType.IsGenericTypeDefinition);
+      Contract.Requires(replacementSelector != null);
+      Contract.Requires(replacementTypeSelector != null);
 
       this.findType = findType;
       this.findTypeDefinition = findType.IsGenericType ? findType.GetGenericTypeDefinition() : null;
@@ -40,17 +42,38 @@ namespace Qactive
 
     public static ReplaceConstantsVisitor CreateForGenericTypeByDefinition(Type findTypeDefinition, Func<object, Type, object> replacementSelector, Func<Type, Type> replacementTypeSelector)
     {
+      Contract.Requires(findTypeDefinition != null);
+      Contract.Requires(replacementSelector != null);
+      Contract.Requires(replacementTypeSelector != null);
+      Contract.Ensures(Contract.Result<ReplaceConstantsVisitor>() != null);
+
       return new ReplaceConstantsVisitor(findTypeDefinition, replacementSelector, replacementTypeSelector);
     }
 
     public static ReplaceConstantsVisitor Create(Type findType, Func<object, Type, object> replacementSelector, Func<Type, Type> replacementTypeSelector, Action<Type, Type> genericTypeArgumentMismatchAction = null)
     {
+      Contract.Requires(findType != null);
+      Contract.Requires(replacementSelector != null);
+      Contract.Requires(replacementTypeSelector != null);
+      Contract.Ensures(Contract.Result<ReplaceConstantsVisitor>() != null);
+
       return new ReplaceConstantsVisitor(findType, replacementSelector, replacementTypeSelector, genericTypeArgumentMismatchAction);
     }
 
     public static ReplaceConstantsVisitor Create(Type findType, object replacement, Type replacementType, Action<Type, Type> genericTypeArgumentMismatchAction = null)
     {
+      Contract.Requires(findType != null);
+      Contract.Requires(replacementType != null);
+      Contract.Ensures(Contract.Result<ReplaceConstantsVisitor>() != null);
+
       return Create(findType, (_, __) => replacement, _ => replacementType, genericTypeArgumentMismatchAction);
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(replacementTypeSelector != null);
     }
 
     protected override Expression VisitConstant(ConstantExpression node)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -17,10 +18,13 @@ namespace Qactive.Expressions
     public SerializableSwitchExpression(SwitchExpression expression, SerializableExpressionConverter converter)
       : base(expression)
     {
-      Cases = expression.Cases.Select(c => Tuple.Create(converter.Convert(c.Body), converter.Convert(c.TestValues))).ToList();
+      Contract.Requires(expression != null);
+      Contract.Requires(converter != null);
+
+      Cases = expression.Cases.Select(c => Tuple.Create(converter.TryConvert(c.Body), converter.TryConvert(c.TestValues))).ToList();
       Comparison = SerializableExpressionConverter.Convert(expression.Comparison);
-      DefaultBody = converter.Convert(expression.DefaultBody);
-      SwitchValue = converter.Convert(expression.SwitchValue);
+      DefaultBody = converter.TryConvert(expression.DefaultBody);
+      SwitchValue = converter.TryConvert(expression.SwitchValue);
     }
 
     internal override Expression Convert() => Expression.Switch(

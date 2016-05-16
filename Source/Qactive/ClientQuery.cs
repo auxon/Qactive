@@ -13,6 +13,7 @@ namespace Qactive
       : base(provider)
     {
       Contract.Requires(clientId != null);
+      Contract.Requires(provider != null);
 
       this.clientId = clientId;
     }
@@ -21,14 +22,14 @@ namespace Qactive
       : base(provider, expression)
     {
       Contract.Requires(clientId != null);
+      Contract.Requires(provider != null);
+      Contract.Requires(expression != null);
 
       this.clientId = clientId;
     }
 
     protected override IDisposable SubscribeCore(IObserver<TResult> observer)
-    {
-      return Provider.Connect<TResult>(PrepareExpression).Subscribe(observer);
-    }
+      => Provider.Connect<TResult>(PrepareExpression).Subscribe(observer);
 
     public Expression PrepareExpression(IQbservableProtocol protocol)
     {

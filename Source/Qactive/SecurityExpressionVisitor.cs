@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.Contracts;
+using System.Linq.Expressions;
 
 namespace Qactive
 {
@@ -6,48 +7,42 @@ namespace Qactive
   {
     // TODO: Place configurable caps on the use of some kinds of types, operators and parameters (see Security Guidelines.md)
 
-    public ExpressionOptions Options
-    {
-      get
-      {
-        return options;
-      }
-    }
+    public ExpressionOptions Options { get; }
 
-    public ServiceEvaluationContext Context
-    {
-      get
-      {
-        return context;
-      }
-    }
-
-    private readonly ExpressionOptions options;
-    private readonly ServiceEvaluationContext context;
+    public ServiceEvaluationContext Context { get; }
 
     public SecurityExpressionVisitor(QbservableServiceOptions serviceOptions)
     {
-      this.options = serviceOptions.ExpressionOptions;
-      this.context = serviceOptions.EvaluationContext;
+      Contract.Requires(serviceOptions != null);
 
-      if (options.HasFlag(ExpressionOptions.AllowTypeTests)
-        && options.HasFlag(ExpressionOptions.AllowExplicitConversions))
+      Options = serviceOptions.ExpressionOptions;
+      Context = serviceOptions.EvaluationContext;
+
+      if (Options.HasFlag(ExpressionOptions.AllowTypeTests)
+        && Options.HasFlag(ExpressionOptions.AllowExplicitConversions))
       {
-        context.EnsureHasKnownOperator("Cast");
-        context.EnsureHasKnownOperator("OfType");
+        Context.EnsureHasKnownOperator("Cast");
+        Context.EnsureHasKnownOperator("OfType");
       }
 
-      if (options.HasFlag(ExpressionOptions.AllowCatchBlocks))
+      if (Options.HasFlag(ExpressionOptions.AllowCatchBlocks))
       {
-        context.EnsureHasKnownOperator("Catch");
-        context.EnsureHasKnownOperator("OnErrorResumeNext");
-        context.EnsureHasKnownOperator("Retry");
+        Context.EnsureHasKnownOperator("Catch");
+        Context.EnsureHasKnownOperator("OnErrorResumeNext");
+        Context.EnsureHasKnownOperator("Retry");
       }
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(Context != null);
     }
 
     protected override Expression VisitBinary(BinaryExpression node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowAssignments))
+      if (!Options.HasFlag(ExpressionOptions.AllowAssignments))
       {
         switch (node.NodeType)
         {
@@ -79,7 +74,7 @@ namespace Qactive
 
     protected override Expression VisitBlock(BlockExpression node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowBlocks))
+      if (!Options.HasFlag(ExpressionOptions.AllowBlocks))
       {
         throw new ExpressionSecurityException("Blocks are not permitted.");
       }
@@ -89,7 +84,7 @@ namespace Qactive
 
     protected override CatchBlock VisitCatchBlock(CatchBlock node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowCatchBlocks))
+      if (!Options.HasFlag(ExpressionOptions.AllowCatchBlocks))
       {
         throw new ExpressionSecurityException("Catch blocks are not permitted.");
       }
@@ -99,7 +94,7 @@ namespace Qactive
 
     protected override Expression VisitConstant(ConstantExpression node)
     {
-      if (!context.IsKnownType(node.Type))
+      if (!Context.IsKnownType(node.Type))
       {
         throw new ExpressionSecurityException("Type \"" + node.Type + "\" is not permitted.");
       }
@@ -109,7 +104,7 @@ namespace Qactive
 
     protected override Expression VisitExtension(Expression node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowExtensions))
+      if (!Options.HasFlag(ExpressionOptions.AllowExtensions))
       {
         throw new ExpressionSecurityException("Extensions are not permitted.");
       }
@@ -122,7 +117,7 @@ namespace Qactive
       switch (node.Kind)
       {
         case GotoExpressionKind.Goto:
-          if (!options.HasFlag(ExpressionOptions.AllowGoto))
+          if (!Options.HasFlag(ExpressionOptions.AllowGoto))
           {
             throw new ExpressionSecurityException("Goto is not permitted.");
           }
@@ -134,12 +129,12 @@ namespace Qactive
 
     protected override Expression VisitInvocation(InvocationExpression node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowDelegateInvoke))
+      if (!Options.HasFlag(ExpressionOptions.AllowDelegateInvoke))
       {
         throw new ExpressionSecurityException("Delegate and lambda invocations are not permitted.");
       }
 
-      if (!options.HasFlag(ExpressionOptions.AllowVoidMethodCalls)
+      if (!Options.HasFlag(ExpressionOptions.AllowVoidMethodCalls)
         && node.Type == typeof(void))
       {
         throw new ExpressionSecurityException("Calls to void-returning delegates are not permitted.");
@@ -150,7 +145,7 @@ namespace Qactive
 
     protected override Expression VisitLabel(LabelExpression node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowGoto))
+      if (!Options.HasFlag(ExpressionOptions.AllowGoto))
       {
         throw new ExpressionSecurityException("Goto labels are not permitted.");
       }
@@ -165,7 +160,7 @@ namespace Qactive
 
     protected override Expression VisitLoop(LoopExpression node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowLoops))
+      if (!Options.HasFlag(ExpressionOptions.AllowLoops))
       {
         throw new ExpressionSecurityException("Loops are not permitted.");
       }
@@ -175,7 +170,7 @@ namespace Qactive
 
     protected override MemberAssignment VisitMemberAssignment(MemberAssignment node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowMemberAssignments))
+      if (!Options.HasFlag(ExpressionOptions.AllowMemberAssignments))
       {
         throw new ExpressionSecurityException("Member assignments are not permitted.");
       }
@@ -185,13 +180,13 @@ namespace Qactive
 
     protected override Expression VisitMethodCall(MethodCallExpression node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowVoidMethodCalls)
+      if (!Options.HasFlag(ExpressionOptions.AllowVoidMethodCalls)
         && node.Type == typeof(void))
       {
         throw new ExpressionSecurityException("Calls to void-returning methods are not permitted.");
       }
 
-      if (!context.IsKnownMethod(node.Method))
+      if (!Context.IsKnownMethod(node.Method))
       {
         throw new ExpressionSecurityException("Calls to method \"" + node.Method + "\" are not permitted.");
       }
@@ -203,12 +198,12 @@ namespace Qactive
     {
       var type = node.Constructor.DeclaringType;
 
-      if (!context.IsKnownType(type))
+      if (!Context.IsKnownType(type))
       {
         throw new ExpressionSecurityException("Type \"" + type + "\" is not permitted.");
       }
 
-      if (!options.HasFlag(ExpressionOptions.AllowConstructors)
+      if (!Options.HasFlag(ExpressionOptions.AllowConstructors)
         && !type.IsPrimitive
         && !ServiceEvaluationContext.IsExtendedPrimitiveType(type))
       {
@@ -220,7 +215,7 @@ namespace Qactive
 
     protected override Expression VisitNewArray(NewArrayExpression node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowArrayInstantiation))
+      if (!Options.HasFlag(ExpressionOptions.AllowArrayInstantiation))
       {
         throw new ExpressionSecurityException("Array instantiation is not permitted.");
       }
@@ -230,7 +225,7 @@ namespace Qactive
 
     protected override Expression VisitTry(TryExpression node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowTryBlocks))
+      if (!Options.HasFlag(ExpressionOptions.AllowTryBlocks))
       {
         throw new ExpressionSecurityException("Try blocks are not permitted.");
       }
@@ -240,7 +235,7 @@ namespace Qactive
 
     protected override Expression VisitTypeBinary(TypeBinaryExpression node)
     {
-      if (!options.HasFlag(ExpressionOptions.AllowTypeTests))
+      if (!Options.HasFlag(ExpressionOptions.AllowTypeTests))
       {
         throw new ExpressionSecurityException("Type tests are not permitted.");
       }
@@ -253,15 +248,15 @@ namespace Qactive
       switch (node.NodeType)
       {
         case ExpressionType.TypeAs:
-          if (!options.HasFlag(ExpressionOptions.AllowTypeTests))
+          if (!Options.HasFlag(ExpressionOptions.AllowTypeTests))
           {
             throw new ExpressionSecurityException("Type tests are not permitted.");
           }
           break;
         case ExpressionType.Convert:
         case ExpressionType.ConvertChecked:
-          if (!options.HasFlag(ExpressionOptions.AllowTypeTests)  // Conversions can be used as brute force type tests
-            || !options.HasFlag(ExpressionOptions.AllowExplicitConversions))
+          if (!Options.HasFlag(ExpressionOptions.AllowTypeTests)  // Conversions can be used as brute force type tests
+            || !Options.HasFlag(ExpressionOptions.AllowExplicitConversions))
           {
             throw new ExpressionSecurityException("Explicit conversions are not permitted.");
           }

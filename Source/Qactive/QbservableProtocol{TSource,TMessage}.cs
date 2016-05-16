@@ -16,24 +16,35 @@ using Qactive.Properties;
 
 namespace Qactive
 {
+  [ContractClass(typeof(QbservableProtocolContract<,>))]
   public abstract class QbservableProtocol<TSource, TMessage> : QbservableProtocol<TSource>
     where TMessage : IProtocolMessage
   {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
-    protected IList<QbservableProtocolSink<TSource, TMessage>> Sinks => sinks;
-
-    private readonly List<QbservableProtocolSink<TSource, TMessage>> sinks = new List<QbservableProtocolSink<TSource, TMessage>>();
+    protected IList<QbservableProtocolSink<TSource, TMessage>> Sinks { get; } = new List<QbservableProtocolSink<TSource, TMessage>>();
 
     protected QbservableProtocol(TSource source, IRemotingFormatter formatter, CancellationToken cancel)
       : base(source, formatter, cancel)
     {
+      Contract.Requires(source != null);
+      Contract.Requires(formatter != null);
       Contract.Ensures(IsClient);
     }
 
     protected QbservableProtocol(TSource source, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
       : base(source, formatter, serviceOptions, cancel)
     {
+      Contract.Requires(source != null);
+      Contract.Requires(formatter != null);
+      Contract.Requires(serviceOptions != null);
       Contract.Ensures(!IsClient);
+    }
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(Sinks != null);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
@@ -69,7 +80,7 @@ namespace Qactive
 
       var converter = new SerializableExpressionConverter();
 
-      await SendMessageAsync(CreateMessage(QbservableProtocolMessageKind.Subscribe, converter.Convert(expression))).ConfigureAwait(false);
+      await SendMessageAsync(CreateMessage(QbservableProtocolMessageKind.Subscribe, converter.TryConvert(expression))).ConfigureAwait(false);
     }
 
     protected override async Task<Tuple<Expression, object>> ServerReceiveQueryAsync()
@@ -95,7 +106,7 @@ namespace Qactive
         {
           var converter = new SerializableExpressionConverter();
 
-          return Tuple.Create(SerializableExpressionConverter.Convert(Deserialize<SerializableExpression>(message)), argument);
+          return Tuple.Create(SerializableExpressionConverter.TryConvert(Deserialize<SerializableExpression>(message)), argument);
         }
         else if (ServerHandleClientShutdown(message))
         {
@@ -185,6 +196,8 @@ namespace Qactive
 
     protected virtual bool ServerHandleClientShutdown(TMessage message)
     {
+      Contract.Requires(message != null);
+
       if (message.Kind == QbservableProtocolMessageKind.Shutdown)
       {
         var reason = GetShutdownReason(message, QbservableProtocolShutdownReason.ClientTerminated);
@@ -224,6 +237,8 @@ namespace Qactive
 
     public async Task SendMessageAsync(TMessage message)
     {
+      Contract.Requires(message != null);
+
       message = await ApplySinksForSending(message).ConfigureAwait(false);
 
       await SendMessageCoreAsync(message).ConfigureAwait(false);
@@ -231,6 +246,8 @@ namespace Qactive
 
     public async Task SendMessageSafeAsync(TMessage message)
     {
+      Contract.Requires(message != null);
+
       try
       {
         await SendMessageAsync(message).ConfigureAwait(false);
@@ -256,16 +273,27 @@ namespace Qactive
     protected abstract Task<TMessage> ReceiveMessageCoreAsync();
 
     public object ServerSendDuplexMessage(int clientId, Func<DuplexCallbackId, TMessage> messageFactory)
-      => ServerSendDuplexMessage(clientId, messageFactory, sink => sink.RegisterInvokeCallback);
+    {
+      Contract.Requires(messageFactory != null);
+
+      return ServerSendDuplexMessage(clientId, messageFactory, sink => sink.RegisterInvokeCallback);
+    }
 
     public object ServerSendEnumeratorDuplexMessage(int clientId, Func<DuplexCallbackId, TMessage> messageFactory)
-      => ServerSendDuplexMessage(clientId, messageFactory, sink => sink.RegisterEnumeratorCallback);
+    {
+      Contract.Requires(messageFactory != null);
+
+      return ServerSendDuplexMessage(clientId, messageFactory, sink => sink.RegisterEnumeratorCallback);
+    }
 
     private object ServerSendDuplexMessage(
       int clientId,
       Func<DuplexCallbackId, TMessage> messageFactory,
       Func<IServerDuplexQbservableProtocolSink, Func<int, Action<object>, Action<ExceptionDispatchInfo>, DuplexCallbackId>> registrationSelector)
     {
+      Contract.Requires(messageFactory != null);
+      Contract.Requires(registrationSelector != null);
+
       var waitForResponse = new ManualResetEventSlim(false);
 
       ExceptionDispatchInfo error = null;
@@ -307,6 +335,11 @@ namespace Qactive
      Action onCompleted,
      Action<int> dispose)
     {
+      Contract.Requires(onNext != null);
+      Contract.Requires(onError != null);
+      Contract.Requires(onCompleted != null);
+      Contract.Requires(dispose != null);
+
       var duplexSink = FindSink<IServerDuplexQbservableProtocolSink>();
 
       var registration = duplexSink.RegisterObservableCallbacks(clientId, onNext, onError, onCompleted, dispose);
@@ -325,19 +358,25 @@ namespace Qactive
     {
       if (IsClient)
       {
-        sinks.AddRange(CreateClientSinks());
+        foreach (var sink in CreateClientSinks())
+        {
+          Sinks.Add(sink);
+        }
       }
       else
       {
-        sinks.AddRange(CreateServerSinks());
+        foreach (var sink in CreateServerSinks())
+        {
+          Sinks.Add(sink);
+        }
 
         if (ServiceOptions.EnableDuplex)
         {
-          sinks.Add(CreateServerDuplexSink());
+          Sinks.Add(CreateServerDuplexSink());
         }
       }
 
-      foreach (var sink in sinks)
+      foreach (var sink in Sinks)
       {
         await sink.InitializeAsync(this, Cancel).ConfigureAwait(false);
       }
@@ -345,7 +384,9 @@ namespace Qactive
 
     private async Task<TMessage> ApplySinksForSending(TMessage message)
     {
-      foreach (var sink in sinks)
+      Contract.Requires(message != null);
+
+      foreach (var sink in Sinks)
       {
         message = await sink.SendingAsync(message, Cancel).ConfigureAwait(false);
       }
@@ -355,7 +396,9 @@ namespace Qactive
 
     private async Task<TMessage> ApplySinksForReceiving(TMessage message)
     {
-      foreach (var sink in sinks)
+      Contract.Requires(message != null);
+
+      foreach (var sink in Sinks)
       {
         message = await sink.ReceivingAsync(message, Cancel).ConfigureAwait(false);
       }
@@ -365,7 +408,7 @@ namespace Qactive
 
     public sealed override TSink FindSink<TSink>()
     {
-      return sinks.OfType<TSink>().FirstOrDefault();
+      return Sinks.OfType<TSink>().FirstOrDefault();
     }
 
     public sealed override TSink GetOrAddSink<TSink>(Func<TSink> createSink)
@@ -375,10 +418,68 @@ namespace Qactive
       if (sink == null)
       {
         sink = createSink();
-        sinks.Add((QbservableProtocolSink<TSource, TMessage>)(object)sink);
+        Sinks.Add((QbservableProtocolSink<TSource, TMessage>)(object)sink);
       }
 
       return sink;
+    }
+  }
+
+  [ContractClassFor(typeof(QbservableProtocol<,>))]
+  internal abstract class QbservableProtocolContract<TSource, TMessage> : QbservableProtocol<TSource, TMessage>
+    where TMessage : IProtocolMessage
+  {
+    protected QbservableProtocolContract(TSource source, IRemotingFormatter formatter, CancellationToken cancel)
+      : base(source, formatter, cancel)
+    {
+    }
+
+    protected override ClientDuplexQbservableProtocolSink<TSource, TMessage> CreateClientDuplexSink()
+    {
+      Contract.Ensures(Contract.Result<ClientDuplexQbservableProtocolSink<TSource, TMessage>>() != null);
+      return null;
+    }
+
+    protected override ServerDuplexQbservableProtocolSink<TSource, TMessage> CreateServerDuplexSink()
+    {
+      Contract.Ensures(Contract.Result<ServerDuplexQbservableProtocolSink<TSource, TMessage>>() != null);
+      return null;
+    }
+
+    protected override QbservableProtocolShutdownReason GetShutdownReason(TMessage message, QbservableProtocolShutdownReason defaultReason)
+    {
+      Contract.Requires(message != null);
+      return default(QbservableProtocolShutdownReason);
+    }
+
+    protected override TMessage CreateMessage(QbservableProtocolMessageKind kind)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override TMessage CreateMessage(QbservableProtocolMessageKind kind, object data)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
+    }
+
+    protected override T Deserialize<T>(TMessage message)
+    {
+      Contract.Requires(message != null);
+      return default(T);
+    }
+
+    protected override Task SendMessageCoreAsync(TMessage message)
+    {
+      Contract.Requires(message != null);
+      return null;
+    }
+
+    protected override TMessage CreateSubscribeDuplexMessage(DuplexCallbackId id)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
     }
   }
 }

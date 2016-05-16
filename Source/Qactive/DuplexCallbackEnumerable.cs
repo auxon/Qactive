@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 
@@ -16,16 +17,18 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
     public IEnumerator<T> GetEnumerator()
     {
+      var protocol = Protocol ?? Sink.Protocol;
+
       // A try..catch block is required because the Rx SelectMany operator doesn't send an exception from GetEnumerator to OnError.
       try
       {
         var enumeratorId = Sink.GetEnumerator(Id);
 
-        return new DuplexCallbackEnumerator(enumeratorId, Protocol, Sink);
+        return new DuplexCallbackEnumerator(enumeratorId, protocol, Sink);
       }
       catch (Exception ex)
       {
-        Protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
+        protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
 
         return Enumerable.Empty<T>().GetEnumerator();
       }
@@ -38,32 +41,31 @@ namespace Qactive
 
     private sealed class DuplexCallbackEnumerator : IEnumerator<T>
     {
-      public T Current
-      {
-        get
-        {
-          return (T)current;
-        }
-      }
+      public T Current => (T)current;
 
-      object System.Collections.IEnumerator.Current
-      {
-        get
-        {
-          return Current;
-        }
-      }
+      object System.Collections.IEnumerator.Current => Current;
 
       private readonly int enumeratorId;
-      private readonly IServerDuplexQbservableProtocolSink sink;
       private readonly IQbservableProtocol protocol;
+      private readonly IServerDuplexQbservableProtocolSink sink;
       private object current;
 
       public DuplexCallbackEnumerator(int enumeratorId, IQbservableProtocol protocol, IServerDuplexQbservableProtocolSink sink)
       {
+        Contract.Requires(protocol != null);
+        Contract.Requires(sink != null);
+
         this.enumeratorId = enumeratorId;
         this.protocol = protocol;
         this.sink = sink;
+      }
+
+      [ContractInvariantMethod]
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+      private void ObjectInvariant()
+      {
+        Contract.Invariant(protocol != null);
+        Contract.Invariant(sink != null);
       }
 
       public bool MoveNext()

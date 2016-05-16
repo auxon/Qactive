@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 
 namespace Qactive
 {
@@ -13,6 +14,9 @@ namespace Qactive
      */
     public static IObservable<TSource> RemotableWithoutConfiguration<TSource>(this IObservable<TSource> observable)
     {
+      Contract.Requires(observable != null);
+      Contract.Ensures(Contract.Result<IObservable<TSource>>() != null);
+
       return new SerializableObservable<TSource>(new RemotableObservable<TSource>(observable));
     }
 
@@ -22,7 +26,16 @@ namespace Qactive
 
       public RemotableObservable(IObservable<T> observable)
       {
+        Contract.Requires(observable != null);
+
         this.observable = observable;
+      }
+
+      [ContractInvariantMethod]
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+      private void ObjectInvariant()
+      {
+        Contract.Invariant(observable != null);
       }
 
       public override object InitializeLifetimeService() => null;
@@ -55,7 +68,16 @@ namespace Qactive
 
         public RemotableSubscription(IDisposable disposable)
         {
+          Contract.Requires(disposable != null);
+
           this.disposable = disposable;
+        }
+
+        [ContractInvariantMethod]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+        private void ObjectInvariant()
+        {
+          Contract.Invariant(disposable != null);
         }
 
         public override object InitializeLifetimeService() => null;
@@ -72,7 +94,16 @@ namespace Qactive
 
       public SerializableObservable(RemotableObservable<T> observable)
       {
+        Contract.Requires(observable != null);
+
         this.observable = observable;
+      }
+
+      [ContractInvariantMethod]
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+      private void ObjectInvariant()
+      {
+        Contract.Invariant(observable != null);
       }
 
       public IDisposable Subscribe(IObserver<T> observer) => observable.Subscribe(new RemotableObserver<T>(observer));
@@ -84,7 +115,16 @@ namespace Qactive
 
       public RemotableObserver(IObserver<T> observer)
       {
+        Contract.Requires(observer != null);
+
         this.observer = observer;
+      }
+
+      [ContractInvariantMethod]
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+      private void ObjectInvariant()
+      {
+        Contract.Invariant(observer != null);
       }
 
       public override object InitializeLifetimeService() => null;

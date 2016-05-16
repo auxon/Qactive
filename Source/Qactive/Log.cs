@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -25,9 +26,7 @@ namespace Qactive
 
     [Conditional("DEBUG")]
     private static void DebugPrint(object expressionDebugView, string category)
-    {
-      Debug.WriteLine(Environment.NewLine + expressionDebugView, category);
-    }
+      => Debug.WriteLine(Environment.NewLine + expressionDebugView, category ?? string.Empty);
 
     public static void Unsafe(Exception exception)
     {
@@ -39,7 +38,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        WriteLine(QactiveTraceSources.Qactive, $"Failed to log full exception: {exception.Message}\r\n{ex}");
+        WriteLine(QactiveTraceSources.Qactive, $"Failed to log full exception: {exception?.Message ?? "{null}"}\r\n{ex}");
         throw;
       }
       finally
@@ -49,19 +48,37 @@ namespace Qactive
     }
 
     private static void WriteLine(this TraceSource trace, FormattableString message)
-      => trace.TraceEvent(TraceEventType.Error, 0, message?.ToString(CultureInfo.InvariantCulture));
+    {
+      Contract.Requires(trace != null);
+
+      trace.TraceEvent(TraceEventType.Error, 0, message?.ToString(CultureInfo.InvariantCulture));
+    }
 
     private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, string message, object data)
-      => trace.TraceData(type, (int)id, message, data);
+    {
+      Contract.Requires(trace != null);
+
+      trace.TraceData(type, (int)id, message, data);
+    }
 
     private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, object data)
-      => trace.TraceData(type, (int)id, data);
+    {
+      Contract.Requires(trace != null);
+
+      trace.TraceData(type, (int)id, data);
+    }
 
     private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, string message)
-      => trace.TraceEvent(type, (int)id, message);
+    {
+      Contract.Requires(trace != null);
+
+      trace.TraceEvent(type, (int)id, message);
+    }
 
     private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, string format, params object[] args)
     {
+      Contract.Requires(trace != null);
+
       if (format == null || args == null)
       {
         trace.Semantic(id, type, format);
@@ -73,19 +90,37 @@ namespace Qactive
     }
 
     private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, FormattableString message)
-      => trace.TraceEvent(type, (int)id, message?.ToString(CultureInfo.InvariantCulture));
+    {
+      Contract.Requires(trace != null);
+
+      trace.TraceEvent(type, (int)id, message?.ToString(CultureInfo.InvariantCulture));
+    }
 
     private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string message, object data)
-      => trace.TraceData(type, (int)id, FormatObjectId(objectId), message, data);
+    {
+      Contract.Requires(trace != null);
+
+      trace.TraceData(type, (int)id, FormatObjectId(objectId), message, data);
+    }
 
     private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, object data)
-      => trace.TraceData(type, (int)id, FormatObjectId(objectId), data);
+    {
+      Contract.Requires(trace != null);
+
+      trace.TraceData(type, (int)id, FormatObjectId(objectId), data);
+    }
 
     private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string message)
-      => trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + message);
+    {
+      Contract.Requires(trace != null);
+
+      trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + message);
+    }
 
     private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string format, params object[] args)
     {
+      Contract.Requires(trace != null);
+
       if (format == null || args == null)
       {
         trace.SemanticObject(id, type, objectId, format);
@@ -97,7 +132,11 @@ namespace Qactive
     }
 
     private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, FormattableString message)
-      => trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + message?.ToString(CultureInfo.InvariantCulture));
+    {
+      Contract.Requires(trace != null);
+
+      trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + message?.ToString(CultureInfo.InvariantCulture));
+    }
 
     private static string FormatObjectId(object value)
       => "[" + (value?.ToString() ?? "?") + "] ";

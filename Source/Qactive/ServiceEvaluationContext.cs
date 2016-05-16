@@ -122,9 +122,17 @@ namespace Qactive
 
     private readonly HashSet<MethodInfo> knownMethods;
 
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(knownMethods != null);
+    }
+
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, params Type[] knownTypes)
       : base(knownTypes)
     {
+      Contract.Requires(knownMethods != null);
       Contract.Requires(Contract.ForAll(knownMethods, method => !method.IsGenericMethod || method.IsGenericMethodDefinition));
 
       this.knownMethods = new HashSet<MethodInfo>(knownMethods);
@@ -133,6 +141,7 @@ namespace Qactive
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, IEnumerable<Type> knownTypes)
       : base(knownTypes)
     {
+      Contract.Requires(knownMethods != null);
       Contract.Requires(Contract.ForAll(knownMethods, method => !method.IsGenericMethod || method.IsGenericMethodDefinition));
 
       this.knownMethods = new HashSet<MethodInfo>(knownMethods);
@@ -141,6 +150,7 @@ namespace Qactive
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, IEnumerable<Assembly> knownAssemblies, params Type[] additionalKnownTypes)
       : base(knownAssemblies, additionalKnownTypes)
     {
+      Contract.Requires(knownMethods != null);
       Contract.Requires(Contract.ForAll(knownMethods, method => !method.IsGenericMethod || method.IsGenericMethodDefinition));
 
       this.knownMethods = new HashSet<MethodInfo>(knownMethods);
@@ -149,6 +159,7 @@ namespace Qactive
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, IEnumerable<Assembly> knownAssemblies, IEnumerable<Type> additionalKnownTypes)
       : base(knownAssemblies, additionalKnownTypes)
     {
+      Contract.Requires(knownMethods != null);
       Contract.Requires(Contract.ForAll(knownMethods, method => !method.IsGenericMethod || method.IsGenericMethodDefinition));
 
       this.knownMethods = new HashSet<MethodInfo>(knownMethods);
@@ -197,59 +208,59 @@ namespace Qactive
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, bool includeSafeOperators, params Type[] knownTypes)
       : this(includeSafeOperators ? knownMethods.Concat(safeOperators) : knownMethods, knownTypes)
     {
+      Contract.Requires(knownMethods != null);
     }
 
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, bool includeSafeOperators, IEnumerable<Type> knownTypes)
       : this(includeSafeOperators ? knownMethods.Concat(safeOperators) : knownMethods, knownTypes)
     {
+      Contract.Requires(knownMethods != null);
     }
 
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, bool includeSafeOperators, IEnumerable<Assembly> knownAssemblies, params Type[] additionalKnownTypes)
       : this(includeSafeOperators ? knownMethods.Concat(safeOperators) : knownMethods, knownAssemblies, additionalKnownTypes)
     {
+      Contract.Requires(knownMethods != null);
     }
 
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, bool includeSafeOperators, IEnumerable<Assembly> knownAssemblies, IEnumerable<Type> additionalKnownTypes)
       : this(includeSafeOperators ? knownMethods.Concat(safeOperators) : knownMethods, knownAssemblies, additionalKnownTypes)
     {
+      Contract.Requires(knownMethods != null);
     }
 
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, bool includeSafeOperators, bool includeConcurrencyOperators, params Type[] knownTypes)
       : this(includeConcurrencyOperators ? knownMethods.Concat(concurrencyOperators) : knownMethods, includeSafeOperators, knownTypes)
     {
+      Contract.Requires(knownMethods != null);
     }
 
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, bool includeSafeOperators, bool includeConcurrencyOperators, IEnumerable<Type> knownTypes)
       : this(includeConcurrencyOperators ? knownMethods.Concat(concurrencyOperators) : knownMethods, includeSafeOperators, knownTypes)
     {
+      Contract.Requires(knownMethods != null);
     }
 
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, bool includeSafeOperators, bool includeConcurrencyOperators, IEnumerable<Assembly> knownAssemblies, params Type[] additionalKnownTypes)
       : this(includeConcurrencyOperators ? knownMethods.Concat(concurrencyOperators) : knownMethods, includeSafeOperators, knownAssemblies, additionalKnownTypes)
     {
+      Contract.Requires(knownMethods != null);
     }
 
     public ServiceEvaluationContext(IEnumerable<MethodInfo> knownMethods, bool includeSafeOperators, bool includeConcurrencyOperators, IEnumerable<Assembly> knownAssemblies, IEnumerable<Type> additionalKnownTypes)
       : this(includeConcurrencyOperators ? knownMethods.Concat(concurrencyOperators) : knownMethods, includeSafeOperators, knownAssemblies, additionalKnownTypes)
     {
+      Contract.Requires(knownMethods != null);
     }
 
     public static bool IsExtendedPrimitiveType(Type type)
-    {
-      return extendedPrimitiveTypes.Contains(type.IsGenericType ? type.GetGenericTypeDefinition() : type);
-    }
+      => type != null && extendedPrimitiveTypes.Contains(type.IsGenericType ? type.GetGenericTypeDefinition() : type);
 
     public override bool IsKnownType(Type type)
-    {
-      if (type == null)
-      {
-        return false;
-      }
-
-      return type.IsEnum
-          || IsExtendedPrimitiveType(type)
-          || base.IsKnownType(type);
-    }
+      => type != null
+      && (type.IsEnum
+        || IsExtendedPrimitiveType(type)
+        || base.IsKnownType(type));
 
     public bool IsKnownMethod(MethodInfo method)
     {
@@ -268,6 +279,8 @@ namespace Qactive
 
     public void AddKnownMethod(MethodInfo method)
     {
+      Contract.Requires(method != null);
+
       knownMethods.Add(method);
     }
 
@@ -290,6 +303,9 @@ namespace Qactive
 
     public void AddKnownOperators(string name, params Type[] parameterTypes)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
+      Contract.Requires(parameterTypes != null);
+
       var matched = false;
 
       foreach (var method in knownOperatorContainers.Where(m => string.Equals(m.Name, name, StringComparison.Ordinal) && m.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameterTypes)))
@@ -307,6 +323,8 @@ namespace Qactive
 
     internal void EnsureHasKnownOperator(string name)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
+
       foreach (var method in knownOperatorContainers.Where(m => string.Equals(m.Name, name, StringComparison.Ordinal)))
       {
         if (knownMethods.Contains(method))

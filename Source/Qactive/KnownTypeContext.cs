@@ -15,51 +15,52 @@ namespace Qactive
     public KnownTypeContext(params Type[] knownTypes)
       : this((IEnumerable<Type>)knownTypes)
     {
-      Contract.Requires(Contract.ForAll(knownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
+      Contract.Requires(knownTypes == null || Contract.ForAll(knownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
     }
 
     public KnownTypeContext(IEnumerable<Type> knownTypes)
       : this(null, knownTypes)
     {
-      Contract.Requires(Contract.ForAll(knownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
+      Contract.Requires(knownTypes == null || Contract.ForAll(knownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
     }
 
     public KnownTypeContext(IEnumerable<Assembly> knownAssemblies, params Type[] additionalKnownTypes)
       : this(knownAssemblies, (IEnumerable<Type>)additionalKnownTypes)
     {
-      Contract.Requires(Contract.ForAll(additionalKnownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
+      Contract.Requires(additionalKnownTypes == null || Contract.ForAll(additionalKnownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
     }
 
     public KnownTypeContext(IEnumerable<Assembly> knownAssemblies, IEnumerable<Type> additionalKnownTypes)
     {
-      Contract.Requires(Contract.ForAll(additionalKnownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
+      Contract.Requires(additionalKnownTypes == null || Contract.ForAll(additionalKnownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
 
       this.knownAssemblies = new HashSet<Assembly>(knownAssemblies ?? Enumerable.Empty<Assembly>());
       this.knownTypes = new HashSet<Type>(additionalKnownTypes ?? Enumerable.Empty<Type>());
     }
 
-    public bool IsTypeInKnownAssembly(Type type)
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
     {
-      return knownAssemblies.Contains(type.Assembly);
-    }
-
-    public bool IsTypeKnown(object value)
-    {
-      return value == null || IsKnownType(value.GetType());
-    }
-
-    public virtual bool IsKnownType(Type type)
-    {
-      return type == null
-          || type.IsPrimitive
-          || type.IsArray && IsKnownType(type.GetElementType())
-          || IsTypeInKnownAssembly(type)
-          || knownTypes.Contains(type.IsGenericType ? type.GetGenericTypeDefinition() : type);
+      Contract.Invariant(knownAssemblies != null);
+      Contract.Invariant(knownTypes != null);
     }
 
     public void AddKnownType(Type type)
     {
+      Contract.Requires(type != null);
+
       knownTypes.Add(type);
     }
+
+    public bool IsTypeInKnownAssembly(Type type) => type != null && knownAssemblies.Contains(type.Assembly);
+
+    public bool IsTypeKnown(object value) => value == null || IsKnownType(value.GetType());
+
+    public virtual bool IsKnownType(Type type) => type == null
+                                               || type.IsPrimitive
+                                               || type.IsArray && IsKnownType(type.GetElementType())
+                                               || IsTypeInKnownAssembly(type)
+                                               || knownTypes.Contains(type.IsGenericType ? type.GetGenericTypeDefinition() : type);
   }
 }

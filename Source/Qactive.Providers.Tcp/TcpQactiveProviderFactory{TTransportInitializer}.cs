@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Net;
 
 namespace Qactive
@@ -10,8 +11,10 @@ namespace Qactive
     public TcpQactiveProviderFactory(IPEndPoint endPoint)
       : base(endPoint)
     {
+      Contract.Requires(endPoint != null);
     }
 
-    public override QactiveProvider Create() => TcpQactiveProvider.Server(EndPoint, Activator.CreateInstance<TTransportInitializer>());
+    public override QactiveProvider Create()
+      => TcpQactiveProvider.Server(EndPoint, Activator.CreateInstance<TTransportInitializer>());
   }
 }

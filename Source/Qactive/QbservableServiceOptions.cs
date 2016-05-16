@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 
 namespace Qactive
 {
@@ -84,6 +85,8 @@ namespace Qactive
     {
       get
       {
+        Contract.Ensures(Contract.Result<ServiceEvaluationContext>() != null);
+
         if (evaluationContext == null)
         {
           evaluationContext = new ServiceEvaluationContext();

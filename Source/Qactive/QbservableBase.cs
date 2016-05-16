@@ -20,6 +20,8 @@ namespace Qactive
 
     protected QbservableBase(TProvider provider)
     {
+      Contract.Requires(provider != null);
+
       Provider = provider;
       Expression = Expression.Constant(this);
     }
@@ -36,10 +38,6 @@ namespace Qactive
     }
 
     protected bool IsSource(Expression candidate)
-    {
-      var constant = candidate as ConstantExpression;
-
-      return constant != null && constant.Value == this;
-    }
+      => (candidate as ConstantExpression)?.Value == this;
   }
 }

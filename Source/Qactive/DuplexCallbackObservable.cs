@@ -15,6 +15,7 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave their contexts because they will be missed.")]
     public IDisposable Subscribe(IObserver<T> observer)
     {
+      var protocol = Protocol ?? Sink.Protocol;
       var disposables = new CompositeDisposable();
 
       Action<Action> tryExecute =
@@ -26,7 +27,7 @@ namespace Qactive
           }
           catch (Exception ex)
           {
-            Protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
+            protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
           }
         };
 
@@ -43,7 +44,7 @@ namespace Qactive
       }
       catch (Exception ex)
       {
-        Protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
+        protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
 
         disposables.Dispose();
 

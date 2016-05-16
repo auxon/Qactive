@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -17,18 +18,16 @@ namespace Qactive
     }
 
     public override Expression GetValue(PropertyInfo property, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
-    {
-      object instance = Evaluate(member.Expression, visitor, Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member);
-
-      return DuplexCallback.Create(protocol, instance, property);
-    }
+      => DuplexCallback.Create(
+          protocol,
+          Evaluate(member.Expression, visitor, Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member),
+          property);
 
     public override Expression GetValue(FieldInfo field, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
-    {
-      object instance = Evaluate(member.Expression, visitor, Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member);
-
-      return DuplexCallback.Create(protocol, instance, field);
-    }
+      => DuplexCallback.Create(
+          protocol,
+          Evaluate(member.Expression, visitor, Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member),
+          field);
 
     public override Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, IQbservableProtocol protocol)
     {
@@ -48,6 +47,10 @@ namespace Qactive
 
     internal static object Evaluate(Expression expression, ExpressionVisitor visitor, string errorMessageFormat, MemberInfo method)
     {
+      Contract.Requires(visitor != null);
+      Contract.Requires(errorMessageFormat != null);
+      Contract.Requires(method != null);
+
       if (expression == null)
       {
         return null;
