@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -17,17 +18,21 @@ namespace Qactive.Tests
 
     public DuplexSubject()
     {
-      NextLeft = Observable.Create<TestMessage>(observer => Await(left, leftEvent, observer));
-      NextRight = Observable.Create<TestMessage>(observer => Await(right, rightEvent, observer));
+      NextLeft = Observable.Create<TestMessage>(observer => Await(left, leftEvent, observer, "<-"));
+      NextRight = Observable.Create<TestMessage>(observer => Await(right, rightEvent, observer, "->"));
 
       Left = Observer.Create<TestMessage>(message =>
       {
+        Debug.WriteLine("Sending (<-): " + message);
+
         left.Enqueue(message);
         leftEvent.Release();
       });
 
       Right = Observer.Create<TestMessage>(message =>
       {
+        Debug.WriteLine("Sending (->): " + message);
+
         right.Enqueue(message);
         rightEvent.Release();
       });
@@ -41,7 +46,7 @@ namespace Qactive.Tests
 
     public IObservable<TestMessage> NextRight { get; }
 
-    private static IDisposable Await(Queue<TestMessage> messages, SemaphoreSlim waitEvent, IObserver<TestMessage> observer, bool alreadyAcquired = false)
+    private static IDisposable Await(Queue<TestMessage> messages, SemaphoreSlim waitEvent, IObserver<TestMessage> observer, string side, bool alreadyAcquired = false)
     {
       if (messages.Count > 0)
       {
@@ -50,7 +55,11 @@ namespace Qactive.Tests
           waitEvent.Wait();
         }
 
-        observer.OnNext(messages.Dequeue());
+        var message = messages.Dequeue();
+
+        Debug.WriteLine("Receive (" + side + "): " + message);
+
+        observer.OnNext(message);
         observer.OnCompleted();
 
         return Disposable.Empty;
@@ -59,7 +68,7 @@ namespace Qactive.Tests
       {
         var cancel = new CancellationDisposable();
 
-        waitEvent.WaitAsync(cancel.Token).ContinueWith(task => Await(messages, waitEvent, observer, alreadyAcquired: true), TaskContinuationOptions.ExecuteSynchronously);
+        waitEvent.WaitAsync(cancel.Token).ContinueWith(task => Await(messages, waitEvent, observer, side, alreadyAcquired: true), TaskContinuationOptions.ExecuteSynchronously);
 
         return cancel;
       }
