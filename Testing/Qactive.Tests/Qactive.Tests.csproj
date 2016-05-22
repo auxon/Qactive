@@ -35,6 +35,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Reactive.Testing, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-Testing.2.2.5\lib\net45\Microsoft.Reactive.Testing.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
@@ -65,7 +69,9 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
+          <Private>False</Private>
+        </Reference>
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -73,12 +79,27 @@
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
+    <Compile Include="CoreTests.cs" />
+    <Compile Include="DuplexStream.cs" />
+    <Compile Include="DuplexSubject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestBase.cs" />
+    <Compile Include="TestDuplexMessage.cs" />
+    <Compile Include="TestMessage.cs" />
+    <Compile Include="TestQactiveProvider.cs" />
+    <Compile Include="TestQbservableProtocol.cs" />
+    <Compile Include="TestService.cs" />
+    <Compile Include="TestService{TSource}.cs" />
+    <Compile Include="TransportStream.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Qactive.Expressions\Qactive.Expressions.csproj">
       <Project>{63f23287-b0d8-408e-995d-bf15a85cee48}</Project>
       <Name>Qactive.Expressions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Qactive.Providers.Streaming\Qactive.Providers.Streaming.csproj">
+      <Project>{c83a5841-a1ed-454c-9c66-238ad217ee83}</Project>
+      <Name>Qactive.Providers.Streaming</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Qactive.Providers.Tcp\Qactive.Providers.Tcp.csproj">
       <Project>{33525618-7ed6-4b4e-a4b7-945beaa372ff}</Project>
