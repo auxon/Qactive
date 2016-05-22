@@ -13,6 +13,15 @@ namespace Qactive
       evaluationContext = new ServiceEvaluationContext()
     };
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "It's immutable due to the frozen flag.")]
+    public static readonly QbservableServiceOptions Unrestricted = new QbservableServiceOptions()
+    {
+      frozen = true,
+      allowExpressionsUnrestricted = true,
+      enableDuplex = true,
+      evaluationContext = new ServiceEvaluationContext()
+    };
+
     public bool SendServerErrorsToClients
     {
       get
