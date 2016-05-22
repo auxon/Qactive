@@ -17,10 +17,10 @@ namespace Qactive.Tests
 
       var results = await service.QueryAsync(source => from context in source
                                                        from x in context.Range0To5
-                                                       join y in Observable.Range(3, 7)
+                                                       join y in Observable.Range(3, 5)
                                                        on Observable.Never<Unit>() equals Observable.Never<Unit>()
                                                        into ys
-                                                       from y in ys
+                                                       from y in ys.Take(3)
                                                        where x == y
                                                        select x + y);
 
@@ -38,7 +38,7 @@ namespace Qactive.Tests
                                                        join y in range3To7
                                                        on Observable.Never<Unit>() equals Observable.Never<Unit>()
                                                        into ys
-                                                       from y in ys
+                                                       from y in ys.Take(3)
                                                        where x == y
                                                        select x + y);
 
