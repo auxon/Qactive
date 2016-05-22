@@ -12,27 +12,43 @@ namespace Qactive.Tests
   {
     private readonly Type[] knownTypes;
     private readonly TestQactiveProvider provider;
+    private readonly IObservable<TSource> source;
 
-    public IReadOnlyCollection<Notification<TSource>> Notifications { get; private set; }
+    public IReadOnlyCollection<Notification<TSource>> Notifications { get; }
 
-    public TestService(Type[] knownTypes, params Notification<TSource>[] notifications)
+    public QbservableServiceOptions Options { get; }
+
+    public TestService(QbservableServiceOptions options, Type[] knownTypes, params Notification<TSource>[] notifications)
+      : this(options, knownTypes, notifications.ToObservable().Dematerialize())
     {
-      this.knownTypes = knownTypes;
       Notifications = notifications;
     }
 
-    public TestService(TestQactiveProvider provider, params Notification<TSource>[] notifications)
+    public TestService(QbservableServiceOptions options, TestQactiveProvider provider, params Notification<TSource>[] notifications)
+      : this(options, provider, notifications.ToObservable().Dematerialize())
     {
-      this.provider = provider;
       Notifications = notifications;
+    }
+
+    public TestService(QbservableServiceOptions options, Type[] knownTypes, IObservable<TSource> source)
+    {
+      Options = options ?? QbservableServiceOptions.Default;
+      this.knownTypes = knownTypes;
+      this.source = source;
+    }
+
+    public TestService(QbservableServiceOptions options, TestQactiveProvider provider, IObservable<TSource> source)
+    {
+      Options = options ?? QbservableServiceOptions.Default;
+      this.provider = provider;
+      this.source = source;
     }
 
     public async Task<IReadOnlyCollection<Notification<TResult>>> QueryAsync<TResult>(
       Func<IQbservable<TSource>, IQbservable<TResult>> query)
     {
       var p = provider ?? TestQactiveProvider.Create<TSource>(knownTypes);
-      var source = Notifications.ToObservable().Dematerialize();
-      var server = source.ServeQbservable(p);
+      var server = source.ServeQbservable(p, Options);
       var client = query(p.CreateQuery<TSource>());
 
       var both = server.Take(1).IgnoreElements().Cast<Notification<TResult>>().Merge(client.AsObservable().Materialize()).Publish();
