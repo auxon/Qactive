@@ -83,6 +83,7 @@
     <Compile Include="DuplexStream.cs" />
     <Compile Include="DuplexSubject.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Queries\JoinTests.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="TestDuplexMessage.cs" />
     <Compile Include="TestMessage.cs" />
