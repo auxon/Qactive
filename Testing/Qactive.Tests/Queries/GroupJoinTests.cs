@@ -13,6 +13,57 @@ namespace Qactive.Tests
     [TestMethod]
     public async Task GroupJoin()
     {
+      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Range(0, 6));
+
+      var results = await service.QueryAsync(source => from x in source
+                                                       join y in Observable.Range(3, 5)
+                                                       on Observable.Never<Unit>() equals Observable.Never<Unit>()
+                                                       into ys
+                                                       from y in ys.Take(3)
+                                                       where x == y
+                                                       select x + y);
+
+      results.AssertEqual(OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+    }
+
+    [TestMethod]
+    public async Task GroupJoinClosure()
+    {
+      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Range(0, 6));
+      var range3To7 = Observable.Range(3, 5);
+
+      var results = await service.QueryAsync(source => from x in source
+                                                       join y in range3To7
+                                                       on Observable.Never<Unit>() equals Observable.Never<Unit>()
+                                                       into ys
+                                                       from y in ys.Take(3)
+                                                       where x == y
+                                                       select x + y);
+
+      results.AssertEqual(OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+    }
+
+    [TestMethod]
+    public async Task GroupJoinDurationClosure()
+    {
+      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Range(0, 6));
+      var range3To7 = Observable.Range(3, 5);
+      var otherDuration = Observable.Never<Unit>();
+
+      var results = await service.QueryAsync(source => from x in source
+                                                       join y in range3To7
+                                                       on Observable.Never<Unit>() equals otherDuration
+                                                       into ys
+                                                       from y in ys.Take(3)
+                                                       where x == y
+                                                       select x + y);
+
+      results.AssertEqual(OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+    }
+
+    [TestMethod]
+    public async Task GroupJoinWithContext()
+    {
       var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Return(new TestContext()));
 
       var results = await service.QueryAsync(source => from context in source
@@ -28,7 +79,7 @@ namespace Qactive.Tests
     }
 
     [TestMethod]
-    public async Task GroupJoinClosure()
+    public async Task GroupJoinClosureWithContext()
     {
       var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Return(new TestContext()));
       var range3To7 = Observable.Range(3, 5);
