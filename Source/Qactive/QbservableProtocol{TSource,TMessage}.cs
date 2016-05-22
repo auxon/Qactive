@@ -5,8 +5,8 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Remoting.Messaging;
 using System.Threading;
@@ -136,62 +136,92 @@ namespace Qactive
 
     protected override IObservable<TResult> ClientReceive<TResult>()
     {
-      return Observable.Create<TResult>(o =>
+      return Observable.Create<TResult>(
+        async (observer, cancel) =>
+        {
+          var deserializeAnonymousTypeOnNext = TryGetAnonymousTypeDeserializer<TResult>();
+
+          do
+          {
+            var message = await ReceiveMessageAsync().ConfigureAwait(false);
+
+            switch (message.Kind)
+            {
+              case QbservableProtocolMessageKind.OnNext:
+                observer.OnNext(deserializeAnonymousTypeOnNext != null
+                              ? deserializeAnonymousTypeOnNext(message)
+                              : Deserialize<TResult>(message));
+                break;
+              case QbservableProtocolMessageKind.OnCompleted:
+                Deserialize<object>(message);  // just in case data is sent, though it's unexpected.
+                observer.OnCompleted();
+                goto Return;
+              case QbservableProtocolMessageKind.OnError:
+                observer.OnError(Deserialize<Exception>(message));
+                goto Return;
+              case QbservableProtocolMessageKind.Shutdown:
+                ShutdownWithoutResponse(GetShutdownReason(message, QbservableProtocolShutdownReason.None));
+                goto Return;
+              default:
+                if (!message.Handled)
+                {
+                  throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Errors.ProtocolUnknownMessageKindFormat, message.Kind));
+                }
+                break;
+            }
+          }
+          while (!cancel.IsCancellationRequested && !Cancel.IsCancellationRequested);
+
+          Return:
+          return () => { };
+        })
+        .Finally(async () =>
+        {
+          try
+          {
+            await ShutdownAsync(QbservableProtocolShutdownReason.ClientTerminated).ConfigureAwait(false);
+          }
+          catch (OperationCanceledException)
+          {
+          }
+          catch (Exception ex)
+          {
+            CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
+          }
+        });
+    }
+
+    private Func<TMessage, TResult> TryGetAnonymousTypeDeserializer<TResult>()
+    {
+      Func<TMessage, TResult> deserializer = null;
+      var resultType = typeof(TResult);
+      ConstructorInfo constructor;
+      IList<string> propertiesInConstructorOrder;
+
+      if (resultType.IsNotPublic
+        && resultType.GetCustomAttributes(typeof(CompilerGenerated), inherit: false) != null
+        && (constructor = resultType.GetConstructors().SingleOrDefault()) != null
+        && (propertiesInConstructorOrder =
+              (from property in resultType.GetProperties()
+               join parameter in constructor.GetParameters()
+               on property.Name equals parameter.Name
+               orderby parameter.Position
+               select property.Name)
+               .ToList())
+           .Count == resultType.GetProperties().Length)
       {
-        var subscription = Observable.Create<TResult>(
-          async (observer, cancel) =>
-          {
-            do
-            {
-              var message = await ReceiveMessageAsync().ConfigureAwait(false);
+        deserializer = message =>
+        {
+          var result = Deserialize<CompilerGenerated>(message);
 
-              switch (message.Kind)
-              {
-                case QbservableProtocolMessageKind.OnNext:
-                  observer.OnNext(Deserialize<TResult>(message));
-                  break;
-                case QbservableProtocolMessageKind.OnCompleted:
-                  Deserialize<object>(message);  // just in case data is sent, though it's unexpected.
-                  observer.OnCompleted();
-                  goto Return;
-                case QbservableProtocolMessageKind.OnError:
-                  observer.OnError(Deserialize<Exception>(message));
-                  goto Return;
-                case QbservableProtocolMessageKind.Shutdown:
-                  ShutdownWithoutResponse(GetShutdownReason(message, QbservableProtocolShutdownReason.None));
-                  goto Return;
-                default:
-                  if (!message.Handled)
-                  {
-                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Errors.ProtocolUnknownMessageKindFormat, message.Kind));
-                  }
-                  break;
-              }
-            }
-            while (!cancel.IsCancellationRequested && !Cancel.IsCancellationRequested);
+          return (TResult)constructor.Invoke(
+            (from property in propertiesInConstructorOrder
+             select result.GetProperty<object>(property))
+             .ToArray());
+        };
+      }
 
-            Return:
-            return () => { };
-          })
-          .Subscribe(o);
-
-        return new CompositeDisposable(
-          subscription,
-          Disposable.Create(async () =>
-          {
-            try
-            {
-              await ShutdownAsync(QbservableProtocolShutdownReason.ClientTerminated).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception ex)
-            {
-              CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
-            }
-          }));
-      });
+      return deserializer;
     }
 
     protected virtual bool ServerHandleClientShutdown(TMessage message)
