@@ -8,10 +8,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Qactive.Tests
 {
   [TestClass]
-  public class JoinTests : TestBase
+  public class GroupJoinTests : TestBase
   {
     [TestMethod]
-    public async Task Join()
+    public async Task GroupJoin()
     {
       var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Return(new TestContext()));
 
@@ -19,6 +19,8 @@ namespace Qactive.Tests
                                                        from x in context.Range0To5
                                                        join y in Observable.Range(3, 7)
                                                        on Observable.Never<Unit>() equals Observable.Never<Unit>()
+                                                       into ys
+                                                       from y in ys
                                                        where x == y
                                                        select x + y);
 
@@ -26,7 +28,7 @@ namespace Qactive.Tests
     }
 
     [TestMethod]
-    public async Task JoinClosure()
+    public async Task GroupJoinClosure()
     {
       var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Return(new TestContext()));
       var range3To7 = Observable.Range(3, 5);
@@ -35,6 +37,8 @@ namespace Qactive.Tests
                                                        from x in context.Range0To5
                                                        join y in range3To7
                                                        on Observable.Never<Unit>() equals Observable.Never<Unit>()
+                                                       into ys
+                                                       from y in ys
                                                        where x == y
                                                        select x + y);
 
