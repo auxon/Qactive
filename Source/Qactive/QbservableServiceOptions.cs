@@ -22,6 +22,13 @@ namespace Qactive
       evaluationContext = new ServiceEvaluationContext()
     };
 
+    private bool frozen;
+    private bool sendServerErrorsToClients;
+    private bool enableDuplex;
+    private bool allowExpressionsUnrestricted;
+    private ExpressionOptions expressionOptions;
+    private ServiceEvaluationContext evaluationContext;
+
     public bool SendServerErrorsToClients
     {
       get
@@ -114,11 +121,34 @@ namespace Qactive
       }
     }
 
-    private bool frozen;
-    private bool sendServerErrorsToClients;
-    private bool enableDuplex;
-    private bool allowExpressionsUnrestricted;
-    private ExpressionOptions expressionOptions;
-    private ServiceEvaluationContext evaluationContext;
+    public QbservableServiceOptions()
+    {
+    }
+
+    public QbservableServiceOptions(QbservableServiceOptions clone)
+    {
+      Contract.Requires(clone != null);
+
+      sendServerErrorsToClients = clone.sendServerErrorsToClients;
+      enableDuplex = clone.enableDuplex;
+      allowExpressionsUnrestricted = clone.allowExpressionsUnrestricted;
+      expressionOptions = clone.expressionOptions;
+      evaluationContext = clone.evaluationContext;
+    }
+
+    public QbservableServiceOptions Freeze()
+    {
+      Contract.Ensures(Contract.Result<QbservableServiceOptions>() != null);
+
+      frozen = true;
+      return this;
+    }
+
+    public QbservableServiceOptions Clone()
+    {
+      Contract.Ensures(Contract.Result<QbservableServiceOptions>() != null);
+
+      return new QbservableServiceOptions(this);
+    }
   }
 }
