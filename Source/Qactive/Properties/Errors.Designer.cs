@@ -97,6 +97,15 @@ namespace Qactive.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The query executes a method &quot;{0}&quot; on an unknown type &quot;{1}&quot;..
+        /// </summary>
+        internal static string ExpressionCallOnUnknownTypeFormat {
+            get {
+                return ResourceManager.GetString("ExpressionCallOnUnknownTypeFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A closure was not replaced while visiting its members.  This may indicate a problem with the visitor..
         /// </summary>
         internal static string ExpressionClosureBug {

@@ -129,6 +129,9 @@
   <data name="ExpressionCallMissingLocalInstanceFormat" xml:space="preserve">
     <value>The query executes a method "{0}" on a local type "{1}" for which an instance is not available locally.</value>
   </data>
+  <data name="ExpressionCallOnUnknownTypeFormat" xml:space="preserve">
+    <value>The query executes a method "{0}" on an unknown type "{1}".</value>
+  </data>
   <data name="ExpressionClosureBug" xml:space="preserve">
     <value>A closure was not replaced while visiting its members.  This may indicate a problem with the visitor.</value>
   </data>

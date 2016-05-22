@@ -20,7 +20,7 @@ namespace Qactive
 
     public override Expression GetValue(PropertyInfo property, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
     {
-      object instance = Evaluate(member.Expression, visitor, Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member);
+      object instance = Evaluate(member.Expression, visitor, _ => Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member);
 
       var value = property.GetValue(instance);
 
@@ -35,7 +35,7 @@ namespace Qactive
 
     public override Expression GetValue(FieldInfo field, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
     {
-      object instance = Evaluate(member.Expression, visitor, Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member);
+      object instance = Evaluate(member.Expression, visitor, _ => Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member);
 
       var value = field.GetValue(instance);
 
@@ -55,7 +55,7 @@ namespace Qactive
         throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Errors.ExpressionCallLocalVoidFormat, call.Method, call.Object));
       }
 
-      object instance = Evaluate(call.Object, visitor, Errors.ExpressionCallMissingLocalInstanceFormat, call.Method);
+      object instance = Evaluate(call.Object, visitor, _ => Errors.ExpressionCallMissingLocalInstanceFormat, call.Method);
 
       var result = call.Method.Invoke(instance, EvaluateArguments(call, visitor).ToArray());
 
@@ -74,8 +74,20 @@ namespace Qactive
       Contract.Requires(visitor != null);
 
       return call.Arguments
-                ?.Select(e => Evaluate(e, visitor, Errors.ExpressionCallMissingLocalArgumentFormat, call.Method))
+                ?.Select(e => Evaluate(e, visitor, exp => IsSourceInScope(exp) ? Errors.ExpressionCallOnUnknownTypeFormat : Errors.ExpressionCallMissingLocalArgumentFormat, call.Method))
                  .ToArray();
+    }
+
+    private static bool IsSourceInScope(Expression expression)
+    {
+      var isParameter = false;
+
+      while (expression != null && !(isParameter = expression is ParameterExpression))
+      {
+        expression = (expression as MemberExpression)?.Expression;
+      }
+
+      return isParameter;
     }
 
     protected override Either<object, Expression> TryEvaluateEnumerable(object value, Type type, IQbservableProtocol protocol)

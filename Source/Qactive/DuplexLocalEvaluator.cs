@@ -20,13 +20,13 @@ namespace Qactive
     public override Expression GetValue(PropertyInfo property, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
       => DuplexCallback.Create(
           protocol,
-          Evaluate(member.Expression, visitor, Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member),
+          Evaluate(member.Expression, visitor, _ => Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member),
           property);
 
     public override Expression GetValue(FieldInfo field, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
       => DuplexCallback.Create(
           protocol,
-          Evaluate(member.Expression, visitor, Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member),
+          Evaluate(member.Expression, visitor, _ => Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member),
           field);
 
     public override Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, IQbservableProtocol protocol)
@@ -39,16 +39,16 @@ namespace Qactive
       }
       else
       {
-        instance = Evaluate(call.Object, visitor, Errors.ExpressionCallMissingLocalInstanceFormat, call.Method);
+        instance = Evaluate(call.Object, visitor, _ => Errors.ExpressionCallMissingLocalInstanceFormat, call.Method);
       }
 
       return DuplexCallback.Create(protocol, instance, call.Method, visitor.Visit(call.Arguments));
     }
 
-    internal static object Evaluate(Expression expression, ExpressionVisitor visitor, string errorMessageFormat, MemberInfo method)
+    internal static object Evaluate(Expression expression, ExpressionVisitor visitor, Func<Expression, string> errorMessageFormatSelector, MemberInfo method)
     {
       Contract.Requires(visitor != null);
-      Contract.Requires(errorMessageFormat != null);
+      Contract.Requires(errorMessageFormatSelector != null);
       Contract.Requires(method != null);
 
       if (expression == null)
@@ -62,7 +62,7 @@ namespace Qactive
 
       if (constant == null)
       {
-        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, errorMessageFormat, method.Name, method.DeclaringType));
+        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, errorMessageFormatSelector(expression), method.Name, method.DeclaringType));
       }
 
       return constant.Value;
