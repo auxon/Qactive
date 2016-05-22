@@ -56,7 +56,7 @@ namespace Qactive.Tests
 
       using (both.Subscribe(results.Add))
       {
-        var completed = both.ToTask();
+        var completed = both.Dematerialize().IgnoreElements().OnErrorResumeNext(Observable.Return(default(TResult))).ToTask();
 
         using (both.Connect())
         {
