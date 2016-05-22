@@ -57,7 +57,7 @@ namespace Qactive.Tests
 
            try
            {
-             using (var protocol = new TestQbservableProtocol(transport.NextRight, transport.Left, QbservableServiceOptions.Default))
+             using (var protocol = new TestQbservableProtocol(transport.NextRight, transport.Left, options))
              {
                var provider = providerFactory(protocol);
 
