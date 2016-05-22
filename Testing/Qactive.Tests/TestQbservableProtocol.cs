@@ -100,7 +100,7 @@ namespace Qactive
         => new TestDuplexMessage(QbservableProtocolMessageKind.DuplexSubscribeResponse, id, clientSubscriptionId);
 
       protected override IDuplexProtocolMessage TryParseDuplexMessage(TestMessage message)
-        => (TestDuplexMessage)message;
+        => message as TestDuplexMessage;
     }
 
     private sealed class ServerDuplexSink : ServerDuplexQbservableProtocolSink<IObservable<TestMessage>, TestMessage>
@@ -134,7 +134,7 @@ namespace Qactive
         => new TestDuplexMessage(QbservableProtocolMessageKind.DuplexResetEnumerator, enumeratorId);
 
       protected override IDuplexProtocolMessage TryParseDuplexMessage(TestMessage message)
-        => (TestDuplexMessage)message;
+        => message as TestDuplexMessage;
     }
   }
 }
