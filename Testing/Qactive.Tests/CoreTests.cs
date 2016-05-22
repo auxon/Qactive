@@ -20,7 +20,7 @@ namespace Qactive.Tests
     [TestMethod]
     public async Task SelectAnonymousType1()
     {
-      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Return(123));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(123));
       var results = await service.QueryAsync(xs => from x in xs
                                                    select new { Value = x });
 
@@ -30,7 +30,7 @@ namespace Qactive.Tests
     [TestMethod]
     public async Task SelectAnonymousType2()
     {
-      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Return(123));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(123));
       var results = await service.QueryAsync(xs => from x in xs
                                                    select new { Value = x, ValueDoubled = x * 2 });
 

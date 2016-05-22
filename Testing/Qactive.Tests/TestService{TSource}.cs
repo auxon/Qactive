@@ -32,14 +32,14 @@ namespace Qactive.Tests
 
     public TestService(QbservableServiceOptions options, Type[] knownTypes, IObservable<TSource> source)
     {
-      Options = options ?? QbservableServiceOptions.Default;
+      Options = options ?? TestService.DefaultOptions;
       this.knownTypes = knownTypes;
       this.source = source;
     }
 
     public TestService(QbservableServiceOptions options, TestQactiveProvider provider, IObservable<TSource> source)
     {
-      Options = options ?? QbservableServiceOptions.Default;
+      Options = options ?? TestService.DefaultOptions;
       this.provider = provider;
       this.source = source;
     }

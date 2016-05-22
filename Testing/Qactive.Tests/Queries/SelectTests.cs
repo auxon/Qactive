@@ -24,7 +24,7 @@ namespace Qactive.Tests.Queries
     {
       Func<int, int> selector = x => x * 5;
 
-      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Range(0, 5));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Range(0, 5));
       var results = await service.QueryAsync(xs => from x in xs
                                                    select selector(x));
 

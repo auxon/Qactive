@@ -13,7 +13,7 @@ namespace Qactive.Tests
     [TestMethod]
     public async Task GroupJoin()
     {
-      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Range(0, 6));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Range(0, 6));
 
       var results = await service.QueryAsync(source => from x in source
                                                        join y in Observable.Range(3, 5)
@@ -29,7 +29,7 @@ namespace Qactive.Tests
     [TestMethod]
     public async Task GroupJoinClosure()
     {
-      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Range(0, 6));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Range(0, 6));
       var range3To7 = Observable.Range(3, 5);
 
       var results = await service.QueryAsync(source => from x in source
@@ -46,7 +46,7 @@ namespace Qactive.Tests
     [TestMethod]
     public async Task GroupJoinDurationClosure()
     {
-      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Range(0, 6));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Range(0, 6));
       var range3To7 = Observable.Range(3, 5);
       var otherDuration = Observable.Never<Unit>();
 
@@ -64,7 +64,7 @@ namespace Qactive.Tests
     [TestMethod]
     public async Task GroupJoinWithContext()
     {
-      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Return(new TestContext()));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var results = await service.QueryAsync(source => from context in source
                                                        from x in context.Range0To5
@@ -81,7 +81,7 @@ namespace Qactive.Tests
     [TestMethod]
     public async Task GroupJoinClosureWithContext()
     {
-      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Return(new TestContext()));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(new TestContext()));
       var range3To7 = Observable.Range(3, 5);
 
       var results = await service.QueryAsync(source => from context in source

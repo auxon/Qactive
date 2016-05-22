@@ -25,7 +25,7 @@ namespace Qactive.Tests.Queries
     {
       Func<int, bool> predicate = x => x % 2 == 0;
 
-      var service = TestService.Create(QbservableServiceOptions.Unrestricted, Observable.Range(0, 5));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Range(0, 5));
       var results = await service.QueryAsync(xs => from x in xs
                                                    where predicate(x)
                                                    select x);
