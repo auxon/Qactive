@@ -31,7 +31,6 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
     private void ObjectInvariant()
     {
-      Contract.Invariant(Protocol != null);
       Contract.Invariant(invokeCallbacks != null);
       Contract.Invariant(enumeratorCallbacks != null);
       Contract.Invariant(observableCallbacks != null);
