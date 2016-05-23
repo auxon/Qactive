@@ -162,6 +162,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Nop.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TcpClientTermination.cs" />
     <Compile Include="TcpQactiveDefaults.cs" />
     <Compile Include="TcpQactiveProviderFactory.cs" />
     <Compile Include="TcpQactiveProviderFactory{TTransportInitializer}.cs" />

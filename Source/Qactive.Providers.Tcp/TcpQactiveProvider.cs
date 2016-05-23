@@ -272,7 +272,7 @@ namespace Qactive
                  exceptions.Add(ExceptionDispatchInfo.Capture(ex));
                }
 
-               return new ClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
+               return new TcpClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
              })
              .Finally(client.Close)
              select result;

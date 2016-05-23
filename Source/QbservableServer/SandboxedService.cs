@@ -51,7 +51,7 @@ namespace QbservableServer
             ConsoleTrace.WriteLine(ConsoleColor.Magenta, $"Sandboxed service error: {security?.Demanded ?? ex.SourceException.Message}");
           }
 
-          ConsoleTrace.WriteLine(ConsoleColor.Yellow, $"Malicious client shutdown: {terminatedClient.Reason}");
+          ConsoleTrace.WriteLine(ConsoleColor.Yellow, $"Malicious client shutdown: {terminatedClient}");
         }),
         ex => DoUnrestricted(() => ConsoleTrace.WriteLine(ConsoleColor.Red, $"Sandboxed service fatal error: {ex.Message}")),
         () => Console.WriteLine("This will never be printed because a service host never completes."));

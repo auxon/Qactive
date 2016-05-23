@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq.Expressions;
-using System.Net;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.ExceptionServices;
@@ -97,7 +96,7 @@ namespace Qactive.Tests
              exceptions.Add(ExceptionDispatchInfo.Capture(ex));
            }
 
-           return new ClientTermination(new IPEndPoint(IPAddress.Loopback, 0), new IPEndPoint(IPAddress.Loopback, 0), watch.Elapsed, shutdownReason, exceptions);
+           return new ClientTermination(watch.Elapsed, shutdownReason, exceptions);
          })
          select result;
   }
