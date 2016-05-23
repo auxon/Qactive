@@ -263,12 +263,6 @@
       <Link>Properties\CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Qactive.Expressions\Qactive.Expressions.csproj">
-      <Project>{63f23287-b0d8-408e-995d-bf15a85cee48}</Project>
-      <Name>Qactive.Expressions</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

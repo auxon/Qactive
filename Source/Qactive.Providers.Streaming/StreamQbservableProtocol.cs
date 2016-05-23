@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Security;
 using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
+using Qactive.Expressions;
 
 namespace Qactive
 {
@@ -154,6 +156,12 @@ namespace Qactive
 
       return new StreamMessage(messageKind, new byte[0]);
     }
+
+    protected override object PrepareExpressionForMessage(Expression expression)
+      => new SerializableExpressionConverter().TryConvert(expression);
+
+    protected override Expression GetExpressionFromMessage(StreamMessage message)
+      => SerializableExpressionConverter.TryConvert(Deserialize<SerializableExpression>(message));
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification = "Reviewed")]
     public byte[] Serialize(object data, out long length)
