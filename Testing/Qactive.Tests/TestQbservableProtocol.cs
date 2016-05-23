@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq.Expressions;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -39,6 +40,12 @@ namespace Qactive
 
     protected override T Deserialize<T>(TestMessage message)
       => (T)message.Value;
+
+    protected override object PrepareExpressionForMessage(Expression expression)
+      => expression;
+
+    protected override Expression GetExpressionFromMessage(TestMessage message)
+      => Deserialize<Expression>(message);
 
     protected override QbservableProtocolShutdownReason GetShutdownReason(TestMessage message, QbservableProtocolShutdownReason defaultReason)
       => defaultReason;

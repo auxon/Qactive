@@ -10,7 +10,6 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Qactive.Expressions;
 using Qactive.Properties;
 
 namespace Qactive
@@ -75,10 +74,12 @@ namespace Qactive
         await SendMessageAsync(CreateMessage(QbservableProtocolMessageKind.Argument, argument)).ConfigureAwait(false);
       }
 
-      var converter = new SerializableExpressionConverter();
-
-      await SendMessageAsync(CreateMessage(QbservableProtocolMessageKind.Subscribe, converter.TryConvert(expression))).ConfigureAwait(false);
+      await SendMessageAsync(CreateMessage(QbservableProtocolMessageKind.Subscribe, PrepareExpressionForMessage(expression))).ConfigureAwait(false);
     }
+
+    protected abstract object PrepareExpressionForMessage(Expression expression);
+
+    protected abstract Expression GetExpressionFromMessage(TMessage message);
 
     protected override async Task<Tuple<Expression, object>> ServerReceiveQueryAsync()
     {
@@ -101,9 +102,7 @@ namespace Qactive
 
         if (message.Kind == QbservableProtocolMessageKind.Subscribe)
         {
-          var converter = new SerializableExpressionConverter();
-
-          return Tuple.Create(SerializableExpressionConverter.TryConvert(Deserialize<SerializableExpression>(message)), argument);
+          return Tuple.Create(GetExpressionFromMessage(message), argument);
         }
         else if (ServerHandleClientShutdown(message))
         {
