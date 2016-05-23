@@ -46,6 +46,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qactive.Tests", "Testing\Qa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qactive.Providers.Streaming", "Source\Qactive.Providers.Streaming\Qactive.Providers.Streaming.csproj", "{C83A5841-A1ED-454C-9C66-238AD217EE83}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qactive.Portable-Net45", "Source\Qactive.Portable-Net45\Qactive.Portable-Net45.csproj", "{FDFE9523-BB5D-4E3F-A2DA-AEC88EC556EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,6 +86,10 @@ Global
 		{C83A5841-A1ED-454C-9C66-238AD217EE83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C83A5841-A1ED-454C-9C66-238AD217EE83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C83A5841-A1ED-454C-9C66-238AD217EE83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDFE9523-BB5D-4E3F-A2DA-AEC88EC556EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDFE9523-BB5D-4E3F-A2DA-AEC88EC556EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDFE9523-BB5D-4E3F-A2DA-AEC88EC556EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDFE9523-BB5D-4E3F-A2DA-AEC88EC556EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,5 +104,6 @@ Global
 		{33525618-7ED6-4B4E-A4B7-945BEAA372FF} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
 		{5BA353FF-7C86-4BD4-BE64-8FF7572A993D} = {F6E91F88-34F1-4B64-82A5-30EB1BF2C251}
 		{C83A5841-A1ED-454C-9C66-238AD217EE83} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
+		{FDFE9523-BB5D-4E3F-A2DA-AEC88EC556EB} = {9D1E9076-948A-4EED-B4E5-3D419E62E05A}
 	EndGlobalSection
 EndGlobal
