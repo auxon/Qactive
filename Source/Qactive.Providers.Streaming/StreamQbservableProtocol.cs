@@ -14,23 +14,28 @@ namespace Qactive
   {
     private readonly AsyncConsumerQueue sendQ = new AsyncConsumerQueue();
     private readonly AsyncConsumerQueue receiveQ = new AsyncConsumerQueue();
+    private readonly IRemotingFormatter formatter;
 
     public StreamQbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
-    : base(stream, formatter, cancel)
+    : base(stream, cancel)
     {
       Contract.Requires(stream != null);
       Contract.Requires(formatter != null);
+
+      this.formatter = formatter;
 
       sendQ.UnhandledExceptions.Subscribe(AddError);
       receiveQ.UnhandledExceptions.Subscribe(AddError);
     }
 
     public StreamQbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
-    : base(stream, formatter, serviceOptions, cancel)
+    : base(stream, serviceOptions, cancel)
     {
       Contract.Requires(stream != null);
       Contract.Requires(formatter != null);
       Contract.Requires(serviceOptions != null);
+
+      this.formatter = formatter;
 
       sendQ.UnhandledExceptions.Subscribe(AddError);
       receiveQ.UnhandledExceptions.Subscribe(AddError);
@@ -170,7 +175,7 @@ namespace Qactive
 
           try
           {
-            Formatter.Serialize(memory, data);
+            formatter.Serialize(memory, data);
           }
           finally
           {
@@ -224,7 +229,7 @@ namespace Qactive
 
           try
           {
-            return (T)Formatter.Deserialize(memory);
+            return (T)formatter.Deserialize(memory);
           }
           finally
           {

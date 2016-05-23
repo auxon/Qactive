@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reactive;
-using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,29 +15,23 @@ namespace Qactive
   {
     protected TSource Source { get; }
 
-    protected IRemotingFormatter Formatter { get; }
-
-    internal QbservableProtocol(TSource source, IRemotingFormatter formatter, CancellationToken cancel)
+    internal QbservableProtocol(TSource source, CancellationToken cancel)
       : base(cancel)
     {
       Contract.Requires(source != null);
-      Contract.Requires(formatter != null);
       Contract.Ensures(IsClient);
 
       Source = source;
-      Formatter = formatter;
     }
 
-    internal QbservableProtocol(TSource source, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    internal QbservableProtocol(TSource source, QbservableServiceOptions serviceOptions, CancellationToken cancel)
       : base(serviceOptions, cancel)
     {
       Contract.Requires(source != null);
-      Contract.Requires(formatter != null);
       Contract.Requires(serviceOptions != null);
       Contract.Ensures(!IsClient);
 
       Source = source;
-      Formatter = formatter;
     }
 
     [ContractInvariantMethod]
@@ -46,7 +39,6 @@ namespace Qactive
     private void ObjectInvariant()
     {
       Contract.Invariant(Source != null);
-      Contract.Invariant(Formatter != null);
     }
   }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.ExceptionServices;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,13 +11,13 @@ namespace Qactive
     private readonly IObserver<TestMessage> other;
 
     public TestQbservableProtocol(IObservable<TestMessage> source, IObserver<TestMessage> other)
-      : base(source, new BinaryFormatter(), CancellationToken.None)
+      : base(source, CancellationToken.None)
     {
       this.other = other;
     }
 
     public TestQbservableProtocol(IObservable<TestMessage> source, IObserver<TestMessage> other, QbservableServiceOptions serviceOptions)
-      : base(source, new BinaryFormatter(), serviceOptions, CancellationToken.None)
+      : base(source, serviceOptions, CancellationToken.None)
     {
       this.other = other;
     }

@@ -8,7 +8,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
-using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
 using Qactive.Expressions;
@@ -23,19 +22,17 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
     protected IList<QbservableProtocolSink<TSource, TMessage>> Sinks { get; } = new List<QbservableProtocolSink<TSource, TMessage>>();
 
-    protected QbservableProtocol(TSource source, IRemotingFormatter formatter, CancellationToken cancel)
-      : base(source, formatter, cancel)
+    protected QbservableProtocol(TSource source, CancellationToken cancel)
+      : base(source, cancel)
     {
       Contract.Requires(source != null);
-      Contract.Requires(formatter != null);
       Contract.Ensures(IsClient);
     }
 
-    protected QbservableProtocol(TSource source, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
-      : base(source, formatter, serviceOptions, cancel)
+    protected QbservableProtocol(TSource source, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+      : base(source, serviceOptions, cancel)
     {
       Contract.Requires(source != null);
-      Contract.Requires(formatter != null);
       Contract.Requires(serviceOptions != null);
       Contract.Ensures(!IsClient);
     }
@@ -459,8 +456,8 @@ namespace Qactive
   internal abstract class QbservableProtocolContract<TSource, TMessage> : QbservableProtocol<TSource, TMessage>
     where TMessage : IProtocolMessage
   {
-    protected QbservableProtocolContract(TSource source, IRemotingFormatter formatter, CancellationToken cancel)
-      : base(source, formatter, cancel)
+    protected QbservableProtocolContract(TSource source, CancellationToken cancel)
+      : base(source, cancel)
     {
     }
 
