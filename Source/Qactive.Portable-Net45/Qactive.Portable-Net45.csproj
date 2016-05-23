@@ -133,12 +133,235 @@
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive\ClientDuplexQbservableProtocolSink.cs">
+      <Link>ClientDuplexQbservableProtocolSink.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ClientQuery.cs">
+      <Link>ClientQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ClientTermination.cs">
+      <Link>ClientTermination.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\CompilerGenerated.cs">
+      <Link>CompilerGenerated.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\DuplexCallback.cs">
+      <Link>DuplexCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\DuplexCallbackEnumerable.cs">
+      <Link>DuplexCallbackEnumerable.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\DuplexCallbackId.cs">
+      <Link>DuplexCallbackId.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\DuplexCallbackObservable.cs">
+      <Link>DuplexCallbackObservable.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\DuplexLocalEvaluator.cs">
+      <Link>DuplexLocalEvaluator.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\Either.cs">
+      <Link>Either.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\Either{TLeft,TRight}.cs">
+      <Link>Either{TLeft,TRight}.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ExceptionDispatchInfoEqualityComparer.cs">
+      <Link>ExceptionDispatchInfoEqualityComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ExpressionOptions.cs">
+      <Link>ExpressionOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ExpressionSecurityException.cs">
+      <Link>ExpressionSecurityException.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\Extensions\Observable3.cs">
+      <Link>Extensions\Observable3.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\Extensions\TypeExtensions.cs">
+      <Link>Extensions\TypeExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\GlobalSuppressions.cs">
+      <Link>GlobalSuppressions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\IClientDuplexQbservableProtocolSink.cs">
+      <Link>IClientDuplexQbservableProtocolSink.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\IDuplexProtocolMessage.cs">
+      <Link>IDuplexProtocolMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ImmediateLocalEvaluator.cs">
+      <Link>ImmediateLocalEvaluator.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\IParameterizedQbservableProvider.cs">
+      <Link>IParameterizedQbservableProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\IProtocolMessage.cs">
+      <Link>IProtocolMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\IQactiveProvider.cs">
+      <Link>IQactiveProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\IQbservableProtocol.cs">
+      <Link>IQbservableProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ISecureQbservable.cs">
+      <Link>ISecureQbservable.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\IServerDuplexQbservableProtocolSink.cs">
+      <Link>IServerDuplexQbservableProtocolSink.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\KnownTypeContext.cs">
+      <Link>KnownTypeContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\LocalEvaluationContext.cs">
+      <Link>LocalEvaluationContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\LocalEvaluationVisitor.cs">
+      <Link>LocalEvaluationVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\LocalEvaluator.cs">
+      <Link>LocalEvaluator.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\Log - Expressions.cs">
+      <Link>Log - Expressions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\Log.cs">
+      <Link>Log.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\NotificationKindExtensions.cs">
+      <Link>NotificationKindExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QactiveProvider.cs">
+      <Link>QactiveProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QactiveProviderFactory.cs">
+      <Link>QactiveProviderFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QactiveTraceSources.cs">
+      <Link>QactiveTraceSources.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\Qbservable2.cs">
+      <Link>Qbservable2.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableBase.cs">
+      <Link>QbservableBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableProtocol.cs">
+      <Link>QbservableProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableProtocolMessageKind.cs">
+      <Link>QbservableProtocolMessageKind.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableProtocolShutdownReason.cs">
+      <Link>QbservableProtocolShutdownReason.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableProtocolSink{TMessage}.cs">
+      <Link>QbservableProtocolSink{TMessage}.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableProtocol{TSource,TMessage}.cs">
+      <Link>QbservableProtocol{TSource,TMessage}.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableProtocol{TSource}.cs">
+      <Link>QbservableProtocol{TSource}.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableServer - Secure.cs">
+      <Link>QbservableServer - Secure.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableServer.cs">
+      <Link>QbservableServer.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableServiceConverter.cs">
+      <Link>QbservableServiceConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableServiceOptions.cs">
+      <Link>QbservableServiceOptions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableSourcePlaceholder.cs">
+      <Link>QbservableSourcePlaceholder.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\QbservableSubscriptionException.cs">
+      <Link>QbservableSubscriptionException.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ReplaceConstantsVisitor.cs">
+      <Link>ReplaceConstantsVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\RxSecureQbservable.cs">
+      <Link>RxSecureQbservable.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\SecurityExpressionVisitor.cs">
+      <Link>SecurityExpressionVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\SemanticTrace.cs">
+      <Link>SemanticTrace.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ServerDuplexQbservableProtocolSink.cs">
+      <Link>ServerDuplexQbservableProtocolSink.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ServerQbservableProvider.cs">
+      <Link>ServerQbservableProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ServerQuery.cs">
+      <Link>ServerQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ServiceEvaluationContext.cs">
+      <Link>ServiceEvaluationContext.cs</Link>
+    </Compile>
+    <Compile Include="Properties\Errors.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Errors.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\LogMessages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LogMessages.resx</DependentUpon>
+    </Compile>
+    <Compile Include="System\Collections\Generic\ListExtensions.cs" />
+    <Compile Include="System\Reflection\BindingFlags.cs" />
+    <Compile Include="System\Reflection\ReflectionExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\Build\Properties\CodeAnalysisDictionary.xml">
       <Link>Properties\CodeAnalysisDictionary.xml</Link>
     </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-Core.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-Interfaces.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.Interfaces.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-Linq.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.Linq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Reactive.PlatformServices, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-PlatformServices.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.PlatformServices.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Reactive.Providers, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Rx-Providers.2.2.5\lib\portable-net45+winrt45+wp8+wpa81\System.Reactive.Providers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Errors.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Errors.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\LogMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LogMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

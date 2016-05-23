@@ -3,6 +3,7 @@ using System.Diagnostics.Contracts;
 
 namespace Qactive
 {
+#if REMOTING
   internal static class Observable3
   {
     /* Observable.Remotable cannot be used within a sandboxed AppDomain because it requires the RemotingConfiguration permission, 
@@ -136,4 +137,5 @@ namespace Qactive
       public void OnCompleted() => observer.OnCompleted();
     }
   }
+#endif
 }

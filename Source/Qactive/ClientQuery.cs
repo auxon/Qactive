@@ -2,6 +2,7 @@
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
+using System.Reflection;
 
 namespace Qactive
 {
@@ -38,7 +39,7 @@ namespace Qactive
 
       Log.ClientSendingExpression(clientId, Expression);
 
-      if (!Expression.Type.IsGenericType
+      if (!Expression.Type.GetIsGenericType()
         || (Expression.Type.GetGenericTypeDefinition() != typeof(IQbservable<>)
           && Expression.Type.GetGenericTypeDefinition() != typeof(ClientQuery<>)))
       {

@@ -31,10 +31,10 @@ namespace Qactive
     {
       Contract.Requires(type != null);
       Contract.Requires(interfaceTypeDefinition != null);
-      Contract.Requires(interfaceTypeDefinition.IsGenericTypeDefinition);
+      Contract.Requires(interfaceTypeDefinition.GetIsGenericTypeDefinition());
 
       return type.GetInterfaces()
-        .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == interfaceTypeDefinition)
+        .Where(i => i.GetIsGenericType() && i.GetGenericTypeDefinition() == interfaceTypeDefinition)
         .FirstOrDefault();
     }
   }
