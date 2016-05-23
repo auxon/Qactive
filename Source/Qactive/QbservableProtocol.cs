@@ -34,7 +34,7 @@ namespace Qactive
     private readonly CancellationTokenSource protocolCancellation = new CancellationTokenSource();
     private readonly ConcurrentBag<ExceptionDispatchInfo> exceptions = new ConcurrentBag<ExceptionDispatchInfo>();
 
-    public QbservableProtocol(CancellationToken cancel)
+    protected QbservableProtocol(CancellationToken cancel)
     {
       Contract.Ensures(IsClient);
 
@@ -43,7 +43,7 @@ namespace Qactive
       cancel.Register(protocolCancellation.Cancel, useSynchronizationContext: false);
     }
 
-    public QbservableProtocol(QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    protected QbservableProtocol(QbservableServiceOptions serviceOptions, CancellationToken cancel)
     {
       Contract.Requires(serviceOptions != null);
       Contract.Ensures(!IsClient);

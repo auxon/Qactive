@@ -53,7 +53,7 @@ namespace Qactive
 
       trace.TraceEvent(TraceEventType.Error, 0, message?.ToString(CultureInfo.InvariantCulture));
     }
-
+    /*
     private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, string message, object data)
     {
       Contract.Requires(trace != null);
@@ -95,14 +95,14 @@ namespace Qactive
 
       trace.TraceEvent(type, (int)id, message?.ToString(CultureInfo.InvariantCulture));
     }
-
+    */
     private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string message, object data)
     {
       Contract.Requires(trace != null);
 
       trace.TraceData(type, (int)id, FormatObjectId(objectId), message, data);
     }
-
+    /*
     private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, object data)
     {
       Contract.Requires(trace != null);
@@ -137,7 +137,7 @@ namespace Qactive
 
       trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + message?.ToString(CultureInfo.InvariantCulture));
     }
-
+    */
     private static string FormatObjectId(object value)
       => "[" + (value?.ToString() ?? "?") + "] ";
   }

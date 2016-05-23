@@ -334,6 +334,7 @@ namespace Qactive
     protected virtual async void SendResponse(DuplexCallbackId id, object result)
       => await Protocol.SendMessageSafeAsync(CreateResponse(id, result)).ConfigureAwait(false);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected virtual async void SendError(DuplexCallbackId id, ExceptionDispatchInfo error)
       => await Protocol.SendMessageSafeAsync(CreateErrorResponse(id, error)).ConfigureAwait(false);
 
@@ -364,22 +365,26 @@ namespace Qactive
 
     protected abstract TMessage CreateOnNext(DuplexCallbackId id, object value);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected abstract TMessage CreateOnError(DuplexCallbackId id, ExceptionDispatchInfo error);
 
     protected abstract TMessage CreateOnCompleted(DuplexCallbackId id);
 
     protected abstract TMessage CreateResponse(DuplexCallbackId id, object result);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected abstract TMessage CreateErrorResponse(DuplexCallbackId id, ExceptionDispatchInfo error);
 
     protected abstract TMessage CreateSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId);
 
     protected abstract TMessage CreateGetEnumeratorResponse(DuplexCallbackId id, int clientEnumeratorId);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected abstract TMessage CreateGetEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error);
 
     protected abstract TMessage CreateEnumeratorResponse(DuplexCallbackId id, bool result, object current);
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected abstract TMessage CreateEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error);
   }
 

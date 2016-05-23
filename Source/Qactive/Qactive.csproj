@@ -184,6 +184,11 @@
     <Compile Include="ExpressionOptions.cs" />
     <Compile Include="Log - Expressions.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="Properties\LogMessages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>LogMessages.resx</DependentUpon>
+    </Compile>
     <Compile Include="NotificationKindExtensions.cs" />
     <Compile Include="QactiveProviderFactory.cs" />
     <Compile Include="QactiveTraceSources.cs" />
@@ -242,6 +247,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Properties\LogMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LogMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Errors.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Errors.Designer.cs</LastGenOutput>

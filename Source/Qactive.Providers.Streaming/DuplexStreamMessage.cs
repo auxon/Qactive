@@ -39,18 +39,6 @@ namespace Qactive
       Value = value;
     }
 
-    private DuplexStreamMessage(QbservableProtocolMessageKind kind, DuplexCallbackId id, ExceptionDispatchInfo error, byte[] data, long length)
-      : base(kind, data, length)
-    {
-      Contract.Requires(error != null);
-      Contract.Requires(length >= 0);
-      Contract.Requires(length == 0 || data != null);
-      Contract.Requires(length == 0 || data.Length >= length);
-
-      Id = id;
-      Error = error;
-    }
-
     public static bool TryParse(StreamMessage message, StreamQbservableProtocol protocol, out DuplexStreamMessage duplexMessage)
     {
       Contract.Requires(message != null);

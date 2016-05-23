@@ -159,6 +159,7 @@
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
     <Compile Include="AsyncConsumerQueue.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IStreamQbservableProtocol.cs" />
     <Compile Include="Properties\Errors.Designer.cs">
       <DependentUpon>Errors.resx</DependentUpon>
