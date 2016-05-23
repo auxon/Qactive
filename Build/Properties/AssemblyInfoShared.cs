@@ -1,9 +1,6 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Resources;
-
-[assembly: CLSCompliant(true)]
 
 [assembly: NeutralResourcesLanguage("en-US")]
 [assembly: AssemblyCulture("")]
