@@ -29,7 +29,7 @@ namespace QbservableServer
             ConsoleTrace.WriteLine(ConsoleColor.Magenta, "Timer service error: " + ex.SourceException.Message);
           }
 
-          ConsoleTrace.WriteLine(ConsoleColor.Yellow, "Timer client shutdown: " + terminatedClient.Reason);
+          ConsoleTrace.WriteLine(ConsoleColor.Yellow, "Timer client shutdown: " + terminatedClient);
         },
         ex => ConsoleTrace.WriteLine(ConsoleColor.Red, "Timer service fatal error: " + ex.Message),
         () => Console.WriteLine("This will never be printed because a service host never completes."));

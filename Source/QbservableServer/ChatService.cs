@@ -45,7 +45,7 @@ namespace QbservableServer
             ConsoleTrace.WriteLine(ConsoleColor.Magenta, "Chat service error: " + ex.SourceException.Message);
           }
 
-          ConsoleTrace.WriteLine(ConsoleColor.Yellow, "Chat client shutdown: " + terminatedClient.Reason);
+          ConsoleTrace.WriteLine(ConsoleColor.Yellow, "Chat client shutdown: " + terminatedClient);
         },
         ex => ConsoleTrace.WriteLine(ConsoleColor.Red, "Chat service fatal error: " + ex.Message),
         () => Console.WriteLine("This will never be printed because a service host never completes."));

@@ -28,7 +28,7 @@ namespace QbservableServer
             ConsoleTrace.WriteLine(ConsoleColor.Magenta, "Basic service error: {0}", ex.SourceException.Message);
           }
 
-          ConsoleTrace.WriteLine(ConsoleColor.Yellow, "Basic client shutdown: " + terminatedClient.Reason);
+          ConsoleTrace.WriteLine(ConsoleColor.Yellow, "Basic client shutdown: " + terminatedClient);
         },
         ex => ConsoleTrace.WriteLine(ConsoleColor.Red, "Basic fatal service error: {0}", ex.Message),
         () => Console.WriteLine("This will never be printed because a service host never completes."));

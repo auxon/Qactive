@@ -27,7 +27,7 @@ namespace QbservableServer
             ConsoleTrace.WriteLine(ConsoleColor.Magenta, "Limited service error: " + ex.SourceException.Message);
           }
 
-          ConsoleTrace.WriteLine(ConsoleColor.Yellow, "Malicious client shutdown: " + terminatedClient.Reason);
+          ConsoleTrace.WriteLine(ConsoleColor.Yellow, "Malicious client shutdown: " + terminatedClient);
         },
         ex => ConsoleTrace.WriteLine(ConsoleColor.Red, "Limited service fatal error: " + ex.Message),
         () => Console.WriteLine("This will never be printed because a service host never completes."));

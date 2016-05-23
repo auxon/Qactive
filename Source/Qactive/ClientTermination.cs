@@ -2,19 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Serialization;
 
 namespace Qactive
 {
   [Serializable]
-  public sealed class ClientTermination : ISerializable
+  public class ClientTermination : ISerializable
   {
-    public EndPoint LocalEndPoint { get; }
-
-    public EndPoint RemoteEndPoint { get; }
-
     public TimeSpan Duration { get; }
 
     public QbservableProtocolShutdownReason Reason { get; }
@@ -22,18 +17,12 @@ namespace Qactive
     public ICollection<ExceptionDispatchInfo> Exceptions { get; }
 
     public ClientTermination(
-      EndPoint localEndPoint,
-      EndPoint remoteEndPoint,
       TimeSpan duration,
       QbservableProtocolShutdownReason reason,
       IEnumerable<ExceptionDispatchInfo> exceptions)
     {
-      Contract.Requires(localEndPoint != null);
-      Contract.Requires(remoteEndPoint != null);
       Contract.Requires(duration >= TimeSpan.Zero);
 
-      LocalEndPoint = localEndPoint;
-      RemoteEndPoint = remoteEndPoint;
       Duration = duration;
       Reason = reason;
       Exceptions = (exceptions ?? Enumerable.Empty<ExceptionDispatchInfo>())
@@ -42,12 +31,10 @@ namespace Qactive
         .AsReadOnly();
     }
 
-    private ClientTermination(SerializationInfo info, StreamingContext context)
+    protected ClientTermination(SerializationInfo info, StreamingContext context)
     {
       Contract.Requires(info != null);
 
-      LocalEndPoint = (EndPoint)info.GetValue("localEndPoint", typeof(EndPoint));
-      RemoteEndPoint = (EndPoint)info.GetValue("remoteEndPoint", typeof(EndPoint));
       Duration = (TimeSpan)info.GetValue("duration", typeof(TimeSpan));
       Reason = (QbservableProtocolShutdownReason)info.GetValue("reason", typeof(QbservableProtocolShutdownReason));
       Exceptions = ((List<Exception>)info.GetValue("rawExceptions", typeof(List<Exception>)))
@@ -56,10 +43,8 @@ namespace Qactive
         .AsReadOnly();
     }
 
-    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-      info.AddValue("localEndPoint", LocalEndPoint);
-      info.AddValue("remoteEndPoint", RemoteEndPoint);
       info.AddValue("duration", Duration);
       info.AddValue("reason", Reason);
 
@@ -79,10 +64,11 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
     private void ObjectInvariant()
     {
-      Contract.Invariant(LocalEndPoint != null);
-      Contract.Invariant(RemoteEndPoint != null);
       Contract.Invariant(Duration >= TimeSpan.Zero);
       Contract.Invariant(Exceptions != null);
     }
+
+    public override string ToString()
+      => Reason + "; Duration=" + Duration + "; " + Exceptions.Count + " exceptions(s)";
   }
 }
