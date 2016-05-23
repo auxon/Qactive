@@ -1,7 +1,7 @@
 ﻿namespace System.Reflection
 {
   [Flags]
-  internal enum BindingFlags
+  public enum BindingFlags
   {
     Default = 0,
     Instance = 4,

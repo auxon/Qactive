@@ -9,6 +9,14 @@
     <NuSpecTags>Rx, reactive, Reactive Extensions, Rx.NET, IObservable, IQbservable, queryable, service, stream</NuSpecTags>
   </PropertyGroup>
 
+  <Choose>
+    <When Condition=" '$(MSBuildProjectName)' == 'Qactive' ">
+      <ItemGroup>
+        <NuGetFlavor Include="..\Qactive-Net45\Qactive-Net45.csproj" />
+      </ItemGroup>
+    </When>
+  </Choose>
+
   <Target Name="_nop" />
 
 </Project>

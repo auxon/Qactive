@@ -2,7 +2,7 @@
 
 namespace System.Reflection
 {
-  internal static partial class PortableReflectionExtensions
+  public static partial class PortableReflectionExtensions
   {
     public static Assembly GetAssembly(this Type type)
     {
@@ -12,10 +12,11 @@ namespace System.Reflection
 #if REFLECTION
       return type.Assembly;
 #else
-
+      return type.GetTypeInfo().Assembly;
 #endif
     }
 
+    [Pure]
     public static bool GetIsPrimitive(this Type type)
     {
       Contract.Requires(type != null);
@@ -23,10 +24,11 @@ namespace System.Reflection
 #if REFLECTION
       return type.IsPrimitive;
 #else
-
+      return type.GetTypeInfo().IsPrimitive;
 #endif
     }
 
+    [Pure]
     public static bool GetIsNotPublic(this Type type)
     {
       Contract.Requires(type != null);
@@ -34,10 +36,11 @@ namespace System.Reflection
 #if REFLECTION
       return type.IsNotPublic;
 #else
-
+      return type.GetTypeInfo().IsNotPublic;
 #endif
     }
 
+    [Pure]
     public static bool GetIsValueType(this Type type)
     {
       Contract.Requires(type != null);
@@ -45,10 +48,11 @@ namespace System.Reflection
 #if REFLECTION
       return type.IsValueType;
 #else
-
+      return type.GetTypeInfo().IsValueType;
 #endif
     }
 
+    [Pure]
     public static bool GetIsEnum(this Type type)
     {
       Contract.Requires(type != null);
@@ -56,10 +60,11 @@ namespace System.Reflection
 #if REFLECTION
       return type.IsEnum;
 #else
-
+      return type.GetTypeInfo().IsEnum;
 #endif
     }
 
+    [Pure]
     public static bool GetIsGenericType(this Type type)
     {
       Contract.Requires(type != null);
@@ -67,10 +72,11 @@ namespace System.Reflection
 #if REFLECTION
       return type.IsGenericType;
 #else
-
+      return type.GetTypeInfo().IsGenericType;
 #endif
     }
 
+    [Pure]
     public static bool GetIsGenericTypeDefinition(this Type type)
     {
       Contract.Requires(type != null);
@@ -78,7 +84,7 @@ namespace System.Reflection
 #if REFLECTION
       return type.IsGenericTypeDefinition;
 #else
-
+      return type.GetTypeInfo().IsGenericTypeDefinition;
 #endif
     }
   }
