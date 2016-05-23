@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Security;
+#if CAS
 using System.Security.Policy;
+#endif
 
 namespace Qactive
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   [ContractClass(typeof(QactiveProviderFactoryContract))]
   public abstract class QactiveProviderFactory
   {
+#if CAS
     public virtual IEnumerable<StrongName> FullTrustAssemblies
     {
       get
@@ -28,6 +33,7 @@ namespace Qactive
         return Enumerable.Empty<IPermission>();
       }
     }
+#endif
 
     public abstract QactiveProvider Create();
   }

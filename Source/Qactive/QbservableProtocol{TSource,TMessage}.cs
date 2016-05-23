@@ -195,7 +195,7 @@ namespace Qactive
       ConstructorInfo constructor;
       IList<string> propertiesInConstructorOrder;
 
-      if (resultType.IsNotPublic
+      if (resultType.GetIsNotPublic()
         && resultType.GetCustomAttributes(typeof(CompilerGenerated), inherit: false) != null
         && (constructor = resultType.GetConstructors().SingleOrDefault()) != null
         && (propertiesInConstructorOrder =

@@ -7,7 +7,9 @@ using System.Reflection;
 
 namespace Qactive
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   public sealed class ServiceEvaluationContext : KnownTypeContext
   {
     private static readonly HashSet<Type> extendedPrimitiveTypes = new HashSet<Type>()
@@ -254,11 +256,11 @@ namespace Qactive
     }
 
     public static bool IsExtendedPrimitiveType(Type type)
-      => type != null && extendedPrimitiveTypes.Contains(type.IsGenericType ? type.GetGenericTypeDefinition() : type);
+      => type != null && extendedPrimitiveTypes.Contains(type.GetIsGenericType() ? type.GetGenericTypeDefinition() : type);
 
     public override bool IsKnownType(Type type)
       => type != null
-      && (type.IsEnum
+      && (type.GetIsEnum()
         || IsExtendedPrimitiveType(type)
         || base.IsKnownType(type));
 
@@ -271,8 +273,8 @@ namespace Qactive
 
       var type = method.DeclaringType;
 
-      return type.IsEnum
-          || type.IsPrimitive
+      return type.GetIsEnum()
+          || type.GetIsPrimitive()
           || IsExtendedPrimitiveType(type)
           || knownMethods.Contains(method.IsGenericMethod ? method.GetGenericMethodDefinition() : method);
     }

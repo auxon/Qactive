@@ -10,7 +10,9 @@ using Qactive.Properties;
 
 namespace Qactive
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   internal class DuplexCallback
   {
     public bool CanInvoke => sink != null && protocol != null;
@@ -31,10 +33,16 @@ namespace Qactive
       .Where(m => !m.IsGenericMethod && m.Name == "ServerInvoke")
       .First();
 
+#if SERIALIZATION
     [NonSerialized]
+#endif
     private IServerDuplexQbservableProtocolSink sink;
+
+#if SERIALIZATION
     [NonSerialized]
+#endif
     private IQbservableProtocol protocol;
+
     private readonly int id;
 
     protected DuplexCallback(int id)
@@ -132,7 +140,9 @@ namespace Qactive
       {
         var type = instance.GetType();
 
+#if SERIALIZATION
         if (!type.IsSerializable)
+#endif
         {
           var observableType = type.GetGenericInterfaceFromDefinition(typeof(IObservable<>));
 

@@ -5,7 +5,9 @@ using System.Reactive.Linq;
 namespace Qactive
 {
   // This class must be public otherwise CreateService fails inside of a new AppDomain - see CreateServiceProxy comments
+#if SERIALIZATION
   [Serializable]
+#endif
   public sealed class QbservableServiceConverter<TSource, TResult>
   {
     private readonly Func<IObservable<TSource>, IObservable<TResult>> service;

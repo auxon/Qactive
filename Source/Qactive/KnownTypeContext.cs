@@ -6,7 +6,9 @@ using System.Reflection;
 
 namespace Qactive
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   public class KnownTypeContext
   {
     private readonly HashSet<Assembly> knownAssemblies;
@@ -15,24 +17,24 @@ namespace Qactive
     public KnownTypeContext(params Type[] knownTypes)
       : this((IEnumerable<Type>)knownTypes)
     {
-      Contract.Requires(knownTypes == null || Contract.ForAll(knownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
+      Contract.Requires(knownTypes == null || Contract.ForAll(knownTypes, type => !type.GetIsGenericType() || type.GetIsGenericTypeDefinition()));
     }
 
     public KnownTypeContext(IEnumerable<Type> knownTypes)
       : this(null, knownTypes)
     {
-      Contract.Requires(knownTypes == null || Contract.ForAll(knownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
+      Contract.Requires(knownTypes == null || Contract.ForAll(knownTypes, type => !type.GetIsGenericType() || type.GetIsGenericTypeDefinition()));
     }
 
     public KnownTypeContext(IEnumerable<Assembly> knownAssemblies, params Type[] additionalKnownTypes)
       : this(knownAssemblies, (IEnumerable<Type>)additionalKnownTypes)
     {
-      Contract.Requires(additionalKnownTypes == null || Contract.ForAll(additionalKnownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
+      Contract.Requires(additionalKnownTypes == null || Contract.ForAll(additionalKnownTypes, type => !type.GetIsGenericType() || type.GetIsGenericTypeDefinition()));
     }
 
     public KnownTypeContext(IEnumerable<Assembly> knownAssemblies, IEnumerable<Type> additionalKnownTypes)
     {
-      Contract.Requires(additionalKnownTypes == null || Contract.ForAll(additionalKnownTypes, type => !type.IsGenericType || type.IsGenericTypeDefinition));
+      Contract.Requires(additionalKnownTypes == null || Contract.ForAll(additionalKnownTypes, type => !type.GetIsGenericType() || type.GetIsGenericTypeDefinition()));
 
       this.knownAssemblies = new HashSet<Assembly>(knownAssemblies ?? Enumerable.Empty<Assembly>());
       this.knownTypes = new HashSet<Type>(additionalKnownTypes ?? Enumerable.Empty<Type>());
@@ -53,14 +55,14 @@ namespace Qactive
       knownTypes.Add(type);
     }
 
-    public bool IsTypeInKnownAssembly(Type type) => type != null && knownAssemblies.Contains(type.Assembly);
+    public bool IsTypeInKnownAssembly(Type type) => type != null && knownAssemblies.Contains(type.GetAssembly());
 
     public bool IsTypeKnown(object value) => value == null || IsKnownType(value.GetType());
 
     public virtual bool IsKnownType(Type type) => type == null
-                                               || type.IsPrimitive
+                                               || type.GetIsPrimitive()
                                                || type.IsArray && IsKnownType(type.GetElementType())
                                                || IsTypeInKnownAssembly(type)
-                                               || knownTypes.Contains(type.IsGenericType ? type.GetGenericTypeDefinition() : type);
+                                               || knownTypes.Contains(type.GetIsGenericType() ? type.GetGenericTypeDefinition() : type);
   }
 }

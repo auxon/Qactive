@@ -4,7 +4,9 @@ using System.Runtime.ExceptionServices;
 
 namespace Qactive
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   internal sealed class DuplexCallbackObservable<T> : DuplexCallback, IObservable<T>
   {
     public DuplexCallbackObservable(int id)

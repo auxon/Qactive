@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.Reactive.Linq;
+using System.Reflection;
 
 namespace Qactive
 {
@@ -60,7 +61,7 @@ namespace Qactive
         protocol => new ServerQbservableProvider<TResult>(
                       protocol,
                       options,
-                      argument => argument == null && typeof(TSource).IsValueType
+                      argument => argument == null && typeof(TSource).GetIsValueType()
                                 ? service(Observable.Return(default(TSource)))
                                 : service(Observable.Return((TSource)argument))));
     }

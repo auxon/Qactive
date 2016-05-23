@@ -7,8 +7,13 @@ using System.Runtime.Serialization;
 
 namespace Qactive
 {
+#if SERIALIZATION
   [Serializable]
-  public class ClientTermination : ISerializable
+#endif
+  public class ClientTermination
+#if SERIALIZATION
+    : ISerializable
+#endif
   {
     public TimeSpan Duration { get; }
 
@@ -31,6 +36,7 @@ namespace Qactive
         .AsReadOnly();
     }
 
+#if SERIALIZATION
     protected ClientTermination(SerializationInfo info, StreamingContext context)
     {
       Contract.Requires(info != null);
@@ -59,6 +65,7 @@ namespace Qactive
        */
       info.AddValue("ignored", Exceptions.Select(ex => ex.SourceException).FirstOrDefault());
     }
+#endif
 
     [ContractInvariantMethod]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]

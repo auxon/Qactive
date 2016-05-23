@@ -10,7 +10,9 @@ using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Security;
+#if CAS
 using System.Security.Permissions;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,7 +27,7 @@ namespace Qactive
 
     public QbservableServiceOptions ServiceOptions { get; }
 
-    public IReadOnlyCollection<ExceptionDispatchInfo> Exceptions => exceptions;
+    public IReadOnlyCollection<ExceptionDispatchInfo> Exceptions => exceptions.ToList().AsReadOnly();
 
     public QbservableProtocolShutdownReason ShutdownReason { get; internal set; }
 
@@ -265,7 +267,9 @@ namespace Qactive
 
         IObservable<object> observable;
 
+#if CAS
         new PermissionSet(PermissionState.Unrestricted).Assert();
+#endif
 
         try
         {
@@ -273,7 +277,9 @@ namespace Qactive
         }
         finally
         {
+#if CAS
           PermissionSet.RevertAssert();
+#endif
         }
 
         await observable.ForEachAsync(
@@ -393,8 +399,8 @@ namespace Qactive
     {
       Contract.Requires(provider != null);
       Contract.Requires(expression != null);
-      Contract.Requires(expression.Type.IsGenericType);
-      Contract.Requires(!expression.Type.IsGenericTypeDefinition);
+      Contract.Requires(expression.Type.GetIsGenericType());
+      Contract.Requires(!expression.Type.GetIsGenericTypeDefinition());
       Contract.Requires(expression.Type.GetGenericTypeDefinition() == typeof(IQbservable<>));
       Contract.Ensures(Contract.Result<object>() != null);
       Contract.Ensures(Contract.ValueAtReturn(out type) != null);
@@ -403,7 +409,9 @@ namespace Qactive
 
       var parameterized = provider as IParameterizedQbservableProvider;
 
+#if CAS
       new PermissionSet(PermissionState.Unrestricted).Assert();
+#endif
 
       try
       {
@@ -428,7 +436,9 @@ namespace Qactive
       }
       finally
       {
+#if CAS
         PermissionSet.RevertAssert();
+#endif
       }
     }
 

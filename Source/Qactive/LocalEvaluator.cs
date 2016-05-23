@@ -91,7 +91,7 @@ namespace Qactive
       if (value != null)
       {
         var isSequence = type == typeof(IEnumerable)
-                      || (type.IsGenericType
+                      || (type.GetIsGenericType()
                          && (type.GetGenericTypeDefinition() == typeof(IEnumerable<>)
                           || type.GetGenericTypeDefinition() == typeof(IObservable<>)));
 

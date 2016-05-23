@@ -6,7 +6,11 @@ using System.Reactive.Linq;
 namespace Qactive
 {
   [ContractClass(typeof(QactiveProviderContract))]
-  public abstract class QactiveProvider : MarshalByRefObject, IQactiveProvider
+  public abstract class QactiveProvider :
+#if REMOTING
+    MarshalByRefObject, 
+#endif
+    IQactiveProvider
   {
     public Type SourceType { get; }
 

@@ -5,7 +5,9 @@ using System.Security;
 
 namespace Qactive
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   internal sealed class ExpressionSecurityException : SecurityException
   {
     public ExpressionSecurityException()
@@ -17,10 +19,12 @@ namespace Qactive
     {
     }
 
+#if SERIALIZATION
     private ExpressionSecurityException(SerializationInfo info, StreamingContext context)
       : base(info, context)
     {
       Contract.Requires(info != null);
     }
+#endif
   }
 }

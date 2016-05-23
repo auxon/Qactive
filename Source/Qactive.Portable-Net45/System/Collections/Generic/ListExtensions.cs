@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 
-namespace Qactive.System.Collections.Generic
+namespace System.Collections.Generic
 {
   internal static class ListExtensions
   {
-    public static IReadOnlyCollection<T> AsReadOnly<T>(this IList<T> list)
+    public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> list)
     {
       Contract.Requires(list != null);
-      Contract.Ensures(Contract.Result<IReadOnlyCollection<T>>() != null);
+      Contract.Ensures(Contract.Result<ReadOnlyCollection<T>>() != null);
 
       return new ReadOnlyCollection<T>(list);
     }

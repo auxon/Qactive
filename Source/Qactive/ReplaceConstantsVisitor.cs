@@ -2,6 +2,7 @@
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Qactive
 {
@@ -17,7 +18,7 @@ namespace Qactive
     private ReplaceConstantsVisitor(Type findTypeDefinition, Func<object, Type, object> replacementSelector, Func<Type, Type> replacementTypeSelector)
     {
       Contract.Requires(findTypeDefinition != null);
-      Contract.Requires(findTypeDefinition.IsGenericTypeDefinition);
+      Contract.Requires(findTypeDefinition.GetIsGenericTypeDefinition());
       Contract.Requires(replacementSelector != null);
       Contract.Requires(replacementTypeSelector != null);
 
@@ -29,12 +30,12 @@ namespace Qactive
     private ReplaceConstantsVisitor(Type findType, Func<object, Type, object> replacementSelector, Func<Type, Type> replacementTypeSelector, Action<Type, Type> genericTypeArgumentMismatchAction)
     {
       Contract.Requires(findType != null);
-      Contract.Requires(!findType.IsGenericTypeDefinition);
+      Contract.Requires(!findType.GetIsGenericTypeDefinition());
       Contract.Requires(replacementSelector != null);
       Contract.Requires(replacementTypeSelector != null);
 
       this.findType = findType;
-      this.findTypeDefinition = findType.IsGenericType ? findType.GetGenericTypeDefinition() : null;
+      this.findTypeDefinition = findType.GetIsGenericType() ? findType.GetGenericTypeDefinition() : null;
       this.replacementSelector = replacementSelector;
       this.replacementTypeSelector = replacementTypeSelector;
       this.genericTypeArgumentMismatchAction = genericTypeArgumentMismatchAction;
@@ -86,7 +87,7 @@ namespace Qactive
 
         return Expression.Constant(replacementSelector(node.Value, actualType), replacementTypeSelector(node.Type));
       }
-      else if (actualType != null && actualType.IsGenericType && actualType.GetGenericTypeDefinition() == findTypeDefinition)
+      else if (actualType != null && actualType.GetIsGenericType() && actualType.GetGenericTypeDefinition() == findTypeDefinition)
       {
         if (genericTypeArgumentMismatchAction != null)
         {

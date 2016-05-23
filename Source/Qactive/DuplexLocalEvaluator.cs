@@ -72,7 +72,7 @@ namespace Qactive
     {
       Expression expression = null;
 
-      if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+      if (type.GetIsGenericType() && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
       {
         expression = DuplexCallback.CreateEnumerable(protocol, value, type.GetGenericArguments()[0], type);
       }

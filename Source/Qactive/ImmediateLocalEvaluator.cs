@@ -99,7 +99,7 @@ namespace Qactive
         var iteratorType = iterator.GetType();
 
         if (iteratorType.GetCustomAttribute<CompilerGeneratedAttribute>(true) != null
-          || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+          || (type.GetIsGenericType() && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
           || type == typeof(IEnumerable))
         {
           value = EvaluateIterator(iterator);

@@ -174,7 +174,7 @@ namespace Qactive
         {
           Type unboundReturnType;
 
-          if (!delegateType.IsGenericType
+          if (!delegateType.GetIsGenericType()
             || !(unboundReturnType = delegateType.GetGenericTypeDefinition().GetMethod("Invoke").ReturnType).IsGenericParameter)
           {
             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Errors.ExpressionDelegateReturnsNonGenericAnonymousType, Environment.NewLine, delegateType));

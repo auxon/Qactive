@@ -223,9 +223,6 @@
     <Compile Include="..\Qactive\LocalEvaluator.cs">
       <Link>LocalEvaluator.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive\Log - Expressions.cs">
-      <Link>Log - Expressions.cs</Link>
-    </Compile>
     <Compile Include="..\Qactive\Log.cs">
       <Link>Log.cs</Link>
     </Compile>
@@ -237,9 +234,6 @@
     </Compile>
     <Compile Include="..\Qactive\QactiveProviderFactory.cs">
       <Link>QactiveProviderFactory.cs</Link>
-    </Compile>
-    <Compile Include="..\Qactive\QactiveTraceSources.cs">
-      <Link>QactiveTraceSources.cs</Link>
     </Compile>
     <Compile Include="..\Qactive\Qbservable2.cs">
       <Link>Qbservable2.cs</Link>
@@ -264,9 +258,6 @@
     </Compile>
     <Compile Include="..\Qactive\QbservableProtocol{TSource}.cs">
       <Link>QbservableProtocol{TSource}.cs</Link>
-    </Compile>
-    <Compile Include="..\Qactive\QbservableServer - Secure.cs">
-      <Link>QbservableServer - Secure.cs</Link>
     </Compile>
     <Compile Include="..\Qactive\QbservableServer.cs">
       <Link>QbservableServer.cs</Link>
@@ -307,6 +298,10 @@
     <Compile Include="..\Qactive\ServiceEvaluationContext.cs">
       <Link>ServiceEvaluationContext.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive\System\Reflection\PortableReflectionExtensions.cs">
+      <Link>System\Reflection\PortableReflectionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="Log - Expressions.cs" />
     <Compile Include="Properties\Errors.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -319,7 +314,7 @@
     </Compile>
     <Compile Include="System\Collections\Generic\ListExtensions.cs" />
     <Compile Include="System\Reflection\BindingFlags.cs" />
-    <Compile Include="System\Reflection\ReflectionExtensions.cs" />
+    <Compile Include="System\Reflection\PortableReflectionExtensions - Exclusive.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

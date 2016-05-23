@@ -7,7 +7,9 @@ using System.Reflection;
 
 namespace Qactive
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   internal sealed class CompilerGenerated
   {
     private static readonly ConstructorInfo constructor = typeof(CompilerGenerated).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(KeyValuePair<string, object>[]) }, null);

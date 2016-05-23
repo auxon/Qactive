@@ -4,7 +4,9 @@ using System.Reactive.Linq;
 
 namespace Qactive
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   internal sealed class QbservableSourcePlaceholder<T> : IQbservable<T>
   {
     public Type ElementType

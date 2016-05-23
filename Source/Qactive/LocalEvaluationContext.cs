@@ -14,18 +14,20 @@ namespace Qactive
   {
     private static readonly IEnumerable<Assembly> defaultKnownAssemblies = new List<Assembly>()
       {
-        typeof(LocalEvaluationContext).Assembly,
-        typeof(int).Assembly,
-        typeof(System.Uri).Assembly,
-        typeof(System.Data.DataSet).Assembly,
-        typeof(System.Xml.XmlReader).Assembly,
-        typeof(System.Xml.Linq.XElement).Assembly,
-        typeof(System.Linq.Enumerable).Assembly,
-        typeof(System.Reactive.Linq.Observable).Assembly,
-        typeof(System.Reactive.Linq.Qbservable).Assembly,
-        typeof(System.Reactive.Notification).Assembly,
-        typeof(System.Reactive.IEventPattern<,>).Assembly,
-        typeof(System.Reactive.Concurrency.TaskPoolScheduler).Assembly,
+        typeof(LocalEvaluationContext).GetAssembly(),
+        typeof(int).GetAssembly(),
+        typeof(System.Uri).GetAssembly(),
+#if SERIALIZATION
+        typeof(System.Data.DataSet).GetAssembly(),
+#endif
+        typeof(System.Xml.XmlReader).GetAssembly(),
+        typeof(System.Xml.Linq.XElement).GetAssembly(),
+        typeof(System.Linq.Enumerable).GetAssembly(),
+        typeof(System.Reactive.Linq.Observable).GetAssembly(),
+        typeof(System.Reactive.Linq.Qbservable).GetAssembly(),
+        typeof(System.Reactive.Notification).GetAssembly(),
+        typeof(System.Reactive.IEventPattern<,>).GetAssembly(),
+        typeof(System.Reactive.Concurrency.TaskPoolScheduler).GetAssembly(),
       }
       .AsReadOnly();
 
@@ -140,7 +142,7 @@ namespace Qactive
     {
       Contract.Requires(type != null);
 
-      if (type.IsGenericType)
+      if (type.GetIsGenericType())
       {
         if (EnsureGenericTypeArgumentsSerializable(ref type))
         {
@@ -249,7 +251,7 @@ namespace Qactive
             replacedAny = true;
           });
 
-        if (!replaced && argument.IsGenericType && EnsureGenericTypeArgumentsSerializable(ref argument))
+        if (!replaced && argument.GetIsGenericType() && EnsureGenericTypeArgumentsSerializable(ref argument))
         {
           genericTypeArguments[i] = argument;
           replacedAny = true;

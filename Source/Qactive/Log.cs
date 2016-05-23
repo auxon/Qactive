@@ -5,7 +5,9 @@ using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Security;
+#if CAS
 using System.Security.Permissions;
+#endif
 
 namespace Qactive
 {
@@ -13,7 +15,9 @@ namespace Qactive
   {
     private static PropertyInfo debugView;
 
+#if CAS
     [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
+#endif
     private static object GetDebugView(Expression expression)
     {
       if (debugView == null)
@@ -28,6 +32,7 @@ namespace Qactive
     private static void DebugPrint(object expressionDebugView, string category)
       => Debug.WriteLine(Environment.NewLine + expressionDebugView, category ?? string.Empty);
 
+#if TRACING
     public static void Unsafe(Exception exception)
     {
       new PermissionSet(PermissionState.Unrestricted).Assert();
@@ -140,5 +145,6 @@ namespace Qactive
     */
     private static string FormatObjectId(object value)
       => "[" + (value?.ToString() ?? "?") + "] ";
+#endif
   }
 }

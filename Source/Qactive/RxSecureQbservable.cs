@@ -14,7 +14,7 @@ namespace Qactive
   // from this library, and the use of reflection, and simply rely on a cast instead.
   internal sealed class RxSecureQbservable<TSource> : ISecureQbservable<TSource>
   {
-    private static readonly Type rxQuery = typeof(Qbservable).Assembly.GetType("System.Reactive.ObservableQuery`1", throwOnError: true, ignoreCase: false).MakeGenericType(typeof(TSource));
+    private static readonly Type rxQuery = typeof(Qbservable).GetAssembly().GetType("System.Reactive.ObservableQuery`1", throwOnError: true, ignoreCase: false).MakeGenericType(typeof(TSource));
     private static readonly FieldInfo rxQuerySource = rxQuery.GetField("_source", BindingFlags.NonPublic | BindingFlags.Instance);
 
     private static readonly Type rxRewriter = rxQuery.GetNestedType("ObservableRewriter", BindingFlags.NonPublic).MakeGenericType(typeof(TSource));

@@ -11,7 +11,9 @@ namespace Qactive
   /// such as type resolution, missing object instances, buggy serialization, etc.  In these circumstances, the call to
   /// the Subscribe method throws and it's wrapped with this exception, which indicates a failure to subscribe to the query.
   /// </summary>
+#if SERIALIZATION
   [Serializable]
+#endif
   [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1064:ExceptionsShouldBePublic", Justification = "For internal use only. It should never be seen (or catchable) externally.")]
   internal sealed class QbservableSubscriptionException : Exception
   {
@@ -20,10 +22,12 @@ namespace Qactive
     {
     }
 
+#if SERIALIZATION
     private QbservableSubscriptionException(SerializationInfo info, StreamingContext context)
       : base(info, context)
     {
       Contract.Requires(info != null);
     }
+#endif
   }
 }

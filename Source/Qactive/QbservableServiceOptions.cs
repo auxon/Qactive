@@ -3,7 +3,9 @@ using System.Diagnostics.Contracts;
 
 namespace Qactive
 {
+#if SERIALIZATION
   [Serializable]
+#endif
   public sealed class QbservableServiceOptions
   {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "It's immutable due to the frozen flag.")]

@@ -3,7 +3,9 @@ using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Security;
+#if CAS
 using System.Security.Permissions;
+#endif
 
 namespace Qactive
 {
@@ -54,7 +56,9 @@ namespace Qactive
 
         if (secureQuery != null)
         {
+#if CAS
           new PermissionSet(PermissionState.Unrestricted).Assert();
+#endif
 
           try
           {
@@ -62,7 +66,9 @@ namespace Qactive
           }
           finally
           {
+#if CAS
             PermissionSet.RevertAssert();
+#endif
           }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Qactive
 {
@@ -204,7 +205,7 @@ namespace Qactive
       }
 
       if (!Options.HasFlag(ExpressionOptions.AllowConstructors)
-        && !type.IsPrimitive
+        && !type.GetIsPrimitive()
         && !ServiceEvaluationContext.IsExtendedPrimitiveType(type))
       {
         throw new ExpressionSecurityException("Constructors are not permitted.");
