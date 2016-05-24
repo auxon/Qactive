@@ -11,6 +11,7 @@ namespace Qactive
 {
   internal sealed class ServerQuery<TSource, TResult> : QbservableBase<TResult, ServerQbservableProvider<TSource>>
   {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields", Justification = "Currently, clientId is only used for the full FCL build, not portable libraries.")]
     private readonly object clientId;
     private readonly object argument;
 

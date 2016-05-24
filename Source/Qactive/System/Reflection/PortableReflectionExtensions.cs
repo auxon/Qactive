@@ -22,6 +22,8 @@ namespace System.Reflection
       Contract.Requires(type != null);
 
 #if REFLECTION
+      Contract.Ensures(Contract.Result<bool>() == type.IsPrimitive);
+
       return type.IsPrimitive;
 #else
       return type.GetTypeInfo().IsPrimitive;
@@ -34,6 +36,8 @@ namespace System.Reflection
       Contract.Requires(type != null);
 
 #if REFLECTION
+      Contract.Ensures(Contract.Result<bool>() == type.IsNotPublic);
+
       return type.IsNotPublic;
 #else
       return type.GetTypeInfo().IsNotPublic;
@@ -46,6 +50,8 @@ namespace System.Reflection
       Contract.Requires(type != null);
 
 #if REFLECTION
+      Contract.Ensures(Contract.Result<bool>() == type.IsValueType);
+
       return type.IsValueType;
 #else
       return type.GetTypeInfo().IsValueType;
@@ -58,6 +64,8 @@ namespace System.Reflection
       Contract.Requires(type != null);
 
 #if REFLECTION
+      Contract.Ensures(Contract.Result<bool>() == type.IsEnum);
+
       return type.IsEnum;
 #else
       return type.GetTypeInfo().IsEnum;
@@ -70,6 +78,8 @@ namespace System.Reflection
       Contract.Requires(type != null);
 
 #if REFLECTION
+      Contract.Ensures(Contract.Result<bool>() == type.IsGenericType);
+
       return type.IsGenericType;
 #else
       return type.GetTypeInfo().IsGenericType;
@@ -82,6 +92,8 @@ namespace System.Reflection
       Contract.Requires(type != null);
 
 #if REFLECTION
+      Contract.Ensures(Contract.Result<bool>() == type.IsGenericTypeDefinition);
+
       return type.IsGenericTypeDefinition;
 #else
       return type.GetTypeInfo().IsGenericTypeDefinition;

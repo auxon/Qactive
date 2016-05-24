@@ -13,11 +13,10 @@ namespace Qactive
 {
   internal static partial class Log
   {
+#if CAS
     private static PropertyInfo debugView;
 
-#if CAS
     [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
-#endif
     private static object GetDebugView(Expression expression)
     {
       if (debugView == null)
@@ -27,6 +26,7 @@ namespace Qactive
 
       return debugView.GetValue(expression);
     }
+#endif
 
     [Conditional("DEBUG")]
     private static void DebugPrint(object expressionDebugView, string category)
