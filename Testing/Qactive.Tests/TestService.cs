@@ -17,6 +17,14 @@ namespace Qactive.Tests
     }
     .Freeze();
 
+    public static readonly QbservableServiceOptions DuplexOptions = new QbservableServiceOptions()
+    {
+      AllowExpressionsUnrestricted = true,
+      EnableDuplex = true,
+      SendServerErrorsToClients = true
+    }
+    .Freeze();
+
     public static TestService<TSource> Create<TSource>(params Notification<TSource>[] notifications)
       => new TestService<TSource>(DefaultOptions, (Type[])null, notifications);
 

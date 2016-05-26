@@ -89,20 +89,23 @@
     <Compile Include="..\Qactive.Tests\Extensions\ObservableExtensions.cs">
       <Link>Extensions\ObservableExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Queries\GroupJoinTests.cs">
-      <Link>Queries\GroupJoinTests.cs</Link>
+    <Compile Include="..\Qactive.Tests\Operators\GroupJoinTests.cs">
+      <Link>Operators\GroupJoinTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Queries\JoinTests.cs">
-      <Link>Queries\JoinTests.cs</Link>
+    <Compile Include="..\Qactive.Tests\Operators\JoinTests.cs">
+      <Link>Operators\JoinTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Operators\SelectTests.cs">
+      <Link>Operators\SelectTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Operators\WhereTests.cs">
+      <Link>Operators\WhereTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Queries\DuplexTests.cs">
+      <Link>Queries\DuplexTests.cs</Link>
     </Compile>
     <Compile Include="..\Qactive.Tests\Queries\NestedQueryTests.cs">
       <Link>Queries\NestedQueryTests.cs</Link>
-    </Compile>
-    <Compile Include="..\Qactive.Tests\Queries\SelectTests.cs">
-      <Link>Queries\SelectTests.cs</Link>
-    </Compile>
-    <Compile Include="..\Qactive.Tests\Queries\WhereTests.cs">
-      <Link>Queries\WhereTests.cs</Link>
     </Compile>
     <Compile Include="..\Qactive.Tests\TestBase.cs">
       <Link>TestBase.cs</Link>
