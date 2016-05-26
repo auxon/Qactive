@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -195,7 +196,7 @@ namespace Qactive
       IList<string> propertiesInConstructorOrder;
 
       if (resultType.GetIsNotPublic()
-        && resultType.GetCustomAttributes(typeof(CompilerGenerated), inherit: false) != null
+        && resultType.GetCustomAttributes(typeof(CompilerGeneratedAttribute), inherit: false) != null
         && (constructor = resultType.GetConstructors().SingleOrDefault()) != null
         && (propertiesInConstructorOrder =
               (from property in resultType.GetProperties()
