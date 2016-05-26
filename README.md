@@ -2,14 +2,16 @@
 A reactive queryable observable framework.
 <img align="right" src="https://raw.githubusercontent.com/RxDave/Qactive/master/Artifacts/Logo2.png" />
 
-* **Runtime:** .NET Framework 4.6.1.
+* **Runtime:** .NET Framework 4.6.1, .NET Framework 4.5 (portable)
 * **Development:** Visual Studio 2015 and C# 6
 * **Dependencies:** [Reactive Extensions (Rx.NET)](https://github.com/Reactive-Extensions/Rx.NET)
 
 ## Download from NuGet
-> [Qactive.Providers.Tcp](https://www.nuget.org/packages/qactive.providers.tcp) (depends on Qactive and Qactive.Expressions)
+> [Qactive.Providers.Tcp](https://www.nuget.org/packages/qactive.providers.tcp) (depends on Qactive.Providers.Streaming, Qactive.Expressions and Qactive)
 
-> [Qactive](https://www.nuget.org/packages/qactive) (depends on Qactive.Expressions)
+> [Qactive.Providers.Streaming](https://www.nuget.org/packages/qactive.providers.streaming) (depends on Qactive.Expressions and Qactive)
+
+> [Qactive](https://www.nuget.org/packages/qactive)
 
 > [Qactive.Expressions](https://www.nuget.org/packages/qactive.expressions)
 
