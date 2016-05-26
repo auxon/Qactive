@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reactive.Disposables;
@@ -13,7 +14,11 @@ using Qactive.Properties;
 
 namespace Qactive
 {
+#if CAS_REF
   public static partial class QbservableServer
+#else
+  public static class QbservableServerSecure
+#endif
   {
     private static int appDomainNumber;
 
@@ -120,7 +125,19 @@ namespace Qactive
 
       minimumPermissions.AddPermission(new SecurityPermission(SecurityPermissionFlag.Execution));
 
-      foreach (var permission in providerFactory.MinimumServerPermissions)
+      IEnumerable<StrongName> factoryAssemblies;
+      IEnumerable<IPermission> factoryPermissions;
+
+#if CAS_REF
+      factoryAssemblies = providerFactory.FullTrustAssemblies;
+      factoryPermissions = providerFactory.MinimumServerPermissions;
+#else
+      var secure = (ISecureQbservableProviderFactory)providerFactory;
+      factoryAssemblies = secure.FullTrustAssemblies;
+      factoryPermissions = secure.MinimumServerPermissions;
+#endif
+
+      foreach (var permission in factoryPermissions)
       {
         minimumPermissions.AddPermission(permission);
       }
@@ -142,7 +159,7 @@ namespace Qactive
           typeof(System.Reactive.Concurrency.TaskPoolScheduler).Assembly.Evidence.GetHostEvidence<StrongName>()
         }
         .Concat(entryAssembly == null ? new StrongName[0] : new[] { entryAssembly.Evidence.GetHostEvidence<StrongName>() })
-        .Concat(providerFactory.FullTrustAssemblies)
+        .Concat(factoryAssemblies)
         .Concat(fullTrustAssemblies.Select(assembly => assembly.Evidence.GetHostEvidence<StrongName>()))
         .Distinct()
         .ToArray());
@@ -260,7 +277,9 @@ namespace Qactive
                                     CodeAccessPermission.RevertAssert();
                                     reverted = true;
 
+#if TRACING_REF
                                     Log.Unsafe(ex);
+#endif
 
                                     observer.OnError(ex);
                                   }

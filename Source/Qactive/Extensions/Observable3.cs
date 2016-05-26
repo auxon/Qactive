@@ -51,7 +51,9 @@ namespace Qactive
           }
           catch (Exception ex)
           {
+#if TRACING_REF
             Log.Unsafe(ex);
+#endif
 
             // Failure to marshal notifications across the AppDomain boundary due to serialization or permission errors are swallowed by Rx, 
             // and without any first-chance exception being thrown and without the downstream observer receiving any notification, causing it

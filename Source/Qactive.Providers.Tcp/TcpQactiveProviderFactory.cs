@@ -9,19 +9,36 @@ namespace Qactive
 {
   [Serializable]
   internal class TcpQactiveProviderFactory : QactiveProviderFactory
+#if CAS_IN_STREAMING
+    , ISecureQbservableProviderFactory
+#endif
   {
     public IPEndPoint EndPoint { get; }
 
+#if CAS_REF
     public override IEnumerable<StrongName> FullTrustAssemblies
       => new[]
-         {
-           typeof(TcpQactiveProvider).Assembly.Evidence.GetHostEvidence<StrongName>(),
-           typeof(StreamQbservableProtocolFactory).Assembly.Evidence.GetHostEvidence<StrongName>()
-         };
+      {
+        typeof(TcpQactiveProvider).Assembly.Evidence.GetHostEvidence<StrongName>(),
+        typeof(StreamQbservableProtocolFactory).Assembly.Evidence.GetHostEvidence<StrongName>()
+      };
+#else
+    public IEnumerable<StrongName> FullTrustAssemblies
+      => new[]
+      {
+        typeof(TcpQactiveProvider).Assembly.Evidence.GetHostEvidence<StrongName>(),
+        typeof(StreamQbservableProtocolFactory).Assembly.Evidence.GetHostEvidence<StrongName>()
+      };
+#endif
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2103:ReviewImperativeSecurity", Justification = "Reviewed.")]
+#if CAS_REF
     public override IEnumerable<IPermission> MinimumServerPermissions
       => new[] { new SocketPermission(NetworkAccess.Accept, TransportType.Tcp, EndPoint.Address.ToString(), EndPoint.Port) };
+#else
+    public IEnumerable<IPermission> MinimumServerPermissions
+      => new[] { new SocketPermission(NetworkAccess.Accept, TransportType.Tcp, EndPoint.Address.ToString(), EndPoint.Port) };
+#endif
 
     public TcpQactiveProviderFactory(IPEndPoint endPoint)
     {

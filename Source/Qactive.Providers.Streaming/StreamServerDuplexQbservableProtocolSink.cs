@@ -34,7 +34,11 @@ namespace Qactive
     {
       Contract.Assume(this.protocol == protocol);
 
+#if TPL
       return Task.CompletedTask;
+#else
+      return Task.FromResult(true);
+#endif
     }
 
     protected override IDuplexProtocolMessage TryParseDuplexMessage(StreamMessage message)

@@ -25,7 +25,16 @@ namespace Qactive
       Contract.Requires(fullTrustAssemblies != null);
       Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
 
-      return QbservableServer.CreateService<TSource, TResult>(appDomainSetup, new TcpQactiveProviderFactory(endPoint), new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
+#if CAS_REF
+      return QbservableServer.CreateService<TSource, TResult>(
+#else
+      return QbservableServerSecure.CreateService<TSource, TResult>(
+#endif
+        appDomainSetup,
+        new TcpQactiveProviderFactory(endPoint),
+        new QbservableServiceConverter<TSource, TResult>(service).Convert,
+        appDomainBaseName,
+        fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
@@ -45,7 +54,17 @@ namespace Qactive
       Contract.Requires(fullTrustAssemblies != null);
       Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
 
-      return QbservableServer.CreateService<TSource, TResult>(appDomainSetup, new TcpQactiveProviderFactory(endPoint), options, new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
+#if CAS_REF
+      return QbservableServer.CreateService<TSource, TResult>(
+#else
+      return QbservableServerSecure.CreateService<TSource, TResult>(
+#endif
+        appDomainSetup,
+        new TcpQactiveProviderFactory(endPoint),
+        options,
+        new QbservableServiceConverter<TSource, TResult>(service).Convert,
+        appDomainBaseName,
+        fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Type is constrained by new() and instances are created as needed.")]
@@ -65,7 +84,16 @@ namespace Qactive
       Contract.Requires(fullTrustAssemblies != null);
       Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
 
-      return QbservableServer.CreateService<TSource, TResult>(appDomainSetup, new TcpQactiveProviderFactory<TTransportInitializer>(endPoint), new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
+#if CAS_REF
+      return QbservableServer.CreateService<TSource, TResult>(
+#else
+      return QbservableServerSecure.CreateService<TSource, TResult>(
+#endif
+        appDomainSetup,
+        new TcpQactiveProviderFactory<TTransportInitializer>(endPoint),
+        new QbservableServiceConverter<TSource, TResult>(service).Convert,
+        appDomainBaseName,
+        fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Type is constrained by new() and instances are created as needed.")]
@@ -87,7 +115,17 @@ namespace Qactive
       Contract.Requires(fullTrustAssemblies != null);
       Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
 
-      return QbservableServer.CreateService<TSource, TResult>(appDomainSetup, new TcpQactiveProviderFactory<TTransportInitializer>(endPoint), options, new QbservableServiceConverter<TSource, TResult>(service).Convert, appDomainBaseName, fullTrustAssemblies);
+#if CAS_REF
+      return QbservableServer.CreateService<TSource, TResult>(
+#else
+      return QbservableServerSecure.CreateService<TSource, TResult>(
+#endif
+        appDomainSetup,
+        new TcpQactiveProviderFactory<TTransportInitializer>(endPoint),
+        options,
+        new QbservableServiceConverter<TSource, TResult>(service).Convert,
+        appDomainBaseName,
+        fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
@@ -105,7 +143,16 @@ namespace Qactive
       Contract.Requires(fullTrustAssemblies != null);
       Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
 
-      return QbservableServer.CreateService(appDomainSetup, new TcpQactiveProviderFactory(endPoint), service, appDomainBaseName, fullTrustAssemblies);
+#if CAS_REF
+      return QbservableServer.CreateService(
+#else
+      return QbservableServerSecure.CreateService(
+#endif
+        appDomainSetup,
+        new TcpQactiveProviderFactory(endPoint),
+        service,
+        appDomainBaseName,
+        fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Justification = "Too many overloads.")]
@@ -125,7 +172,17 @@ namespace Qactive
       Contract.Requires(fullTrustAssemblies != null);
       Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
 
-      return QbservableServer.CreateService(appDomainSetup, new TcpQactiveProviderFactory(endPoint), options, service, appDomainBaseName, fullTrustAssemblies);
+#if CAS_REF
+      return QbservableServer.CreateService(
+#else
+      return QbservableServerSecure.CreateService(
+#endif
+        appDomainSetup,
+        new TcpQactiveProviderFactory(endPoint),
+        options,
+        service,
+        appDomainBaseName,
+        fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Type is constrained by new() and instances are created as needed.")]
@@ -145,7 +202,16 @@ namespace Qactive
       Contract.Requires(fullTrustAssemblies != null);
       Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
 
-      return QbservableServer.CreateService(appDomainSetup, new TcpQactiveProviderFactory<TTransportInitializer>(endPoint), service, appDomainBaseName, fullTrustAssemblies);
+#if CAS_REF
+      return QbservableServer.CreateService(
+#else
+      return QbservableServerSecure.CreateService(
+#endif
+        appDomainSetup,
+        new TcpQactiveProviderFactory<TTransportInitializer>(endPoint),
+        service,
+        appDomainBaseName,
+        fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Type is constrained by new() and instances are created as needed.")]
@@ -167,7 +233,17 @@ namespace Qactive
       Contract.Requires(fullTrustAssemblies != null);
       Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
 
-      return QbservableServer.CreateService(appDomainSetup, new TcpQactiveProviderFactory<TTransportInitializer>(endPoint), options, service, appDomainBaseName, fullTrustAssemblies);
+#if CAS_REF
+      return QbservableServer.CreateService(
+#else
+      return QbservableServerSecure.CreateService(
+#endif
+        appDomainSetup,
+        new TcpQactiveProviderFactory<TTransportInitializer>(endPoint),
+        options,
+        service,
+        appDomainBaseName,
+        fullTrustAssemblies);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Type is constrained by new() and instances are created as needed.")]
@@ -193,7 +269,18 @@ namespace Qactive
       Contract.Requires(fullTrustAssemblies != null);
       Contract.Ensures(Contract.Result<IObservable<ClientTermination>>() != null);
 
-      return QbservableServer.CreateService(appDomainSetup, permissions, new TcpQactiveProviderFactory<TTransportInitializer>(endPoint), options, service, appDomainBaseName, fullTrustAssemblies);
+#if CAS_REF
+      return QbservableServer.CreateService(
+#else
+      return QbservableServerSecure.CreateService(
+#endif
+        appDomainSetup,
+        permissions,
+        new TcpQactiveProviderFactory<TTransportInitializer>(endPoint),
+        options,
+        service,
+        appDomainBaseName,
+        fullTrustAssemblies);
     }
   }
 }

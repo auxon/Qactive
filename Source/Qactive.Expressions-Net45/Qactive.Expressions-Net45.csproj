@@ -1,17 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\packages\WhiteTie.1.3.16\build\WhiteTie.props" Condition="Exists('..\..\packages\WhiteTie.1.3.16\build\WhiteTie.props')" />
-  <Import Project="..\..\Build\NuGet.props" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{63F23287-B0D8-408E-995D-BF15A85CEE48}</ProjectGuid>
+    <ProjectGuid>{49736EB0-E17E-42C2-A9D1-01F5C45E853C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Qactive.Expressions</RootNamespace>
     <AssemblyName>Qactive.Expressions</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -22,9 +21,10 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;TRACING;CAS;REFLECTION</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\..\Build\Properties\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
@@ -74,7 +74,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL</DefineConstants>
+    <DefineConstants>TRACE;REMOTING;SERIALIZATION;TRACING;CAS;REFLECTION</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -143,34 +143,88 @@
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
-    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="..\Qactive.Expressions\GlobalSuppressions.cs">
+      <Link>GlobalSuppressions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableBinaryExpression.cs">
+      <Link>SerializableBinaryExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableBlockExpression.cs">
+      <Link>SerializableBlockExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableConditionalExpression.cs">
+      <Link>SerializableConditionalExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableConstantExpression.cs">
+      <Link>SerializableConstantExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableDefaultExpression.cs">
+      <Link>SerializableDefaultExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableExpression.cs">
+      <Link>SerializableExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableExpressionConverter.cs">
+      <Link>SerializableExpressionConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableExpressionExtensions.cs">
+      <Link>SerializableExpressionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableGotoExpression.cs">
+      <Link>SerializableGotoExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableIndexExpression.cs">
+      <Link>SerializableIndexExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableInvocationExpression.cs">
+      <Link>SerializableInvocationExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableLabelExpression.cs">
+      <Link>SerializableLabelExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableLambdaExpression.cs">
+      <Link>SerializableLambdaExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableListInitExpression.cs">
+      <Link>SerializableListInitExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableLoopExpression.cs">
+      <Link>SerializableLoopExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableMemberExpression.cs">
+      <Link>SerializableMemberExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableMemberInitExpression.cs">
+      <Link>SerializableMemberInitExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableMethodCallExpression.cs">
+      <Link>SerializableMethodCallExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableNewArrayExpression.cs">
+      <Link>SerializableNewArrayExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableNewExpression.cs">
+      <Link>SerializableNewExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableParameterExpression.cs">
+      <Link>SerializableParameterExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableRuntimeVariablesExpression.cs">
+      <Link>SerializableRuntimeVariablesExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableSwitchExpression.cs">
+      <Link>SerializableSwitchExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableTryExpression.cs">
+      <Link>SerializableTryExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableTypeBinaryExpression.cs">
+      <Link>SerializableTypeBinaryExpression.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableUnaryExpression.cs">
+      <Link>SerializableUnaryExpression.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SerializableBinaryExpression.cs" />
-    <Compile Include="SerializableBlockExpression.cs" />
-    <Compile Include="SerializableConditionalExpression.cs" />
-    <Compile Include="SerializableConstantExpression.cs" />
-    <Compile Include="SerializableDefaultExpression.cs" />
-    <Compile Include="SerializableExpression.cs" />
-    <Compile Include="SerializableExpressionConverter.cs" />
-    <Compile Include="SerializableExpressionExtensions.cs" />
-    <Compile Include="SerializableGotoExpression.cs" />
-    <Compile Include="SerializableIndexExpression.cs" />
-    <Compile Include="SerializableInvocationExpression.cs" />
-    <Compile Include="SerializableLabelExpression.cs" />
-    <Compile Include="SerializableLambdaExpression.cs" />
-    <Compile Include="SerializableListInitExpression.cs" />
-    <Compile Include="SerializableLoopExpression.cs" />
-    <Compile Include="SerializableMemberExpression.cs" />
-    <Compile Include="SerializableMemberInitExpression.cs" />
-    <Compile Include="SerializableMethodCallExpression.cs" />
-    <Compile Include="SerializableNewArrayExpression.cs" />
-    <Compile Include="SerializableNewExpression.cs" />
-    <Compile Include="SerializableParameterExpression.cs" />
-    <Compile Include="SerializableRuntimeVariablesExpression.cs" />
-    <Compile Include="SerializableSwitchExpression.cs" />
-    <Compile Include="SerializableTryExpression.cs" />
-    <Compile Include="SerializableTypeBinaryExpression.cs" />
-    <Compile Include="SerializableUnaryExpression.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\Build\Properties\CodeAnalysisDictionary.xml">
@@ -179,6 +233,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Properties\ReactiveQ.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
