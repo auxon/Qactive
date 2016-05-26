@@ -8,20 +8,20 @@ A reactive queryable observable framework.
 
 ## Download from NuGet
 > [Qactive.Providers.Tcp](https://www.nuget.org/packages/qactive.providers.tcp)  
-> depends on Rx, Qactive.Providers.Streaming, Qactive.Expressions and Qactive  
-> .NET Framework 4.6.1, .NET Framework 4.5
+> Depends on Rx, Qactive.Providers.Streaming, Qactive.Expressions and Qactive  
+> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5
 
 > [Qactive.Providers.Streaming](https://www.nuget.org/packages/qactive.providers.streaming)  
-> depends on Rx, Qactive.Expressions and Qactive  
-> .NET Framework 4.6.1, .NET Framework 4.5
+> Depends on Rx, Qactive.Expressions and Qactive  
+> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5
 
 > [Qactive](https://www.nuget.org/packages/qactive)  
-> depends on Rx  
-> .NET Framework 4.6.1, .NET Framework 4.5, ASP.NET Core 1.0, Windows 8, Windows Phone 8.1, Xamarin.Android, Xamarin.iOS
+> Depends on Rx  
+> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5, ASP.NET Core 1.0, Windows 8, Windows Phone 8.1, Xamarin.Android, Xamarin.iOS
 
 > [Qactive.Expressions](https://www.nuget.org/packages/qactive.expressions)  
-> no dependencies  
-> .NET Framework 4.6.1, .NET Framework 4.5
+> No dependencies  
+> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5
 
 Add a reference to the **Qactive.Providers.Tcp** package in your Visual Studio project. That package references the other packages as dependencies, so NuGet will automatically download all of them for you.
 
