@@ -84,11 +84,11 @@
     <Compile Include="DuplexSubject.cs" />
     <Compile Include="Extensions\ObservableExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Queries\GroupJoinTests.cs" />
-    <Compile Include="Queries\JoinTests.cs" />
+    <Compile Include="Operators\GroupJoinTests.cs" />
+    <Compile Include="Operators\JoinTests.cs" />
     <Compile Include="Queries\NestedQueryTests.cs" />
-    <Compile Include="Queries\SelectTests.cs" />
-    <Compile Include="Queries\WhereTests.cs" />
+    <Compile Include="Operators\SelectTests.cs" />
+    <Compile Include="Operators\WhereTests.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="TestDuplexMessage.cs" />
     <Compile Include="TestMessage.cs" />
