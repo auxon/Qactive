@@ -45,12 +45,14 @@ namespace Qactive
 
         ISecureQbservable<TResult> secureQuery = null;
 
+#if REFLECTION
         if (RxSecureQbservable<TResult>.IsRxQuery(query))
         {
           secureQuery = new RxSecureQbservable<TResult>(query);
           query = secureQuery;
         }
         else
+#endif
         {
           secureQuery = query as ISecureQbservable<TResult>;
         }

@@ -56,6 +56,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qactive.Expressions-Net45",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qactive.Providers.Tcp-Net45", "Source\Qactive.Providers.Tcp-Net45\Qactive.Providers.Tcp-Net45.csproj", "{FF10503F-4E3A-427D-B935-ABD5C85A826C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qactive.Tests-Net45", "Testing\Qactive.Tests-Net45\Qactive.Tests-Net45.csproj", "{F11D6D7D-8D29-43E4-A865-BF34F400E522}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +112,10 @@ Global
 		{FF10503F-4E3A-427D-B935-ABD5C85A826C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF10503F-4E3A-427D-B935-ABD5C85A826C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF10503F-4E3A-427D-B935-ABD5C85A826C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F11D6D7D-8D29-43E4-A865-BF34F400E522}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F11D6D7D-8D29-43E4-A865-BF34F400E522}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F11D6D7D-8D29-43E4-A865-BF34F400E522}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F11D6D7D-8D29-43E4-A865-BF34F400E522}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -129,5 +135,6 @@ Global
 		{2325C60C-FC0E-46B5-BA1B-9BAB8979EAEE} = {2F367CF8-CF43-45AC-A152-D326D4F28F20}
 		{49736EB0-E17E-42C2-A9D1-01F5C45E853C} = {2F367CF8-CF43-45AC-A152-D326D4F28F20}
 		{FF10503F-4E3A-427D-B935-ABD5C85A826C} = {2F367CF8-CF43-45AC-A152-D326D4F28F20}
+		{F11D6D7D-8D29-43E4-A865-BF34F400E522} = {F6E91F88-34F1-4B64-82A5-30EB1BF2C251}
 	EndGlobalSection
 EndGlobal

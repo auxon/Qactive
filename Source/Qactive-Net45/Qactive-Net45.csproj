@@ -280,9 +280,6 @@
     <Compile Include="..\Qactive\ReplaceConstantsVisitor.cs">
       <Link>ReplaceConstantsVisitor.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive\RxSecureQbservable.cs">
-      <Link>RxSecureQbservable.cs</Link>
-    </Compile>
     <Compile Include="..\Qactive\SecurityExpressionVisitor.cs">
       <Link>SecurityExpressionVisitor.cs</Link>
     </Compile>

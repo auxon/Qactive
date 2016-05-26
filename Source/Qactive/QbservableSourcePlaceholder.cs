@@ -33,10 +33,6 @@ namespace Qactive
       }
     }
 
-    internal QbservableSourcePlaceholder()
-    {
-    }
-
     public IDisposable Subscribe(IObserver<T> observer)
     {
       throw new NotSupportedException();

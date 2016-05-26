@@ -49,7 +49,11 @@ namespace Qactive
 
       var visitor = ReplaceConstantsVisitor.CreateForGenericTypeByDefinition(
         typeof(ClientQuery<>),
+#if REFLECTION
         (_, actualType) => Activator.CreateInstance(typeof(QbservableSourcePlaceholder<>).MakeGenericType(actualType.GetGenericArguments()[0]), true),
+#else
+        (_, actualType) => Activator.CreateInstance(typeof(QbservableSourcePlaceholder<>).MakeGenericType(actualType.GetGenericArguments()[0])),
+#endif
         type => typeof(IQbservable<>).MakeGenericType(type.GetGenericArguments()[0]));
 
       var result = visitor.Visit(Expression);

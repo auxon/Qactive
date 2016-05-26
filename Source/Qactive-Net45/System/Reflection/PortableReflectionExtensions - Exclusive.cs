@@ -65,12 +65,12 @@ namespace System.Reflection
     }
 
     [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "_", Justification = "Required to match the signature of the same method in the FCL.")]
-    internal static FieldInfo GetField(this Type type, string name, BindingFlags _)
+    internal static FieldInfo GetField(this Type type, string name, BindingFlags flags)
     {
       Contract.Requires(type != null);
       Contract.Requires(name != null);
 
-      return type.GetTypeInfo().GetDeclaredField(name);
+      return type.GetTypeInfo().DeclaredFields.FirstOrDefault(field => field.Name == name && ShouldBind(flags, field.IsPublic, field.IsStatic));
     }
 
     internal static IEnumerable<MethodInfo> GetMethods(this Type type)
@@ -82,12 +82,12 @@ namespace System.Reflection
     }
 
     [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "_", Justification = "Required to match the signature of the same method in the FCL.")]
-    internal static IEnumerable<MethodInfo> GetMethods(this Type type, BindingFlags _)
+    internal static IEnumerable<MethodInfo> GetMethods(this Type type, BindingFlags flags)
     {
       Contract.Requires(type != null);
       Contract.Ensures(Contract.Result<IEnumerable<MethodInfo>>() != null);
 
-      return type.GetTypeInfo().DeclaredMethods;
+      return type.GetTypeInfo().DeclaredMethods.Where(method => ShouldBind(flags, method.IsPublic, method.IsStatic));
     }
 
     internal static MethodInfo GetMethod(this Type type, string name)
@@ -99,12 +99,12 @@ namespace System.Reflection
     }
 
     [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "_", Justification = "Required to match the signature of the same method in the FCL.")]
-    internal static MethodInfo GetMethod(this Type type, string name, BindingFlags _)
+    internal static MethodInfo GetMethod(this Type type, string name, BindingFlags flags)
     {
       Contract.Requires(type != null);
       Contract.Requires(name != null);
 
-      return type.GetTypeInfo().GetDeclaredMethod(name);
+      return type.GetTypeInfo().DeclaredMethods.FirstOrDefault(method => method.Name == name && ShouldBind(flags, method.IsPublic, method.IsStatic));
     }
 
     internal static MethodInfo GetMethod(this Type type, string name, params Type[] parameters)
@@ -127,12 +127,12 @@ namespace System.Reflection
     }
 
     [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "_", Justification = "Required to match the signature of the same method in the FCL.")]
-    internal static ConstructorInfo[] GetConstructors(this Type type, BindingFlags _)
+    internal static ConstructorInfo[] GetConstructors(this Type type, BindingFlags flags)
     {
       Contract.Requires(type != null);
       Contract.Ensures(Contract.Result<ConstructorInfo[]>() != null);
 
-      return type.GetTypeInfo().DeclaredConstructors.ToArray();
+      return type.GetTypeInfo().DeclaredConstructors.Where(ctor => ShouldBind(flags, ctor.IsPublic, ctor.IsStatic)).ToArray();
     }
 
     internal static ConstructorInfo GetConstructor(this Type type, params Type[] parameters)
@@ -145,14 +145,15 @@ namespace System.Reflection
     [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "_", Justification = "Required to match the signature of the same method in the FCL.")]
     [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "__", Justification = "Required to match the signature of the same method in the FCL.")]
     [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "___", Justification = "Required to match the signature of the same method in the FCL.")]
-    internal static ConstructorInfo GetConstructor(this Type type, BindingFlags _, object __, Type[] parameters, object ___)
+    internal static ConstructorInfo GetConstructor(this Type type, BindingFlags flags, object __, Type[] parameters, object ___)
     {
       Contract.Requires(type != null);
 
       return type.GetTypeInfo().DeclaredConstructors.FirstOrDefault(ctor =>
-        parameters?.SequenceEqual(from parameter in ctor.GetParameters()
-                                  select parameter.ParameterType)
-                 ?? ctor.GetParameters().Length == 0);
+           ShouldBind(flags, ctor.IsPublic, ctor.IsStatic)
+        && (parameters?.SequenceEqual(from parameter in ctor.GetParameters()
+                                      select parameter.ParameterType)
+                     ?? ctor.GetParameters().Length == 0));
     }
 
     [Pure]
@@ -165,12 +166,12 @@ namespace System.Reflection
     }
 
     [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "_", Justification = "Required to match the signature of the same method in the FCL.")]
-    internal static Type GetNestedType(this Type type, string name, BindingFlags _)
+    internal static Type GetNestedType(this Type type, string name, BindingFlags flags)
     {
       Contract.Requires(type != null);
       Contract.Requires(name != null);
 
-      return type.GetTypeInfo().GetDeclaredNestedType(name)?.AsType();
+      return type.GetTypeInfo().DeclaredNestedTypes.FirstOrDefault(nested => nested.Name == name && ShouldBind(flags, nested.IsPublic, isStatic: false))?.AsType();
     }
 
     internal static Type[] GetGenericArguments(this Type type)
@@ -188,5 +189,11 @@ namespace System.Reflection
 
       return type.GetTypeInfo().ImplementedInterfaces;
     }
+
+    private static bool ShouldBind(BindingFlags flags, bool isPublic, bool isStatic)
+      => (!flags.HasFlag(BindingFlags.Static) || isStatic)
+      && (!flags.HasFlag(BindingFlags.Instance) || !isStatic)
+      && (!flags.HasFlag(BindingFlags.Public) || isPublic)
+      && (!flags.HasFlag(BindingFlags.NonPublic) || !isPublic);
   }
 }

@@ -3,12 +3,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5BA353FF-7C86-4BD4-BE64-8FF7572A993D}</ProjectGuid>
+    <ProjectGuid>{F11D6D7D-8D29-43E4-A865-BF34F400E522}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Qactive.Tests</RootNamespace>
-    <AssemblyName>Qactive.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>Qactive.Tests_Net45</RootNamespace>
+    <AssemblyName>Qactive.Tests-Net45</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -30,7 +30,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -69,9 +69,7 @@
     </When>
     <Otherwise>
       <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework">
-          <Private>False</Private>
-        </Reference>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
       </ItemGroup>
     </Otherwise>
   </Choose>
@@ -79,41 +77,75 @@
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
-    <Compile Include="CoreTests.cs" />
-    <Compile Include="DuplexStream.cs" />
-    <Compile Include="DuplexSubject.cs" />
-    <Compile Include="Extensions\ObservableExtensions.cs" />
+    <Compile Include="..\Qactive.Tests\CoreTests.cs">
+      <Link>CoreTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\DuplexStream.cs">
+      <Link>DuplexStream.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\DuplexSubject.cs">
+      <Link>DuplexSubject.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Extensions\ObservableExtensions.cs">
+      <Link>Extensions\ObservableExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Queries\GroupJoinTests.cs">
+      <Link>Queries\GroupJoinTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Queries\JoinTests.cs">
+      <Link>Queries\JoinTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Queries\NestedQueryTests.cs">
+      <Link>Queries\NestedQueryTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Queries\SelectTests.cs">
+      <Link>Queries\SelectTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Queries\WhereTests.cs">
+      <Link>Queries\WhereTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestBase.cs">
+      <Link>TestBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestDuplexMessage.cs">
+      <Link>TestDuplexMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestMessage.cs">
+      <Link>TestMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestQactiveProvider.cs">
+      <Link>TestQactiveProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestQbservableProtocol.cs">
+      <Link>TestQbservableProtocol.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestService.cs">
+      <Link>TestService.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestService{TSource}.cs">
+      <Link>TestService{TSource}.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TransportStream.cs">
+      <Link>TransportStream.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Queries\GroupJoinTests.cs" />
-    <Compile Include="Queries\JoinTests.cs" />
-    <Compile Include="Queries\NestedQueryTests.cs" />
-    <Compile Include="Queries\SelectTests.cs" />
-    <Compile Include="Queries\WhereTests.cs" />
-    <Compile Include="TestBase.cs" />
-    <Compile Include="TestDuplexMessage.cs" />
-    <Compile Include="TestMessage.cs" />
-    <Compile Include="TestQactiveProvider.cs" />
-    <Compile Include="TestQbservableProtocol.cs" />
-    <Compile Include="TestService.cs" />
-    <Compile Include="TestService{TSource}.cs" />
-    <Compile Include="TransportStream.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Qactive.Expressions\Qactive.Expressions.csproj">
-      <Project>{63f23287-b0d8-408e-995d-bf15a85cee48}</Project>
-      <Name>Qactive.Expressions</Name>
+    <ProjectReference Include="..\..\Source\Qactive-Net45\Qactive-Net45.csproj">
+      <Project>{fdfe9523-bb5d-4e3f-a2da-aec88ec556eb}</Project>
+      <Name>Qactive-Net45</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\Qactive.Providers.Streaming\Qactive.Providers.Streaming.csproj">
-      <Project>{c83a5841-a1ed-454c-9c66-238ad217ee83}</Project>
-      <Name>Qactive.Providers.Streaming</Name>
+    <ProjectReference Include="..\..\Source\Qactive.Expressions-Net45\Qactive.Expressions-Net45.csproj">
+      <Project>{49736eb0-e17e-42c2-a9d1-01f5c45e853c}</Project>
+      <Name>Qactive.Expressions-Net45</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\Qactive.Providers.Tcp\Qactive.Providers.Tcp.csproj">
-      <Project>{33525618-7ed6-4b4e-a4b7-945beaa372ff}</Project>
-      <Name>Qactive.Providers.Tcp</Name>
+    <ProjectReference Include="..\..\Source\Qactive.Providers.Streaming-Net45\Qactive.Providers.Streaming-Net45.csproj">
+      <Project>{2325c60c-fc0e-46b5-ba1b-9bab8979eaee}</Project>
+      <Name>Qactive.Providers.Streaming-Net45</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\Qactive\Qactive.csproj">
-      <Project>{9b68408d-1974-4f76-9c89-eccd466a25e0}</Project>
-      <Name>Qactive</Name>
+    <ProjectReference Include="..\..\Source\Qactive.Providers.Tcp-Net45\Qactive.Providers.Tcp-Net45.csproj">
+      <Project>{ff10503f-4e3a-427d-b935-abd5c85a826c}</Project>
+      <Name>Qactive.Providers.Tcp-Net45</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -57,7 +57,11 @@ namespace Qactive
     {
       other.OnNext(message);
 
+#if TPL
       return Task.CompletedTask;
+#else
+      return Task.FromResult(true);
+#endif
     }
 
     protected override Task ShutdownCoreAsync()
@@ -73,7 +77,13 @@ namespace Qactive
       }
 
       public override Task InitializeAsync(QbservableProtocol<IObservable<TestMessage>, TestMessage> protocol, CancellationToken cancel)
-        => Task.CompletedTask;
+      {
+#if TPL
+        return Task.CompletedTask;
+#else
+        return Task.FromResult(true);
+#endif
+      }
 
       protected override TestMessage CreateEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error)
         => new TestDuplexMessage(QbservableProtocolMessageKind.DuplexEnumeratorErrorResponse, id, error);
@@ -119,7 +129,13 @@ namespace Qactive
       }
 
       public override Task InitializeAsync(QbservableProtocol<IObservable<TestMessage>, TestMessage> protocol, CancellationToken cancel)
-        => Task.CompletedTask;
+      {
+#if TPL
+        return Task.CompletedTask;
+#else
+        return Task.FromResult(true);
+#endif
+      }
 
       protected override TestMessage CreateDisposeEnumerator(int enumeratorId)
         => new TestDuplexMessage(QbservableProtocolMessageKind.DuplexDisposeEnumerator, enumeratorId);

@@ -37,7 +37,11 @@ namespace Qactive.Tests
     {
       Write(buffer, offset, count);
 
+#if TPL
       return Task.CompletedTask;
+#else
+      return Task.FromResult(true);
+#endif
     }
 
     public override int Read(byte[] buffer, int offset, int count)
