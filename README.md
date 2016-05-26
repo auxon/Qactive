@@ -16,7 +16,7 @@ A reactive queryable observable framework.
 > .NET Framework 4.6.1, .NET Framework 4.5
 
 > [Qactive](https://www.nuget.org/packages/qactive)  
-> depends on Rx
+> depends on Rx  
 > .NET Framework 4.6.1, .NET Framework 4.5, ASP.NET Core 1.0, Windows 8, Windows Phone 8.1, Xamarin.Android, Xamarin.iOS
 
 > [Qactive.Expressions](https://www.nuget.org/packages/qactive.expressions)  
