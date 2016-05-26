@@ -206,6 +206,8 @@ namespace Qactive
 
     private sealed class CreateServiceProxy<TSource, TResult> : MarshalByRefObject
     {
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The exception is passed to the observer.")]
+      [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "It must be an instance method so that the call is marshaled to another AppDomain.")]
       public IObservable<ClientTermination> CreateService(
         QactiveProviderFactory providerFactory,
         QbservableServiceOptions options,

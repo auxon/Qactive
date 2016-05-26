@@ -1,36 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.IO;
 using System.Linq;
 
 namespace System.Reflection
 {
   partial class PortableReflectionExtensions
   {
-    [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Bug in Code Analysis probably due to use of the when keyword. The Exception type is not being caught here.")]
-    internal static Type GetType(this Assembly assembly, string name, bool throwOnError)
-    {
-      Contract.Requires(assembly != null);
-      Contract.Requires(name != null);
-
-      try
-      {
-        return assembly.GetType(name);
-      }
-      catch (BadImageFormatException) when (!throwOnError)
-      {
-        return null;
-      }
-      catch (IOException) when (!throwOnError)
-      {
-        return null;
-      }
-      catch (ArgumentException) when (!throwOnError)
-      {
-        return null;
-      }
-    }
-
     internal static TAttribute GetCustomAttribute<TAttribute>(this Type type, bool inherit)
       where TAttribute : Attribute
     {
@@ -62,15 +37,6 @@ namespace System.Reflection
       Contract.Ensures(Contract.Result<PropertyInfo[]>() != null);
 
       return type.GetTypeInfo().DeclaredProperties.ToArray();
-    }
-
-    [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "_", Justification = "Required to match the signature of the same method in the FCL.")]
-    internal static FieldInfo GetField(this Type type, string name, BindingFlags flags)
-    {
-      Contract.Requires(type != null);
-      Contract.Requires(name != null);
-
-      return type.GetTypeInfo().DeclaredFields.FirstOrDefault(field => field.Name == name && ShouldBind(flags, field.IsPublic, field.IsStatic));
     }
 
     internal static IEnumerable<MethodInfo> GetMethods(this Type type)
@@ -105,17 +71,6 @@ namespace System.Reflection
       Contract.Requires(name != null);
 
       return type.GetTypeInfo().DeclaredMethods.FirstOrDefault(method => method.Name == name && ShouldBind(flags, method.IsPublic, method.IsStatic));
-    }
-
-    internal static MethodInfo GetMethod(this Type type, string name, params Type[] parameters)
-    {
-      Contract.Requires(type != null);
-      Contract.Requires(name != null);
-
-      return type.GetTypeInfo().GetDeclaredMethods(name).FirstOrDefault(method =>
-        parameters?.SequenceEqual(from parameter in method.GetParameters()
-                                  select parameter.ParameterType)
-                 ?? method.GetParameters().Length == 0);
     }
 
     internal static ConstructorInfo[] GetConstructors(this Type type)
@@ -163,15 +118,6 @@ namespace System.Reflection
       Contract.Requires(other != null);
 
       return type.GetTypeInfo().IsAssignableFrom(other.GetTypeInfo());
-    }
-
-    [Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "_", Justification = "Required to match the signature of the same method in the FCL.")]
-    internal static Type GetNestedType(this Type type, string name, BindingFlags flags)
-    {
-      Contract.Requires(type != null);
-      Contract.Requires(name != null);
-
-      return type.GetTypeInfo().DeclaredNestedTypes.FirstOrDefault(nested => nested.Name == name && ShouldBind(flags, nested.IsPublic, isStatic: false))?.AsType();
     }
 
     internal static Type[] GetGenericArguments(this Type type)
