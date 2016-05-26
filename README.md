@@ -20,7 +20,7 @@ A reactive queryable observable framework.
 > .NET Framework 4.6.1, .NET Framework 4.5, ASP.NET Core 1.0, Windows 8, Windows Phone 8.1, Xamarin.Android, Xamarin.iOS
 
 > [Qactive.Expressions](https://www.nuget.org/packages/qactive.expressions)  
-> no dependencies
+> no dependencies  
 > .NET Framework 4.6.1, .NET Framework 4.5
 
 Add a reference to the **Qactive.Providers.Tcp** package in your Visual Studio project. That package references the other packages as dependencies, so NuGet will automatically download all of them for you.
