@@ -21,7 +21,7 @@ using System.Resources;
 [SuppressMessage("Microsoft.Design", "CA1050:DeclareTypesInNamespaces", Justification = "Referenced by assembly-level attributes only.")]
 internal static class AssemblyConstants
 {
-  public const string Version = "1.1.0";
+  public const string Version = "2.0.0";
 
   /// <summary>
   /// Semantic version for the assembly, indicating a prerelease package in NuGet.
