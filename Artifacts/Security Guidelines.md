@@ -45,14 +45,14 @@ operators defined by Qbservable, Observable, Enumerable and Queryable, where app
 
 Place configurable caps on the use of some kinds of types, operators and parameters: 
 
-	- Limit the size of strings
-	- Limit the number of strings
-	- Allow only 1 use of Observable.Timer or Observable.Interval per query
-		- Duration must be >= 30 seconds and <= 12 hours
-	- Observable.Range length must be <= 10
-	- Limit the number of operators that are permitted.
-	- Limit the size of the serialized expression tree bytes that is permitted for deserialization.
-	- Limit the size of all data payloads, including duplex.
-		- Provide distinct settings between initial input (e.g., expression) vs. incoming duplex (e.g., OnNext and member values).
-	- Throttle duplex observables by applying a minimum duration of 30 seconds.
-	- Throttle service output by applying a minimum duration of 30 seconds.
+- Limit the size of strings
+- Limit the number of strings
+- Allow only 1 use of Observable.Timer or Observable.Interval per query
+	- Duration must be >= 30 seconds and <= 12 hours
+- Observable.Range length must be <= 10
+- Limit the number of operators that are permitted.
+- Limit the size of the serialized expression tree bytes that is permitted for deserialization.
+- Limit the size of all data payloads, including duplex.
+	- Provide distinct settings between initial input (e.g., expression) vs. incoming duplex (e.g., OnNext and member values).
+- Throttle duplex observables by applying a minimum duration of 30 seconds.
+- Throttle service output by applying a minimum duration of 30 seconds.
