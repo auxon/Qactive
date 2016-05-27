@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <NuSpecProjectUrl>https://github.com/RxDave/Qactive</NuSpecProjectUrl>
-    <NuSpecReleaseNotes>https://github.com/RxDave/Qactive/wiki/Release-Notes</NuSpecReleaseNotes>
+    <NuSpecReleaseNotes>https://github.com/RxDave/Qactive/releases</NuSpecReleaseNotes>
     <NuSpecIconUrl></NuSpecIconUrl>
     <NuSpecLicenseUrl>https://github.com/RxDave/Qactive/blob/master/LICENSE.txt</NuSpecLicenseUrl>
     <NuSpecTags>Rx, reactive, Reactive Extensions, Rx.NET, IObservable, IQbservable, queryable, service, stream</NuSpecTags>
