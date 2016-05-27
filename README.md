@@ -43,6 +43,8 @@ For more information, see [this series of blog posts](http://davesexton.com/blog
 > it hasn't been fully considered yet. Do not expose a Qbservable service on a public server without 
 > taking the necessary precautions to secure it first.
 
+> See [Security Guidelines](Artifacts/Security Guidelines.md) for more information.
+
 ## Features
 * Works immediately with pre-built transport providers.
   * TCP with binary serialization is provided by the optional Qactive.Providers.Tcp package on NuGet.
