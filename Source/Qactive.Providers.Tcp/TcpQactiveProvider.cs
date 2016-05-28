@@ -12,6 +12,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Remoting.Messaging;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -83,6 +84,15 @@ namespace Qactive
       formatterFactory = new ConstantFormatterFactory(formatter).GetFormatter;
     }
 
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(EndPoint != null);
+      Contract.Invariant(formatterFactory != null);
+      Contract.Invariant(prepareSocket != null);
+    }
+
     public static TcpQactiveProvider Client(Type sourceType, IPEndPoint endPoint, Action<Socket> prepareSocket, IRemotingFormatter formatter, LocalEvaluator localEvaluator)
     {
       Contract.Requires(sourceType != null);
@@ -105,15 +115,6 @@ namespace Qactive
       Contract.Ensures(Contract.Result<TcpQactiveProvider>() != null);
 
       return new TcpQactiveProvider(sourceType, endPoint, prepareSocket, formatter, localEvaluator, argument);
-    }
-
-    [ContractInvariantMethod]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
-    private void ObjectInvariant()
-    {
-      Contract.Invariant(EndPoint != null);
-      Contract.Invariant(formatterFactory != null);
-      Contract.Invariant(prepareSocket != null);
     }
 
     public static TcpQactiveProvider Server(IPEndPoint endPoint, ITcpQactiveProviderTransportInitializer transportInitializer = null)
@@ -206,7 +207,7 @@ namespace Qactive
 
       return from protocol in NegotiateClientAsync(stream, formatterFactory(), cancel).ToObservable()
              from result in protocol
-              .ExecuteClient<TResult>(prepareExpression(protocol), Argument)
+              .ExecuteClient<TResult>(Id, prepareExpression(protocol), Argument)
               .Finally(protocol.Dispose)
              select result;
     }
@@ -232,33 +233,39 @@ namespace Qactive
                try
                {
                  using (var stream = client.GetStream())
-                 using (var protocol = await NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false))
                  {
-                   var provider = providerFactory(protocol);
+                   var result = await NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false);
+                   var protocol = result.Item1;
+                   var clientId = result.Item2;
 
-                   try
+                   using (protocol)
                    {
-                     await protocol.ExecuteServerAsync(Id + " C" + number + " " + remoteEndPoint, provider).ConfigureAwait(false);
-                   }
-                   catch (OperationCanceledException)
-                   {
-                   }
-                   catch (Exception ex)
-                   {
-                     exceptions.Add(ExceptionDispatchInfo.Capture(ex));
-                   }
+                     var provider = providerFactory(protocol);
 
-                   var protocolExceptions = protocol.Exceptions;
-
-                   if (protocolExceptions != null)
-                   {
-                     foreach (var exception in protocolExceptions)
+                     try
                      {
-                       exceptions.Add(exception);
+                       await protocol.ExecuteServerAsync(Id + " C" + number + " " + remoteEndPoint + " (" + clientId + ")", provider).ConfigureAwait(false);
                      }
-                   }
+                     catch (OperationCanceledException)
+                     {
+                     }
+                     catch (Exception ex)
+                     {
+                       exceptions.Add(ExceptionDispatchInfo.Capture(ex));
+                     }
 
-                   shutdownReason = protocol.ShutdownReason;
+                     var protocolExceptions = protocol.Exceptions;
+
+                     if (protocolExceptions != null)
+                     {
+                       foreach (var exception in protocolExceptions)
+                       {
+                         exceptions.Add(exception);
+                       }
+                     }
+
+                     shutdownReason = protocol.ShutdownReason;
+                   }
                  }
                }
                catch (OperationCanceledException)
@@ -278,43 +285,58 @@ namespace Qactive
              select result;
     }
 
-    private static async Task<IStreamQbservableProtocol> NegotiateClientAsync(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
+    private async Task<IStreamQbservableProtocol> NegotiateClientAsync(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
     {
       Contract.Requires(stream != null);
       Contract.Requires(formatter != null);
 
-      // TODO: Implement actual protocol negotiation
-
       var protocol = StreamQbservableProtocolFactory.CreateClient(stream, formatter, cancel);
 
-      const int ping = 123;
+      var id = (string)Id;
+      var buffer = Encoding.ASCII.GetBytes(id);
 
-      var buffer = BitConverter.GetBytes(ping);
+      await protocol.SendAsync(BitConverter.GetBytes(id.Length), 0, 4).ConfigureAwait(false);
+      await protocol.SendAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+      await protocol.ReceiveAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
 
-      await protocol.SendAsync(buffer, 0, 4).ConfigureAwait(false);
-      await protocol.ReceiveAsync(buffer, 0, 4).ConfigureAwait(false);
-
-      Contract.Assume(BitConverter.ToInt32(buffer, 0) == ping);
+      Contract.Assume(Encoding.ASCII.GetString(buffer) == id);
 
       return protocol;
     }
 
-    private static async Task<IStreamQbservableProtocol> NegotiateServerAsync(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    private static async Task<Tuple<IStreamQbservableProtocol, string>> NegotiateServerAsync(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
     {
       Contract.Requires(stream != null);
       Contract.Requires(formatter != null);
       Contract.Requires(serviceOptions != null);
 
-      // TODO: Implement actual protocol negotiation
-
       var protocol = StreamQbservableProtocolFactory.CreateServer(stream, formatter, serviceOptions, cancel);
 
-      var buffer = new byte[4];
+      var lengthBuffer = new byte[4];
 
-      await protocol.ReceiveAsync(buffer, 0, 4).ConfigureAwait(false);
-      await protocol.SendAsync(buffer, 0, 4).ConfigureAwait(false);
+      await protocol.ReceiveAsync(lengthBuffer, 0, 4).ConfigureAwait(false);
 
-      return protocol;
+      var length = BitConverter.ToInt32(lengthBuffer, 0);
+
+      if (length <= 0 || length > 255)
+      {
+        throw new InvalidOperationException("Invalid client ID received. (" + length + " bytes)");
+      }
+
+      var clientIdBuffer = new byte[length];
+
+      await protocol.ReceiveAsync(clientIdBuffer, 0, clientIdBuffer.Length).ConfigureAwait(false);
+
+      var clientId = Encoding.ASCII.GetString(clientIdBuffer);
+
+      if (clientId == null || string.IsNullOrWhiteSpace(clientId))
+      {
+        throw new InvalidOperationException("Invalid client ID received (empty or only whitespace).");
+      }
+
+      await protocol.SendAsync(clientIdBuffer, 0, clientIdBuffer.Length).ConfigureAwait(false);
+
+      return Tuple.Create(protocol, clientId);
     }
 
     // This class avoids a compiler-generated closure, which was causing the Code Contract rewriter to generate invalid code.
