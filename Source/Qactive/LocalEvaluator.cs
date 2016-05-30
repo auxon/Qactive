@@ -29,6 +29,7 @@ namespace Qactive
 
       var instance = closure.Value;
 
+      string name;
       object value;
       Type type;
 
@@ -36,6 +37,7 @@ namespace Qactive
 
       if (field != null)
       {
+        name = field.DeclaringType.Name + "." + field.Name;
         type = field.FieldType;
         value = field.GetValue(instance);
       }
@@ -43,11 +45,12 @@ namespace Qactive
       {
         var property = (PropertyInfo)member.Member;
 
+        name = property.DeclaringType.Name + "." + property.Name;
         type = property.PropertyType;
         value = property.GetValue(instance);
       }
 
-      var result = TryEvaluateSequences(value, type, protocol);
+      var result = TryEvaluateSequences(name, value, type, protocol);
 
       return result == null
            ? Expression.Constant(value, type)
@@ -83,8 +86,9 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Call", Justification = "Reviewed")]
     public abstract Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, IQbservableProtocol protocol);
 
-    protected Either<object, Expression> TryEvaluateSequences(object value, Type type, IQbservableProtocol protocol)
+    protected Either<object, Expression> TryEvaluateSequences(string name, object value, Type type, IQbservableProtocol protocol)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(type != null);
       Contract.Requires(protocol != null);
 
@@ -97,7 +101,7 @@ namespace Qactive
 
         if (isSequence || !IsTypeKnown(value))
         {
-          var result = TryEvaluateEnumerable(value, type, protocol);
+          var result = TryEvaluateEnumerable(name, value, type, protocol);
 
           if (result != null)
           {
@@ -105,7 +109,7 @@ namespace Qactive
           }
           else
           {
-            var expression = TryEvaluateObservable(value, type, protocol);
+            var expression = TryEvaluateObservable(name, value, type, protocol);
 
             if (expression != null)
             {
@@ -118,9 +122,9 @@ namespace Qactive
       return null;
     }
 
-    protected abstract Either<object, Expression> TryEvaluateEnumerable(object value, Type type, IQbservableProtocol protocol);
+    protected abstract Either<object, Expression> TryEvaluateEnumerable(string name, object value, Type type, IQbservableProtocol protocol);
 
-    protected abstract Expression TryEvaluateObservable(object value, Type type, IQbservableProtocol protocol);
+    protected abstract Expression TryEvaluateObservable(string name, object value, Type type, IQbservableProtocol protocol);
   }
 
   [ContractClassFor(typeof(LocalEvaluator))]
@@ -160,16 +164,18 @@ namespace Qactive
       return null;
     }
 
-    protected override Either<object, Expression> TryEvaluateEnumerable(object value, Type type, IQbservableProtocol protocol)
+    protected override Either<object, Expression> TryEvaluateEnumerable(string name, object value, Type type, IQbservableProtocol protocol)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(value != null);
       Contract.Requires(type != null);
       Contract.Requires(protocol != null);
       return null;
     }
 
-    protected override Expression TryEvaluateObservable(object value, Type type, IQbservableProtocol protocol)
+    protected override Expression TryEvaluateObservable(string name, object value, Type type, IQbservableProtocol protocol)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(value != null);
       Contract.Requires(type != null);
       Contract.Requires(protocol != null);

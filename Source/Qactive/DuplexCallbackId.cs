@@ -64,7 +64,7 @@ namespace Qactive
 
     public override string ToString()
     {
-      return "{ClientId = " + ClientId + ", ServerId = " + ServerId + '}';
+      return "Duplex:" + ClientId + "," + ServerId;
     }
   }
 }

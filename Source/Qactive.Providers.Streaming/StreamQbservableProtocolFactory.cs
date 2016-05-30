@@ -7,13 +7,14 @@ namespace Qactive
 {
   public static class StreamQbservableProtocolFactory
   {
-    public static IStreamQbservableProtocol CreateClient(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
+    public static IStreamQbservableProtocol CreateClient(object clientId, Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
     {
+      Contract.Requires(clientId != null);
       Contract.Requires(stream != null);
       Contract.Requires(formatter != null);
       Contract.Ensures(Contract.Result<IStreamQbservableProtocol>() != null);
 
-      return new StreamQbservableProtocol(stream, formatter, cancel);
+      return new StreamQbservableProtocol(clientId, stream, formatter, cancel);
     }
 
     public static IStreamQbservableProtocol CreateServer(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)

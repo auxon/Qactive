@@ -128,6 +128,7 @@
   -->
   <Target Name="AfterBuild">
     <PropertyGroup>
+      <!-- This directory is required for the sandbox example, which loads the assemblies into a secure AppDomain. -->
       <SandboxDir Condition=" '$(SandboxDir)' == '' ">$(OutDir)bin\</SandboxDir>
     </PropertyGroup>
     <ItemGroup>

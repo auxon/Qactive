@@ -13,7 +13,7 @@ namespace Qactive
   {
     bool IsClient { get; }
 
-    object CurrentClientId { get; }
+    object ClientId { get; set; }
 
     IReadOnlyCollection<ExceptionDispatchInfo> Exceptions { get; }
 
@@ -29,7 +29,7 @@ namespace Qactive
 
     IObservable<TResult> ExecuteClient<TResult>(Expression expression, object argument);
 
-    Task ExecuteServerAsync(object clientId, IQbservableProvider provider);
+    Task ExecuteServerAsync(IQbservableProvider provider);
 
     void CancelAllCommunication();
 
@@ -41,7 +41,22 @@ namespace Qactive
   {
     public bool IsClient { get; }
 
-    public object CurrentClientId { get; }
+    public object ClientId
+    {
+      get
+      {
+        Contract.Ensures(!IsClient || Contract.Result<object>() != null);
+        return null;
+      }
+
+      set
+      {
+        Contract.Requires(!IsClient);
+        Contract.Requires(ClientId == null, "ClientId can only be assigned once.");
+        Contract.Requires(value != null);
+        Contract.Ensures(ClientId != null);
+      }
+    }
 
     public IReadOnlyCollection<ExceptionDispatchInfo> Exceptions
     {
@@ -85,10 +100,9 @@ namespace Qactive
       return null;
     }
 
-    public Task ExecuteServerAsync(object clientId, IQbservableProvider provider)
+    public Task ExecuteServerAsync(IQbservableProvider provider)
     {
       Contract.Requires(!IsClient);
-      Contract.Requires(clientId != null);
       Contract.Requires(provider != null);
       Contract.Ensures(Contract.Result<Task>() != null);
       return null;

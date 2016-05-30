@@ -49,7 +49,7 @@ namespace Qactive
            : null;
     }
 
-    public override IDisposable Subscribe(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted)
+    public override IDisposable Subscribe(string name, int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted)
     {
       /*
       In testing, the observer permanently blocked incoming data from the client unless concurrency was introduced.
@@ -68,11 +68,15 @@ namespace Qactive
       var scheduler = TaskPoolScheduler.Default;
 
       return base.Subscribe(
+        name,
         clientId,
         value => scheduler.Schedule(value, (_, v) => { onNext(v); return Disposable.Empty; }),
         ex => scheduler.Schedule(ex, (_, e) => { onError(e); return Disposable.Empty; }),
         () => scheduler.Schedule(onCompleted));
     }
+
+    protected override StreamMessage CreateSubscribe(DuplexCallbackId clientId)
+      => DuplexStreamMessage.CreateSubscribe(clientId, protocol);
 
     protected override StreamMessage CreateDisposeSubscription(int subscriptionId)
       => DuplexStreamMessage.CreateDisposeSubscription(subscriptionId, protocol);

@@ -13,19 +13,19 @@ namespace Qactive
 
     DuplexCallbackId RegisterEnumeratorCallback(int clientId, Action<object> callback, Action<ExceptionDispatchInfo> onError);
 
-    Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted, Action<int> dispose);
+    Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<DuplexCallbackId, object> onNext, Action<DuplexCallbackId, ExceptionDispatchInfo> onError, Action<DuplexCallbackId> onCompleted, Action<DuplexCallbackId> dispose, Action<DuplexCallbackId> subscribed);
 
-    object Invoke(int clientId, object[] arguments);
+    object Invoke(string name, int clientId, object[] arguments);
 
-    IDisposable Subscribe(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted);
+    IDisposable Subscribe(string name, int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted);
 
-    int GetEnumerator(int clientId);
+    int GetEnumerator(string name, int clientId);
 
-    Tuple<bool, object> MoveNext(int enumeratorId);
+    Tuple<bool, object> MoveNext(string name, int enumeratorId);
 
-    void ResetEnumerator(int enumeratorId);
+    void ResetEnumerator(string name, int enumeratorId);
 
-    void DisposeEnumerator(int enumeratorId);
+    void DisposeEnumerator(string name, int enumeratorId);
   }
 
   [ContractClassFor(typeof(IServerDuplexQbservableProtocolSink))]
@@ -54,23 +54,26 @@ namespace Qactive
       return default(DuplexCallbackId);
     }
 
-    public Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted, Action<int> dispose)
+    public Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<DuplexCallbackId, object> onNext, Action<DuplexCallbackId, ExceptionDispatchInfo> onError, Action<DuplexCallbackId> onCompleted, Action<DuplexCallbackId> dispose, Action<DuplexCallbackId> subscribed)
     {
       Contract.Requires(onNext != null);
       Contract.Requires(onError != null);
       Contract.Requires(onCompleted != null);
       Contract.Requires(dispose != null);
+      Contract.Requires(subscribed != null);
       Contract.Ensures(Contract.Result<Tuple<DuplexCallbackId, IDisposable>>() != null);
       return null;
     }
 
-    public object Invoke(int clientId, object[] arguments)
+    public object Invoke(string name, int clientId, object[] arguments)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       return null;
     }
 
-    public IDisposable Subscribe(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted)
+    public IDisposable Subscribe(string name, int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(onNext != null);
       Contract.Requires(onError != null);
       Contract.Requires(onCompleted != null);
@@ -78,23 +81,27 @@ namespace Qactive
       return null;
     }
 
-    public int GetEnumerator(int clientId)
+    public int GetEnumerator(string name, int clientId)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       return 0;
     }
 
-    public Tuple<bool, object> MoveNext(int enumeratorId)
+    public Tuple<bool, object> MoveNext(string name, int enumeratorId)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Ensures(Contract.Result<Tuple<bool, object>>() != null);
       return null;
     }
 
-    public void ResetEnumerator(int enumeratorId)
+    public void ResetEnumerator(string name, int enumeratorId)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
     }
 
-    public void DisposeEnumerator(int enumeratorId)
+    public void DisposeEnumerator(string name, int enumeratorId)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
     }
   }
 }

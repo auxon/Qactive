@@ -19,12 +19,14 @@ namespace Qactive
 
     public override Expression GetValue(PropertyInfo property, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
       => DuplexCallback.Create(
+          property.DeclaringType.Name + "." + property.Name,
           protocol,
           Evaluate(member.Expression, visitor, _ => Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member),
           property);
 
     public override Expression GetValue(FieldInfo field, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
       => DuplexCallback.Create(
+          field.DeclaringType.Name + "." + field.Name,
           protocol,
           Evaluate(member.Expression, visitor, _ => Errors.ExpressionMemberMissingLocalInstanceFormat, member.Member),
           field);
@@ -42,7 +44,7 @@ namespace Qactive
         instance = Evaluate(call.Object, visitor, _ => Errors.ExpressionCallMissingLocalInstanceFormat, call.Method);
       }
 
-      return DuplexCallback.Create(protocol, instance, call.Method, visitor.Visit(call.Arguments));
+      return DuplexCallback.Create(call.Method.DeclaringType.Name + "." + call.Method.Name, protocol, instance, call.Method, visitor.Visit(call.Arguments));
     }
 
     internal static object Evaluate(Expression expression, ExpressionVisitor visitor, Func<Expression, string> errorMessageFormatSelector, MemberInfo method)
@@ -68,31 +70,31 @@ namespace Qactive
       return constant.Value;
     }
 
-    protected override Either<object, Expression> TryEvaluateEnumerable(object value, Type type, IQbservableProtocol protocol)
+    protected override Either<object, Expression> TryEvaluateEnumerable(string name, object value, Type type, IQbservableProtocol protocol)
     {
       Expression expression = null;
 
       if (type.GetIsGenericType() && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
       {
-        expression = DuplexCallback.CreateEnumerable(protocol, value, type.GetGenericArguments()[0], type);
+        expression = DuplexCallback.CreateEnumerable(name, protocol, value, type.GetGenericArguments()[0], type);
       }
       else if (type == typeof(IEnumerable))
       {
         var enumerable = (IEnumerable)value;
 
-        expression = DuplexCallback.CreateEnumerable(protocol, enumerable.Cast<object>(), typeof(object), type);
+        expression = DuplexCallback.CreateEnumerable(name, protocol, enumerable.Cast<object>(), typeof(object), type);
       }
 
       return expression == null ? null : Either.Right<object, Expression>(expression);
     }
 
-    protected override Expression TryEvaluateObservable(object value, Type type, IQbservableProtocol protocol)
+    protected override Expression TryEvaluateObservable(string name, object value, Type type, IQbservableProtocol protocol)
     {
       var observableType = value.GetType().GetGenericInterfaceFromDefinition(typeof(IObservable<>));
 
       if (observableType != null)
       {
-        return DuplexCallback.CreateObservable(protocol, value, observableType.GetGenericArguments()[0], type);
+        return DuplexCallback.CreateObservable(name, protocol, value, observableType.GetGenericArguments()[0], type);
       }
 
       return null;

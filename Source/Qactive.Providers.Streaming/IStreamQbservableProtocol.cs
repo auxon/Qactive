@@ -39,7 +39,7 @@ namespace Qactive
 
     public bool IsClient { get; }
 
-    public object CurrentClientId { get; }
+    public object ClientId { get; set; }
 
     public IReadOnlyCollection<ExceptionDispatchInfo> Exceptions { get; }
 
@@ -72,7 +72,7 @@ namespace Qactive
       return null;
     }
 
-    public Task ExecuteServerAsync(object clientId, IQbservableProvider provider)
+    public Task ExecuteServerAsync(IQbservableProvider provider)
     {
       return null;
     }

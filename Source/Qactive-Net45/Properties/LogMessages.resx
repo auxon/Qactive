@@ -123,6 +123,12 @@
   <data name="ClientSendingExpression" xml:space="preserve">
     <value>Client sending expression</value>
   </data>
+  <data name="Received" xml:space="preserve">
+    <value>Received</value>
+  </data>
+  <data name="Sending" xml:space="preserve">
+    <value>Sending</value>
+  </data>
   <data name="ServerReceivingExpression" xml:space="preserve">
     <value>Server receiving expression</value>
   </data>

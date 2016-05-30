@@ -15,9 +15,10 @@ namespace Qactive
   {
     protected TSource Source { get; }
 
-    internal QbservableProtocol(TSource source, CancellationToken cancel)
-      : base(cancel)
+    internal QbservableProtocol(object clientId, TSource source, CancellationToken cancel)
+      : base(clientId, cancel)
     {
+      Contract.Requires(clientId != null);
       Contract.Requires(source != null);
       Contract.Ensures(IsClient);
 

@@ -18,9 +18,10 @@ namespace Qactive
     private readonly AsyncConsumerQueue receiveQ = new AsyncConsumerQueue();
     private readonly IRemotingFormatter formatter;
 
-    public StreamQbservableProtocol(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
-    : base(stream, cancel)
+    public StreamQbservableProtocol(object clientId, Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
+    : base(clientId, stream, cancel)
     {
+      Contract.Requires(clientId != null);
       Contract.Requires(stream != null);
       Contract.Requires(formatter != null);
 
@@ -101,9 +102,6 @@ namespace Qactive
       long length;
       return new StreamMessage(kind, Serialize(data, out length), length);
     }
-
-    protected override StreamMessage CreateSubscribeDuplexMessage(DuplexCallbackId id)
-      => DuplexStreamMessage.CreateSubscribe(id, this);
 
     protected override Task SendMessageCoreAsync(StreamMessage message)
     {

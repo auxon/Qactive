@@ -11,16 +11,18 @@ namespace Qactive
   {
     private readonly IObserver<TestMessage> other;
 
-    public TestQbservableProtocol(IObservable<TestMessage> source, IObserver<TestMessage> other)
-      : base(source, CancellationToken.None)
+    public TestQbservableProtocol(object clientId, IObservable<TestMessage> source, IObserver<TestMessage> other)
+      : base(clientId, source, CancellationToken.None)
     {
       this.other = other;
     }
 
-    public TestQbservableProtocol(IObservable<TestMessage> source, IObserver<TestMessage> other, QbservableServiceOptions serviceOptions)
+    public TestQbservableProtocol(object clientId, IObservable<TestMessage> source, IObserver<TestMessage> other, QbservableServiceOptions serviceOptions)
       : base(source, serviceOptions, CancellationToken.None)
     {
       this.other = other;
+
+      ClientId = clientId;
     }
 
     protected override ClientDuplexQbservableProtocolSink<IObservable<TestMessage>, TestMessage> CreateClientDuplexSink()
@@ -34,9 +36,6 @@ namespace Qactive
 
     protected override TestMessage CreateMessage(QbservableProtocolMessageKind kind, object data)
       => new TestMessage(kind, data);
-
-    protected override TestMessage CreateSubscribeDuplexMessage(DuplexCallbackId id)
-      => new TestDuplexMessage(QbservableProtocolMessageKind.DuplexSubscribe, id);
 
     protected override T Deserialize<T>(TestMessage message)
       => (T)message.Value;
@@ -136,6 +135,9 @@ namespace Qactive
         return Task.FromResult(true);
 #endif
       }
+
+      protected override TestMessage CreateSubscribe(DuplexCallbackId clientId)
+        => new TestDuplexMessage(QbservableProtocolMessageKind.DuplexSubscribe, clientId);
 
       protected override TestMessage CreateDisposeEnumerator(int enumeratorId)
         => new TestDuplexMessage(QbservableProtocolMessageKind.DuplexDisposeEnumerator, enumeratorId);

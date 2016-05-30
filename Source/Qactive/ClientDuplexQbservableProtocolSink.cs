@@ -15,11 +15,11 @@ namespace Qactive
   public abstract class ClientDuplexQbservableProtocolSink<TSource, TMessage> : QbservableProtocolSink<TSource, TMessage>, IClientDuplexQbservableProtocolSink
     where TMessage : IProtocolMessage
   {
-    private readonly ConcurrentDictionary<int, Func<object[], object>> invokeCallbacks = new ConcurrentDictionary<int, Func<object[], object>>();
-    private readonly ConcurrentDictionary<int, Func<IEnumerator>> enumerableCallbacks = new ConcurrentDictionary<int, Func<IEnumerator>>();
-    private readonly ConcurrentDictionary<int, Func<int, IDisposable>> obsevableCallbacks = new ConcurrentDictionary<int, Func<int, IDisposable>>();
-    private readonly ConcurrentDictionary<int, IEnumerator> enumerators = new ConcurrentDictionary<int, IEnumerator>();
-    private readonly ConcurrentDictionary<int, IDisposable> subscriptions = new ConcurrentDictionary<int, IDisposable>();
+    private readonly ConcurrentDictionary<int, IInvokeDuplexCallback> invokeCallbacks = new ConcurrentDictionary<int, IInvokeDuplexCallback>();
+    private readonly ConcurrentDictionary<int, IEnumerableDuplexCallback> enumerableCallbacks = new ConcurrentDictionary<int, IEnumerableDuplexCallback>();
+    private readonly ConcurrentDictionary<int, IObservableDuplexCallback> obsevableCallbacks = new ConcurrentDictionary<int, IObservableDuplexCallback>();
+    private readonly ConcurrentDictionary<int, NamedEnumerator> enumerators = new ConcurrentDictionary<int, NamedEnumerator>();
+    private readonly ConcurrentDictionary<int, NamedDisposable> subscriptions = new ConcurrentDictionary<int, NamedDisposable>();
     private int lastCallbackId;
     private int lastObservableId;
     private int lastSubscriptionId;
@@ -52,7 +52,7 @@ namespace Qactive
             Subscribe(duplexMessage.Id);
             break;
           case QbservableProtocolMessageKind.DuplexDisposeSubscription:
-            DisposeSubscription(duplexMessage.Id.ClientId);
+            DisposeSubscription(duplexMessage.Id);
             break;
           case QbservableProtocolMessageKind.DuplexGetEnumerator:
             GetEnumerator(duplexMessage.Id);
@@ -64,7 +64,7 @@ namespace Qactive
             ResetEnumerator(duplexMessage.Id);
             break;
           case QbservableProtocolMessageKind.DuplexDisposeEnumerator:
-            DisposeEnumerator(duplexMessage.Id.ClientId);
+            DisposeEnumerator(duplexMessage.Id);
             break;
           default:
             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Errors.ProtocolUnknownMessageKindFormat, duplexMessage.Kind));
@@ -78,11 +78,11 @@ namespace Qactive
 
     protected abstract IDuplexProtocolMessage TryParseDuplexMessage(TMessage message);
 
-    public int RegisterInvokeCallback(Func<object[], object> callback)
+    public int RegisterInvokeCallback(IInvokeDuplexCallback invoke)
     {
       var id = Interlocked.Increment(ref lastCallbackId);
 
-      if (!invokeCallbacks.TryAdd(id, callback))
+      if (!invokeCallbacks.TryAdd(id, invoke))
       {
         throw new InvalidOperationException(Errors.ProtocolDuplicateDuplexId);
       }
@@ -90,31 +90,33 @@ namespace Qactive
       return id;
     }
 
-    public int RegisterEnumerableCallback(Func<IEnumerator> getEnumerator)
+    public IEnumerableDuplexCallback RegisterEnumerableCallback(Func<int, IEnumerableDuplexCallback> callbackFactory)
     {
       var id = Interlocked.Increment(ref lastEnumerableId);
+      var enumerable = callbackFactory(id);
 
-      if (!enumerableCallbacks.TryAdd(id, getEnumerator))
+      if (!enumerableCallbacks.TryAdd(id, enumerable))
       {
         throw new InvalidOperationException(Errors.ProtocolDuplicateDuplexId);
       }
 
-      return id;
+      return enumerable;
     }
 
-    public int RegisterObservableCallback(Func<int, IDisposable> subscribe)
+    public IObservableDuplexCallback RegisterObservableCallback(Func<int, IObservableDuplexCallback> callbackFactory)
     {
       var id = Interlocked.Increment(ref lastObservableId);
+      var observable = callbackFactory(id);
 
-      if (!obsevableCallbacks.TryAdd(id, subscribe))
+      if (!obsevableCallbacks.TryAdd(id, observable))
       {
         throw new InvalidOperationException(Errors.ProtocolDuplicateDuplexId);
       }
 
-      return id;
+      return observable;
     }
 
-    private int RegisterSubscription(IDisposable subscription)
+    private int RegisterSubscription(NamedDisposable subscription)
     {
       Contract.Requires(subscription != null);
       Contract.Ensures(Contract.Result<int>() >= 0);
@@ -129,7 +131,7 @@ namespace Qactive
       return id;
     }
 
-    private int RegisterEnumerator(IEnumerator enumerator)
+    private int RegisterEnumerator(NamedEnumerator enumerator)
     {
       Contract.Requires(enumerator != null);
       Contract.Ensures(Contract.Result<int>() >= 0);
@@ -144,11 +146,11 @@ namespace Qactive
       return id;
     }
 
-    private Func<IEnumerator> GetEnumerable(int clientId)
+    private IEnumerableDuplexCallback GetEnumerable(int clientId)
     {
-      Contract.Ensures(Contract.Result<Func<IEnumerator>>() != null);
+      Contract.Ensures(Contract.Result<IEnumerableDuplexCallback>() != null);
 
-      Func<IEnumerator> enumerable;
+      IEnumerableDuplexCallback enumerable;
 
       if (!enumerableCallbacks.TryGetValue(clientId, out enumerable))
       {
@@ -158,11 +160,11 @@ namespace Qactive
       return enumerable;
     }
 
-    private IEnumerator GetEnumerator(int enumeratorId)
+    private NamedEnumerator GetEnumerator(int enumeratorId)
     {
       Contract.Ensures(Contract.Result<IEnumerator>() != null);
 
-      IEnumerator enumerator;
+      NamedEnumerator enumerator;
 
       if (enumerators.TryGetValue(enumeratorId, out enumerator))
       {
@@ -178,17 +180,23 @@ namespace Qactive
     {
       Contract.Requires(arguments != null);
 
-      Func<object[], object> callback;
+      IInvokeDuplexCallback callback;
 
       if (!invokeCallbacks.TryGetValue(id.ClientId, out callback))
       {
         throw new InvalidOperationException(Errors.ProtocolInvalidDuplexId);
       }
 
+#if TRACE
+      var sourceId = GetSourceId(id);
+
+      Log.Invoking(callback.Name, arguments, false, sourceId, LogMessages.Received);
+#endif
+
       object result;
       try
       {
-        result = callback(arguments);
+        result = callback.Invoke(arguments);
       }
       catch (Exception ex)
       {
@@ -203,6 +211,10 @@ namespace Qactive
         duplex.SetClientProtocol(Protocol);
       }
 
+#if TRACE
+      Log.Invoked(callback.Name, arguments, result, false, sourceId, LogMessages.Sending);
+#endif
+
       SendResponse(id, result);
     }
 
@@ -210,40 +222,63 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The subscription local is registered with this sink object.")]
     protected void Subscribe(DuplexCallbackId id)
     {
-      Func<int, IDisposable> subscribe;
+      IObservableDuplexCallback observable;
 
-      if (!obsevableCallbacks.TryGetValue(id.ClientId, out subscribe))
+      if (!obsevableCallbacks.TryGetValue(id.ClientId, out observable))
       {
         throw new InvalidOperationException(Errors.ProtocolInvalidDuplexId);
       }
 
+#if TRACE
+      var sourceId = GetSourceId(id);
+
+      Log.Subscribing(observable.Name, false, true, sourceId, LogMessages.Received);
+#endif
+
       var subscription = new SingleAssignmentDisposable();
 
-      var subscriptionId = RegisterSubscription(subscription);
+      var subscriptionId = RegisterSubscription(new NamedDisposable(observable.Name, subscription));
 
       try
       {
-        subscription.Disposable = subscribe(id.ServerId);
+        subscription.Disposable = observable.Subscribe(
+          value => SendOnNext(observable.Name, id, value),
+          ex => SendOnError(observable.Name, id, ExceptionDispatchInfo.Capture(ex)),
+          () => SendOnCompleted(observable.Name, id));
       }
       catch (Exception ex)
       {
-        SendOnError(id, ExceptionDispatchInfo.Capture(ex));
+        SendOnError(observable.Name, id, ExceptionDispatchInfo.Capture(ex));
         return;
       }
+
+#if TRACE
+      Log.Subscribed(observable.Name, false, true, sourceId, LogMessages.Sending);
+#endif
 
       SendSubscribeResponse(id, subscriptionId);
     }
 
-    protected void DisposeSubscription(int subscriptionId)
+    protected void DisposeSubscription(DuplexCallbackId id)
     {
-      IDisposable subscription;
+      NamedDisposable subscription;
 
-      if (!subscriptions.TryGetValue(subscriptionId, out subscription))
+      if (!subscriptions.TryGetValue(id.ClientId, out subscription))
       {
         throw new InvalidOperationException(Errors.ProtocolInvalidDuplexId);
       }
 
+#if TRACE
+      var sourceId = GetSourceId(id);
+
+      Log.Unsubscribing(subscription.Name, false, true, sourceId, LogMessages.Received);
+#endif
+
       subscription.Dispose();
+
+#if TRACE
+      Log.Unsubscribed(subscription.Name, false, false, sourceId, LogMessages.Sending);
+#endif
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
@@ -251,10 +286,16 @@ namespace Qactive
     {
       var enumerable = GetEnumerable(id.ClientId);
 
+#if TRACE
+      var sourceId = GetSourceId(id);
+
+      Log.Enumerating(enumerable.Name, false, sourceId, LogMessages.Received);
+#endif
+
       IEnumerator enumerator;
       try
       {
-        enumerator = enumerable();
+        enumerator = enumerable.GetEnumerator();
       }
       catch (Exception ex)
       {
@@ -262,7 +303,7 @@ namespace Qactive
         return;
       }
 
-      var enumeratorId = RegisterEnumerator(enumerator);
+      var enumeratorId = RegisterEnumerator(new NamedEnumerator(enumerable.Name, enumerator));
 
       SendGetEnumeratorResponse(id, enumeratorId);
     }
@@ -272,9 +313,17 @@ namespace Qactive
     {
       var enumerator = GetEnumerator(id.ClientId);
 
+#if TRACE
+      var sourceId = GetSourceId(id);
+
+      if (enumerator != null)
+      {
+        Log.MoveNext(enumerator.Name, false, sourceId, LogMessages.Received);
+      }
+#endif
+
       object current;
       bool result;
-
       try
       {
         if (enumerator != null && enumerator.MoveNext())
@@ -294,6 +343,13 @@ namespace Qactive
         return;
       }
 
+#if TRACE
+      if (result)
+      {
+        Log.Current(enumerator.Name, current, false, sourceId, LogMessages.Sending);
+      }
+#endif
+
       SendEnumeratorResponse(id, result, current);
     }
 
@@ -312,9 +368,17 @@ namespace Qactive
       }
     }
 
-    protected void DisposeEnumerator(int enumeratorId)
+    protected void DisposeEnumerator(DuplexCallbackId id)
     {
-      var disposable = GetEnumerator(enumeratorId) as IDisposable;
+      var enumerator = GetEnumerator(id.ClientId);
+
+#if TRACE
+      var sourceId = GetSourceId(id);
+
+      Log.Enumerated(enumerator.Name, false, sourceId, LogMessages.Received);
+#endif
+
+      var disposable = enumerator.Decorated as IDisposable;
 
       if (disposable != null)
       {
@@ -322,14 +386,39 @@ namespace Qactive
       }
     }
 
-    public virtual async void SendOnNext(DuplexCallbackId id, object value) => await Protocol.SendMessageSafeAsync(CreateOnNext(id, value)).ConfigureAwait(false);
+    public virtual async void SendOnNext(string name, DuplexCallbackId id, object value)
+    {
+#if TRACE
+      var sourceId = GetSourceId(id);
+
+      Log.OnNext(name, value, false, false, sourceId, LogMessages.Sending);
+#endif
+
+      await Protocol.SendMessageSafeAsync(CreateOnNext(id, value)).ConfigureAwait(false);
+    }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
-    public virtual async void SendOnError(DuplexCallbackId id, ExceptionDispatchInfo error)
-      => await Protocol.SendMessageSafeAsync(CreateOnError(id, error)).ConfigureAwait(false);
+    public virtual async void SendOnError(string name, DuplexCallbackId id, ExceptionDispatchInfo error)
+    {
+#if TRACE
+      var sourceId = GetSourceId(id);
 
-    public virtual async void SendOnCompleted(DuplexCallbackId id)
-      => await Protocol.SendMessageSafeAsync(CreateOnCompleted(id)).ConfigureAwait(false);
+      Log.OnError(name, error.SourceException, false, false, sourceId, LogMessages.Sending);
+#endif
+
+      await Protocol.SendMessageSafeAsync(CreateOnError(id, error)).ConfigureAwait(false);
+    }
+
+    public virtual async void SendOnCompleted(string name, DuplexCallbackId id)
+    {
+#if TRACE
+      var sourceId = GetSourceId(id);
+
+      Log.OnCompleted(name, false, false, sourceId, LogMessages.Sending);
+#endif
+
+      await Protocol.SendMessageSafeAsync(CreateOnCompleted(id)).ConfigureAwait(false);
+    }
 
     protected virtual async void SendResponse(DuplexCallbackId id, object result)
       => await Protocol.SendMessageSafeAsync(CreateResponse(id, result)).ConfigureAwait(false);
@@ -386,6 +475,9 @@ namespace Qactive
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected abstract TMessage CreateEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error);
+
+    private string GetSourceId(DuplexCallbackId id)
+      => Protocol.ClientId + " " + id;
   }
 
   [ContractClassFor(typeof(ClientDuplexQbservableProtocolSink<,>))]

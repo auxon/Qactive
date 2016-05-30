@@ -17,7 +17,7 @@ namespace Qactive
   {
     private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>> invokeCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>>();
     private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>> enumeratorCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>>>();
-    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>>> observableCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>>>();
+    private readonly ConcurrentDictionary<DuplexCallbackId, Tuple<Action<DuplexCallbackId, object>, Action<DuplexCallbackId, ExceptionDispatchInfo>, Action<DuplexCallbackId>, Action<DuplexCallbackId>, Action<DuplexCallbackId>>> observableCallbacks = new ConcurrentDictionary<DuplexCallbackId, Tuple<Action<DuplexCallbackId, object>, Action<DuplexCallbackId, ExceptionDispatchInfo>, Action<DuplexCallbackId>, Action<DuplexCallbackId>, Action<DuplexCallbackId>>>();
     private readonly Dictionary<DuplexCallbackId, int?> subscriptions = new Dictionary<DuplexCallbackId, int?>();
     private int lastCallbackId;
     private int lastEnumeratorId;
@@ -121,13 +121,13 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Returned to caller.")]
-    public Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted, Action<int> dispose)
+    public Tuple<DuplexCallbackId, IDisposable> RegisterObservableCallbacks(int clientId, Action<DuplexCallbackId, object> onNext, Action<DuplexCallbackId, ExceptionDispatchInfo> onError, Action<DuplexCallbackId> onCompleted, Action<DuplexCallbackId> dispose, Action<DuplexCallbackId> subscribed)
     {
       var serverId = Interlocked.Increment(ref lastObservableId);
 
       var id = new DuplexCallbackId(clientId, serverId);
 
-      var actions = Tuple.Create(onNext, onError, onCompleted, dispose);
+      var actions = Tuple.Create(onNext, onError, onCompleted, dispose, subscribed);
 
       if (!observableCallbacks.TryAdd(id, actions))
       {
@@ -146,7 +146,7 @@ namespace Qactive
             {
               Contract.Assume(clientSubscriptionId.HasValue);   // Disposable.Create ensures that this code only runs once
 
-              actions.Item4(clientSubscriptionId.Value);
+              actions.Item4(new DuplexCallbackId(clientSubscriptionId.Value, id.ServerId));
             }
           }
         }));
@@ -200,11 +200,11 @@ namespace Qactive
 
     private void TryInvokeObservableCallback(
       DuplexCallbackId id,
-      Action<Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>>> action)
+      Action<Tuple<Action<DuplexCallbackId, object>, Action<DuplexCallbackId, ExceptionDispatchInfo>, Action<DuplexCallbackId>, Action<DuplexCallbackId>, Action<DuplexCallbackId>>> action)
     {
       Contract.Requires(action != null);
 
-      Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>> callbacks;
+      Tuple<Action<DuplexCallbackId, object>, Action<DuplexCallbackId, ExceptionDispatchInfo>, Action<DuplexCallbackId>, Action<DuplexCallbackId>, Action<DuplexCallbackId>> callbacks;
 
       if (observableCallbacks.TryGetValue(id, out callbacks))
       {
@@ -217,30 +217,156 @@ namespace Qactive
        */
     }
 
-    public virtual IDisposable Subscribe(int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted)
+    public virtual IDisposable Subscribe(string name, int clientId, Action<object> onNext, Action<ExceptionDispatchInfo> onError, Action onCompleted)
     {
       return Protocol.ServerSendSubscribeDuplexMessage(
         clientId,
-        onNext,
-        onError,
-        onCompleted,
-        async subscriptionId => await Protocol.SendMessageSafeAsync(CreateDisposeSubscription(subscriptionId)).ConfigureAwait(false));
+        id =>
+        {
+#if TRACE
+          var sourceId = GetSourceId(id);
+
+          Log.Subscribing(name, true, false, sourceId, LogMessages.Sending);
+#endif
+
+          return CreateSubscribe(id);
+        },
+        id =>
+        {
+#if TRACE
+          var sourceId = GetSourceId(id);
+
+          Log.Subscribed(name, true, true, sourceId, LogMessages.Received);
+#endif
+        },
+        (id, value) =>
+        {
+#if TRACE
+          var sourceId = GetSourceId(id);
+
+          Log.OnNext(name, value, true, true, sourceId, LogMessages.Received);
+#endif
+
+          onNext(value);
+        },
+        (id, ex) =>
+        {
+#if TRACE
+          var sourceId = GetSourceId(id);
+
+          Log.OnError(name, ex.SourceException, true, true, sourceId, LogMessages.Received);
+#endif
+
+          onError(ex);
+        },
+        id =>
+        {
+#if TRACE
+          var sourceId = GetSourceId(id);
+
+          Log.OnCompleted(name, true, true, sourceId, LogMessages.Received);
+#endif
+
+          onCompleted();
+        },
+        async id =>
+        {
+#if TRACE
+          var sourceId = GetSourceId(id);
+
+          Log.Unsubscribing(name, true, false, sourceId, LogMessages.Sending);
+#endif
+
+          await Protocol.SendMessageSafeAsync(CreateDisposeSubscription(id.ClientId)).ConfigureAwait(false);
+
+#if TRACE
+          Log.Unsubscribed(name, true, true, sourceId, LogMessages.Received);
+#endif
+        });
     }
 
-    public virtual object Invoke(int clientId, object[] arguments)
-      => Protocol.ServerSendDuplexMessage(clientId, id => CreateInvoke(id, arguments));
+    public virtual object Invoke(string name, int clientId, object[] arguments)
+    {
+      object sourceId = null;
 
-    public virtual int GetEnumerator(int clientId)
-      => (int)Protocol.ServerSendDuplexMessage(clientId, CreateGetEnumerator);
+      var result = Protocol.ServerSendDuplexMessage(
+        clientId,
+        id =>
+        {
+#if TRACE
+          sourceId = GetSourceId(id);
 
-    public virtual Tuple<bool, object> MoveNext(int enumeratorId)
-      => (Tuple<bool, object>)Protocol.ServerSendEnumeratorDuplexMessage(enumeratorId, CreateMoveNext);
+          Log.Invoking(name, arguments, true, sourceId, LogMessages.Sending);
+#endif
 
-    public virtual void ResetEnumerator(int enumeratorId)
+          return CreateInvoke(id, arguments);
+        });
+
+      Log.Invoked(name, arguments, result, true, sourceId, LogMessages.Received);
+
+      return result;
+    }
+
+    public virtual int GetEnumerator(string name, int clientId)
+    {
+      return (int)Protocol.ServerSendDuplexMessage(
+        clientId,
+        id =>
+        {
+#if TRACE
+          var sourceId = GetSourceId(id);
+
+          Log.Enumerating(name, true, sourceId, LogMessages.Sending);
+#endif
+
+          return CreateGetEnumerator(id);
+        });
+    }
+
+    public virtual Tuple<bool, object> MoveNext(string name, int enumeratorId)
+    {
+      object sourceId = null;
+
+      var result = (Tuple<bool, object>)Protocol.ServerSendEnumeratorDuplexMessage(enumeratorId,
+        id =>
+        {
+#if TRACE
+          sourceId = GetSourceId(id);
+
+          Log.MoveNext(name, true, sourceId, LogMessages.Sending);
+#endif
+
+          return CreateMoveNext(id);
+        });
+
+#if TRACE
+      if (result.Item1)
+      {
+        Log.Current(name, result.Item2, true, sourceId, LogMessages.Received);
+      }
+#endif
+
+      return result;
+    }
+
+    public virtual void ResetEnumerator(string name, int enumeratorId)
       => Protocol.ServerSendEnumeratorDuplexMessage(enumeratorId, CreateResetEnumerator);
 
-    public virtual async void DisposeEnumerator(int enumeratorId)
-      => await Protocol.SendMessageSafeAsync(CreateDisposeEnumerator(enumeratorId)).ConfigureAwait(false);
+    public virtual async void DisposeEnumerator(string name, int enumeratorId)
+    {
+      var message = CreateDisposeEnumerator(enumeratorId);
+
+#if TRACE
+      var duplex = message as IDuplexProtocolMessage;
+      var sourceId = GetSourceId(duplex?.Id ?? enumeratorId);
+
+      Log.Enumerated(name, true, sourceId, LogMessages.Sending);
+#endif
+
+      await Protocol.SendMessageSafeAsync(message).ConfigureAwait(false);
+    }
+
+    protected abstract TMessage CreateSubscribe(DuplexCallbackId clientId);
 
     protected abstract TMessage CreateDisposeSubscription(int subscriptionId);
 
@@ -290,7 +416,7 @@ namespace Qactive
 
     protected void HandleSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId)
     {
-      Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>> actions;
+      Tuple<Action<DuplexCallbackId, object>, Action<DuplexCallbackId, ExceptionDispatchInfo>, Action<DuplexCallbackId>, Action<DuplexCallbackId>, Action<DuplexCallbackId>> actions;
 
       if (!observableCallbacks.TryGetValue(id, out actions))
       {
@@ -304,26 +430,33 @@ namespace Qactive
         {
           subscriptions.Remove(id);
 
-          Tuple<Action<object>, Action<ExceptionDispatchInfo>, Action, Action<int>> ignored;
+          Tuple<Action<DuplexCallbackId, object>, Action<DuplexCallbackId, ExceptionDispatchInfo>, Action<DuplexCallbackId>, Action<DuplexCallbackId>, Action<DuplexCallbackId>> ignored;
           observableCallbacks.TryRemove(id, out ignored);
 
-          actions.Item4(clientSubscriptionId);
+          actions.Item4(new DuplexCallbackId(clientSubscriptionId, id.ServerId));
+        }
+        else
+        {
+          actions.Item5(new DuplexCallbackId(clientSubscriptionId, id.ServerId));
         }
       }
     }
 
     protected void HandleOnNext(DuplexCallbackId id, object result)
-      => TryInvokeObservableCallback(id, actions => actions.Item1(result));
+      => TryInvokeObservableCallback(id, actions => actions.Item1(id, result));
 
     protected void HandleOnCompleted(DuplexCallbackId id)
-      => TryInvokeObservableCallback(id, actions => actions.Item3());
+      => TryInvokeObservableCallback(id, actions => actions.Item3(id));
 
     protected void HandleOnError(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       Contract.Requires(error != null);
 
-      TryInvokeObservableCallback(id, actions => actions.Item2(error));
+      TryInvokeObservableCallback(id, actions => actions.Item2(id, error));
     }
+
+    private string GetSourceId(DuplexCallbackId id)
+      => Protocol.ClientId + " " + id;
   }
 
   [ContractClassFor(typeof(ServerDuplexQbservableProtocolSink<,>))]
@@ -343,6 +476,12 @@ namespace Qactive
     {
       Contract.Requires(message != null);
       return null;
+    }
+
+    protected override TMessage CreateSubscribe(DuplexCallbackId clientId)
+    {
+      Contract.Ensures(Contract.Result<TMessage>() != null);
+      return default(TMessage);
     }
 
     protected override TMessage CreateDisposeSubscription(int subscriptionId)

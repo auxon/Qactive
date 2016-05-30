@@ -193,8 +193,17 @@
     <Compile Include="..\Qactive\IDuplexProtocolMessage.cs">
       <Link>IDuplexProtocolMessage.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive\IEnumerableDuplexCallback.cs">
+      <Link>IEnumerableDuplexCallback.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\IInvokeDuplexCallback.cs">
+      <Link>IInvokeDuplexCallback.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive\ImmediateLocalEvaluator.cs">
       <Link>ImmediateLocalEvaluator.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\IObservableDuplexCallback.cs">
+      <Link>IObservableDuplexCallback.cs</Link>
     </Compile>
     <Compile Include="..\Qactive\IParameterizedQbservableProvider.cs">
       <Link>IParameterizedQbservableProvider.cs</Link>
@@ -226,8 +235,26 @@
     <Compile Include="..\Qactive\LocalEvaluator.cs">
       <Link>LocalEvaluator.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive\Log - Expressions.cs">
+      <Link>Log - Expressions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\Log - Invocations.cs">
+      <Link>Log - Invocations.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\Log - Notifications.cs">
+      <Link>Log - Notifications.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\Log - Subscriptions.cs">
+      <Link>Log - Subscriptions.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive\Log.cs">
       <Link>Log.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\NamedDisposable.cs">
+      <Link>NamedDisposable.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\NamedEnumerator.cs">
+      <Link>NamedEnumerator.cs</Link>
     </Compile>
     <Compile Include="..\Qactive\NotificationKindExtensions.cs">
       <Link>NotificationKindExtensions.cs</Link>
@@ -301,7 +328,6 @@
     <Compile Include="..\Qactive\System\Reflection\PortableReflectionExtensions.cs">
       <Link>System\Reflection\PortableReflectionExtensions.cs</Link>
     </Compile>
-    <Compile Include="Log - Expressions.cs" />
     <Compile Include="Properties\Errors.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

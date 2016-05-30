@@ -123,10 +123,55 @@
   <data name="ClientSendingExpression" xml:space="preserve">
     <value>Client sending expression</value>
   </data>
+  <data name="Current" xml:space="preserve">
+    <value>Current</value>
+  </data>
+  <data name="Enumerated" xml:space="preserve">
+    <value>Enumerated</value>
+  </data>
+  <data name="Enumerating" xml:space="preserve">
+    <value>Enumerating</value>
+  </data>
+  <data name="Invoked" xml:space="preserve">
+    <value>Invoked</value>
+  </data>
+  <data name="Invoking" xml:space="preserve">
+    <value>Invoking</value>
+  </data>
+  <data name="MoveNext" xml:space="preserve">
+    <value>MoveNext</value>
+  </data>
+  <data name="OnCompleted" xml:space="preserve">
+    <value>OnCompleted</value>
+  </data>
+  <data name="OnError" xml:space="preserve">
+    <value>OnError</value>
+  </data>
+  <data name="OnNext" xml:space="preserve">
+    <value>OnNext</value>
+  </data>
+  <data name="Received" xml:space="preserve">
+    <value>Received</value>
+  </data>
+  <data name="Sending" xml:space="preserve">
+    <value>Sending</value>
+  </data>
   <data name="ServerReceivingExpression" xml:space="preserve">
     <value>Server receiving expression</value>
   </data>
   <data name="ServerRewrittenExpression" xml:space="preserve">
     <value>Server rewritten expression</value>
+  </data>
+  <data name="Subscribed" xml:space="preserve">
+    <value>Subscribed</value>
+  </data>
+  <data name="Subscribing" xml:space="preserve">
+    <value>Subscribing</value>
+  </data>
+  <data name="Unsubscribed" xml:space="preserve">
+    <value>Unsubscribed</value>
+  </data>
+  <data name="Unsubscribing" xml:space="preserve">
+    <value>Unsubscribing</value>
   </data>
 </root>

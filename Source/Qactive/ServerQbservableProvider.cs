@@ -43,8 +43,10 @@ namespace Qactive
       return sourceSelector(argument);
     }
 
-    public IQbservable<TResult> CreateQuery<TResult>(Expression expression) => new ServerQuery<TSource, TResult>(Protocol.CurrentClientId, this, expression, null);
+    public IQbservable<TResult> CreateQuery<TResult>(Expression expression)
+      => new ServerQuery<TSource, TResult>(Protocol.ClientId, this, expression, null);
 
-    public IQbservable<TResult> CreateQuery<TResult>(Expression expression, object argument) => new ServerQuery<TSource, TResult>(Protocol.CurrentClientId, this, expression, argument);
+    public IQbservable<TResult> CreateQuery<TResult>(Expression expression, object argument)
+      => new ServerQuery<TSource, TResult>(Protocol.ClientId, this, expression, argument);
   }
 }

@@ -11,6 +11,7 @@ using System.Security.Permissions;
 
 namespace Qactive
 {
+  // TODO: Expose log events in the portable library (and possibly the full library as well) as an IObservable<T> where T is some kind of custom, lightweight trace event object.
   internal static partial class Log
   {
 #if CAS
@@ -39,7 +40,7 @@ namespace Qactive
 
       try
       {
-        QactiveTraceSources.Qactive.TraceData(TraceEventType.Error, 0, exception);
+        QactiveTraceSources.Qactive.TraceEvent(TraceEventType.Error, 0, exception?.ToString());
       }
       catch (Exception ex)
       {
@@ -63,14 +64,14 @@ namespace Qactive
     {
       Contract.Requires(trace != null);
 
-      trace.TraceData(type, (int)id, message, data);
+      trace.TraceEvent(type, (int)id, message + " = " + data);
     }
 
     private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, object data)
     {
       Contract.Requires(trace != null);
 
-      trace.TraceData(type, (int)id, data);
+      trace.TraceEvent(type, (int)id, data?.ToString());
     }
 
     private static void Semantic(this TraceSource trace, SemanticTrace id, TraceEventType type, string message)
@@ -105,21 +106,21 @@ namespace Qactive
     {
       Contract.Requires(trace != null);
 
-      trace.TraceData(type, (int)id, FormatObjectId(objectId), message, data);
+      trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + " " + message + " = " + data);
     }
     /*
-    private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, object data)
-    {
-      Contract.Requires(trace != null);
-
-      trace.TraceData(type, (int)id, FormatObjectId(objectId), data);
-    }
-
     private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string message)
     {
       Contract.Requires(trace != null);
 
-      trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + message);
+      trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + " " + message);
+    }
+
+    private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, object data)
+    {
+      Contract.Requires(trace != null);
+
+      trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + " " + data);
     }
 
     private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string format, params object[] args)
@@ -132,7 +133,7 @@ namespace Qactive
       }
       else
       {
-        trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + string.Format(CultureInfo.InvariantCulture, format, args));
+        trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + " " + string.Format(CultureInfo.InvariantCulture, format, args));
       }
     }
 
@@ -140,11 +141,11 @@ namespace Qactive
     {
       Contract.Requires(trace != null);
 
-      trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + message?.ToString(CultureInfo.InvariantCulture));
+      trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + " " + message?.ToString(CultureInfo.InvariantCulture));
     }
     */
     private static string FormatObjectId(object value)
-      => "[" + (value?.ToString() ?? "?") + "] ";
+      => "[" + (value?.ToString() ?? "?") + "]";
 #endif
   }
 }

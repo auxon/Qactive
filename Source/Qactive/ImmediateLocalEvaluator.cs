@@ -24,7 +24,7 @@ namespace Qactive
 
       var value = property.GetValue(instance);
 
-      var either = TryEvaluateSequences(value, property.PropertyType, protocol);
+      var either = TryEvaluateSequences(property.DeclaringType.Name + "." + property.Name, value, property.PropertyType, protocol);
 
       return either == null
         ? Expression.Constant(value, property.PropertyType)
@@ -39,7 +39,7 @@ namespace Qactive
 
       var value = field.GetValue(instance);
 
-      var either = TryEvaluateSequences(value, field.FieldType, protocol);
+      var either = TryEvaluateSequences(field.DeclaringType.Name + "." + field.Name, value, field.FieldType, protocol);
 
       return either == null
         ? Expression.Constant(value, field.FieldType)
@@ -59,7 +59,7 @@ namespace Qactive
 
       var result = call.Method.Invoke(instance, EvaluateArguments(call, visitor).ToArray());
 
-      var either = TryEvaluateSequences(result, call.Type, protocol);
+      var either = TryEvaluateSequences(call.Method.DeclaringType.Name + "." + call.Method.Name, result, call.Type, protocol);
 
       return either == null
           ? Expression.Constant(result, call.Type)
@@ -90,7 +90,7 @@ namespace Qactive
       return isParameter;
     }
 
-    protected override Either<object, Expression> TryEvaluateEnumerable(object value, Type type, IQbservableProtocol protocol)
+    protected override Either<object, Expression> TryEvaluateEnumerable(string name, object value, Type type, IQbservableProtocol protocol)
     {
       var iterator = value as IEnumerable;
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Diagnostics.Contracts;
 using System.Runtime.ExceptionServices;
 
@@ -10,18 +9,18 @@ namespace Qactive
   {
     IQbservableProtocol Protocol { get; }
 
-    int RegisterInvokeCallback(Func<object[], object> callback);
+    int RegisterInvokeCallback(IInvokeDuplexCallback invoke);
 
-    int RegisterEnumerableCallback(Func<IEnumerator> getEnumerator);
+    IEnumerableDuplexCallback RegisterEnumerableCallback(Func<int, IEnumerableDuplexCallback> callbackFactory);
 
-    int RegisterObservableCallback(Func<int, IDisposable> subscribe);
+    IObservableDuplexCallback RegisterObservableCallback(Func<int, IObservableDuplexCallback> callbackFactory);
 
-    void SendOnNext(DuplexCallbackId id, object value);
+    void SendOnNext(string name, DuplexCallbackId id, object value);
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
-    void SendOnError(DuplexCallbackId id, ExceptionDispatchInfo error);
+    void SendOnError(string name, DuplexCallbackId id, ExceptionDispatchInfo error);
 
-    void SendOnCompleted(DuplexCallbackId id);
+    void SendOnCompleted(string name, DuplexCallbackId id);
   }
 
   [ContractClassFor(typeof(IClientDuplexQbservableProtocolSink))]
@@ -36,35 +35,46 @@ namespace Qactive
       }
     }
 
-    public int RegisterEnumerableCallback(Func<IEnumerator> getEnumerator)
+    public int RegisterInvokeCallback(IInvokeDuplexCallback invoke)
     {
-      Contract.Requires(getEnumerator != null);
+      Contract.Requires(invoke != null);
       return 0;
     }
 
-    public int RegisterInvokeCallback(Func<object[], object> callback)
+    public IEnumerableDuplexCallback RegisterEnumerableCallback(Func<int, IEnumerableDuplexCallback> callbackFactory)
     {
-      Contract.Requires(callback != null);
-      return 0;
+      Contract.Requires(callbackFactory != null);
+      Contract.Ensures(Contract.Result<IEnumerableDuplexCallback>() != null);
+      return null;
     }
 
-    public int RegisterObservableCallback(Func<int, IDisposable> subscribe)
+    public IObservableDuplexCallback RegisterObservableCallback(Func<int, IObservableDuplexCallback> callbackFactory)
     {
-      Contract.Requires(subscribe != null);
-      return 0;
+      Contract.Requires(callbackFactory != null);
+      Contract.Ensures(Contract.Result<IObservableDuplexCallback>() != null);
+      return null;
     }
 
-    public void SendOnCompleted(DuplexCallbackId id)
+    public void SendOnCompleted(string name, DuplexCallbackId id)
     {
+#if TRACE
+      Contract.Requires(!string.IsNullOrEmpty(name));
+#endif
     }
 
-    public void SendOnError(DuplexCallbackId id, ExceptionDispatchInfo error)
+    public void SendOnError(string name, DuplexCallbackId id, ExceptionDispatchInfo error)
     {
+#if TRACE
+      Contract.Requires(!string.IsNullOrEmpty(name));
+#endif
       Contract.Requires(error != null);
     }
 
-    public void SendOnNext(DuplexCallbackId id, object value)
+    public void SendOnNext(string name, DuplexCallbackId id, object value)
     {
+#if TRACE
+      Contract.Requires(!string.IsNullOrEmpty(name));
+#endif
     }
   }
 }

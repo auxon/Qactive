@@ -172,6 +172,11 @@
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
     <Compile Include="IDuplexProtocolMessage.cs" />
+    <Compile Include="IEnumerableDuplexCallback.cs" />
+    <Compile Include="IInvokeDuplexCallback.cs" />
+    <Compile Include="NamedEnumerator.cs" />
+    <Compile Include="NamedDisposable.cs" />
+    <Compile Include="IObservableDuplexCallback.cs" />
     <Compile Include="IQactiveProvider.cs" />
     <Compile Include="Either.cs" />
     <Compile Include="Either{TLeft,TRight}.cs" />
@@ -183,6 +188,9 @@
     <Compile Include="ExceptionDispatchInfoEqualityComparer.cs" />
     <Compile Include="ExpressionOptions.cs" />
     <Compile Include="Log - Expressions.cs" />
+    <Compile Include="Log - Notifications.cs" />
+    <Compile Include="Log - Invocations.cs" />
+    <Compile Include="Log - Subscriptions.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="Properties\LogMessages.Designer.cs">
       <AutoGen>True</AutoGen>

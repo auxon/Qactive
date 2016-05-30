@@ -207,7 +207,7 @@ namespace Qactive
 
       return from protocol in NegotiateClientAsync(stream, formatterFactory(), cancel).ToObservable()
              from result in protocol
-              .ExecuteClient<TResult>(Id, prepareExpression(protocol), Argument)
+              .ExecuteClient<TResult>(prepareExpression(protocol), Argument)
               .Finally(protocol.Dispose)
              select result;
     }
@@ -233,39 +233,33 @@ namespace Qactive
                try
                {
                  using (var stream = client.GetStream())
+                 using (var protocol = await NegotiateServerAsync(Id + " C" + number + " " + remoteEndPoint, stream, formatterFactory(), options, cancel).ConfigureAwait(false))
                  {
-                   var result = await NegotiateServerAsync(stream, formatterFactory(), options, cancel).ConfigureAwait(false);
-                   var protocol = result.Item1;
-                   var clientId = result.Item2;
+                   var provider = providerFactory(protocol);
 
-                   using (protocol)
+                   try
                    {
-                     var provider = providerFactory(protocol);
-
-                     try
-                     {
-                       await protocol.ExecuteServerAsync(Id + " C" + number + " " + remoteEndPoint + " (" + clientId + ")", provider).ConfigureAwait(false);
-                     }
-                     catch (OperationCanceledException)
-                     {
-                     }
-                     catch (Exception ex)
-                     {
-                       exceptions.Add(ExceptionDispatchInfo.Capture(ex));
-                     }
-
-                     var protocolExceptions = protocol.Exceptions;
-
-                     if (protocolExceptions != null)
-                     {
-                       foreach (var exception in protocolExceptions)
-                       {
-                         exceptions.Add(exception);
-                       }
-                     }
-
-                     shutdownReason = protocol.ShutdownReason;
+                     await protocol.ExecuteServerAsync(provider).ConfigureAwait(false);
                    }
+                   catch (OperationCanceledException)
+                   {
+                   }
+                   catch (Exception ex)
+                   {
+                     exceptions.Add(ExceptionDispatchInfo.Capture(ex));
+                   }
+
+                   var protocolExceptions = protocol.Exceptions;
+
+                   if (protocolExceptions != null)
+                   {
+                     foreach (var exception in protocolExceptions)
+                     {
+                       exceptions.Add(exception);
+                     }
+                   }
+
+                   shutdownReason = protocol.ShutdownReason;
                  }
                }
                catch (OperationCanceledException)
@@ -290,9 +284,9 @@ namespace Qactive
       Contract.Requires(stream != null);
       Contract.Requires(formatter != null);
 
-      var protocol = StreamQbservableProtocolFactory.CreateClient(stream, formatter, cancel);
-
       var id = (string)Id;
+      var protocol = StreamQbservableProtocolFactory.CreateClient(id, stream, formatter, cancel);
+
       var buffer = Encoding.ASCII.GetBytes(id);
 
       await protocol.SendAsync(BitConverter.GetBytes(id.Length), 0, 4).ConfigureAwait(false);
@@ -304,7 +298,7 @@ namespace Qactive
       return protocol;
     }
 
-    private static async Task<Tuple<IStreamQbservableProtocol, string>> NegotiateServerAsync(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    private static async Task<IStreamQbservableProtocol> NegotiateServerAsync(string baseId, Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
     {
       Contract.Requires(stream != null);
       Contract.Requires(formatter != null);
@@ -336,7 +330,9 @@ namespace Qactive
 
       await protocol.SendAsync(clientIdBuffer, 0, clientIdBuffer.Length).ConfigureAwait(false);
 
-      return Tuple.Create(protocol, clientId);
+      protocol.ClientId = baseId + " (" + clientId + ")";
+
+      return protocol;
     }
 
     // This class avoids a compiler-generated closure, which was causing the Code Contract rewriter to generate invalid code.

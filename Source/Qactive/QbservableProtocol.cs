@@ -23,7 +23,7 @@ namespace Qactive
   {
     public bool IsClient { get; }
 
-    public object CurrentClientId { get; internal set; }
+    public object ClientId { get; set; }
 
     public QbservableServiceOptions ServiceOptions { get; }
 
@@ -33,13 +33,17 @@ namespace Qactive
 
     protected CancellationToken Cancel => protocolCancellation.Token;
 
+    private const string ServiceObservableName = "{service}";
+
     private readonly CancellationTokenSource protocolCancellation = new CancellationTokenSource();
     private readonly ConcurrentBag<ExceptionDispatchInfo> exceptions = new ConcurrentBag<ExceptionDispatchInfo>();
 
-    protected QbservableProtocol(CancellationToken cancel)
+    protected QbservableProtocol(object clientId, CancellationToken cancel)
     {
+      Contract.Requires(clientId != null);
       Contract.Ensures(IsClient);
 
+      ClientId = clientId;
       IsClient = true;
       ServiceOptions = QbservableServiceOptions.Default;
       cancel.Register(protocolCancellation.Cancel, useSynchronizationContext: false);
@@ -58,6 +62,7 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
     private void ObjectInvariant()
     {
+      Contract.Invariant(!IsClient || ClientId != null);
       Contract.Invariant(ServiceOptions != null);
       Contract.Invariant(protocolCancellation != null);
       Contract.Invariant(exceptions != null);
@@ -104,10 +109,15 @@ namespace Qactive
                   CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
 
                   return Observable.Throw<TResult>(ex);
-                });
+                })
+#if TRACE
+             .TraceSubscriptions(ServiceObservableName, false, false, ClientId)
+             .TraceNotifications(ServiceObservableName, false, false, ClientId)
+#endif
+             ;
     }
 
-    public async Task ExecuteServerAsync(object clientId, IQbservableProvider provider)
+    public async Task ExecuteServerAsync(IQbservableProvider provider)
     {
       Task receivingAsync = null;
       ExceptionDispatchInfo fatalException = null;
@@ -122,7 +132,7 @@ namespace Qactive
 
         try
         {
-          await ExecuteServerQueryAsync(clientId, input, provider).ConfigureAwait(false);
+          await ExecuteServerQueryAsync(input, provider).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -189,7 +199,7 @@ namespace Qactive
       }
     }
 
-    private async Task ExecuteServerQueryAsync(object clientId, Tuple<Expression, object> input, IQbservableProvider provider)
+    private async Task ExecuteServerQueryAsync(Tuple<Expression, object> input, IQbservableProvider provider)
     {
       Contract.Requires(provider != null);
 
@@ -217,8 +227,6 @@ namespace Qactive
 
           try
           {
-            CurrentClientId = clientId;
-
             observable = CreateQuery(provider, expression, argument, out dataType);
           }
           catch (Exception ex)
@@ -282,29 +290,34 @@ namespace Qactive
 #endif
         }
 
-        await observable.ForEachAsync(
-          async data =>
-          {
-            try
+        await observable
+#if TRACE
+          .TraceSubscriptions(ServiceObservableName, true, true, ClientId)
+          .TraceNotifications(ServiceObservableName, true, true, ClientId)
+#endif
+          .ForEachAsync(
+            async data =>
             {
-              await ServerSendAsync(NotificationKind.OnNext, data).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception ex)
-            {
-              /* Collecting exceptions handles a possible race condition.  Since this code is using a fire-and-forget model to 
-               * subscribe to the observable, due to the async OnNext handler, it's possible that more than one SendAsync task
-               * can be executing concurrently.  As a result, cancelling the cancelSubscription below does not guarantee that 
-               * this catch block won't run again.
-               */
-              networkErrors.Add(ExceptionDispatchInfo.Capture(ex));
+              try
+              {
+                await ServerSendAsync(NotificationKind.OnNext, data).ConfigureAwait(false);
+              }
+              catch (OperationCanceledException)
+              {
+              }
+              catch (Exception ex)
+              {
+                /* Collecting exceptions handles a possible race condition.  Since this code is using a fire-and-forget model to 
+                 * subscribe to the observable, due to the async OnNext handler, it's possible that more than one SendAsync task
+                 * can be executing concurrently.  As a result, cancelling the cancelSubscription below does not guarantee that 
+                 * this catch block won't run again.
+                 */
+                networkErrors.Add(ExceptionDispatchInfo.Capture(ex));
 
-              cancelSubscription.Cancel();
-            }
-          },
-          cancelSubscription.Token)
+                cancelSubscription.Cancel();
+              }
+            },
+            cancelSubscription.Token)
           .ConfigureAwait(false);
       }
       catch (OperationCanceledException)
@@ -418,20 +431,20 @@ namespace Qactive
         if (parameterized != null)
         {
           return provider.GetType()
-            .GetInterfaceMap(typeof(IParameterizedQbservableProvider))
-            .TargetMethods
-            .First()
-            .MakeGenericMethod(type)
-            .Invoke(provider, new[] { expression, argument });
+                         .GetInterfaceMap(typeof(IParameterizedQbservableProvider))
+                         .TargetMethods
+                         .First()
+                         .MakeGenericMethod(type)
+                         .Invoke(provider, new[] { expression, argument });
         }
         else
         {
           return provider.GetType()
-            .GetInterfaceMap(typeof(IQbservableProvider))
-            .TargetMethods
-            .First()
-            .MakeGenericMethod(type)
-            .Invoke(provider, new[] { expression });
+                         .GetInterfaceMap(typeof(IQbservableProvider))
+                         .TargetMethods
+                         .First()
+                         .MakeGenericMethod(type)
+                         .Invoke(provider, new[] { expression });
         }
       }
       finally
@@ -532,7 +545,7 @@ namespace Qactive
   internal abstract class QbservableProtocolContract : QbservableProtocol
   {
     public QbservableProtocolContract()
-      : base(CancellationToken.None)
+      : base(null, CancellationToken.None)
     {
     }
 

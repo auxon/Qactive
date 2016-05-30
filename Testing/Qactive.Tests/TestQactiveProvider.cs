@@ -36,7 +36,7 @@ namespace Qactive.Tests
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The SocketAsyncEventArgs instance is either disposed before returning or by the observable's Finally operator.")]
     public override IObservable<TResult> Connect<TResult>(Func<IQbservableProtocol, Expression> prepareExpression)
       => from transport in Observable.Return(new DuplexSubject()).Do(clients.OnNext)
-         let protocol = new TestQbservableProtocol(transport.NextLeft, transport.Right)
+         let protocol = new TestQbservableProtocol(transport.GetHashCode(), transport.NextLeft, transport.Right)
          from result in protocol
           .ExecuteClient<TResult>(prepareExpression(protocol), Argument)
           .Finally(protocol.Dispose)
@@ -56,13 +56,13 @@ namespace Qactive.Tests
 
            try
            {
-             using (var protocol = new TestQbservableProtocol(transport.NextRight, transport.Left, options))
+             using (var protocol = new TestQbservableProtocol(transport.GetHashCode(), transport.NextRight, transport.Left, options))
              {
                var provider = providerFactory(protocol);
 
                try
                {
-                 await protocol.ExecuteServerAsync(transport.GetHashCode(), provider).ConfigureAwait(false);
+                 await protocol.ExecuteServerAsync(provider).ConfigureAwait(false);
                }
                catch (OperationCanceledException)
                {

@@ -13,15 +13,22 @@ namespace Qactive
 #if SERIALIZATION
   [Serializable]
 #endif
-  internal class DuplexCallback
+  internal class DuplexCallback : IInvokeDuplexCallback
   {
-    public bool CanInvoke => sink != null && protocol != null;
+    public bool IsInitialized => sink != null && protocol != null;
+
+    /// <summary>
+    /// Get the name of the member or variable that this callback represents, for diagnostic purposes only.
+    /// </summary>
+    public string Name { get; }
 
     public IQbservableProtocol Protocol => protocol;
 
     protected IServerDuplexQbservableProtocolSink Sink => sink;
 
-    protected int Id => id;
+    protected int Id { get; }
+
+    protected object ClientId { get; }
 
     private static readonly MethodInfo serverInvokeMethod = typeof(DuplexCallback)
       .GetMethods()
@@ -43,45 +50,65 @@ namespace Qactive
 #endif
     private IQbservableProtocol protocol;
 
-    private readonly int id;
+#if SERIALIZATION
+    [NonSerialized]
+#endif
+    private readonly Func<int, object[], object> invoke;
 
-    protected DuplexCallback(int id)
+    protected DuplexCallback(string name, int id, object clientId)
     {
-      this.id = id;
+      Contract.Requires(!string.IsNullOrEmpty(name));
+      Contract.Requires(clientId != null);
+
+      Name = name;
+      Id = id;
+      ClientId = clientId;
     }
 
-    private DuplexCallback(IQbservableProtocol protocol, Func<int, object[], object> callback)
+    private DuplexCallback(string name, IQbservableProtocol protocol, Func<int, object[], object> invoke)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(protocol != null);
-      Contract.Requires(callback != null);
+      Contract.Requires(invoke != null);
 
-      id = protocol.GetOrAddSink(protocol.CreateClientDuplexSink)
-                   .RegisterInvokeCallback(arguments => callback(this.id, arguments));
+      Name = name;
+      this.invoke = invoke;
+      ClientId = protocol.ClientId;
+      Id = protocol.GetOrAddSink(protocol.CreateClientDuplexSink)
+                   .RegisterInvokeCallback(this);
     }
 
-    public static Expression Create(IQbservableProtocol protocol, object instance, PropertyInfo property)
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(!string.IsNullOrEmpty(Name));
+      Contract.Invariant(ClientId != null);
+    }
+
+    public static Expression Create(string name, IQbservableProtocol protocol, object instance, PropertyInfo property)
     {
       Contract.Requires(protocol != null);
       Contract.Requires(property != null);
       Contract.Ensures(Contract.Result<Expression>() != null);
 
       return CreateInvoke(
-        new DuplexCallback(protocol, (_, __) => ConvertIfSequence(protocol, property.GetValue(instance))),
+        new DuplexCallback(name, protocol, (_, __) => ConvertIfSequence(name, protocol, property.GetValue(instance))),
         property.PropertyType);
     }
 
-    public static Expression Create(IQbservableProtocol protocol, object instance, FieldInfo field)
+    public static Expression Create(string name, IQbservableProtocol protocol, object instance, FieldInfo field)
     {
       Contract.Requires(protocol != null);
       Contract.Requires(field != null);
       Contract.Ensures(Contract.Result<Expression>() != null);
 
       return CreateInvoke(
-        new DuplexCallback(protocol, (_, __) => ConvertIfSequence(protocol, field.GetValue(instance))),
+        new DuplexCallback(name, protocol, (_, __) => ConvertIfSequence(name, protocol, field.GetValue(instance))),
         field.FieldType);
     }
 
-    public static Expression Create(IQbservableProtocol protocol, object instance, MethodInfo method, IEnumerable<Expression> argExpressions)
+    public static Expression Create(string name, IQbservableProtocol protocol, object instance, MethodInfo method, IEnumerable<Expression> argExpressions)
     {
       Contract.Requires(protocol != null);
       Contract.Requires(method != null);
@@ -89,32 +116,34 @@ namespace Qactive
       Contract.Ensures(Contract.Result<Expression>() != null);
 
       return CreateInvoke(
-        new DuplexCallback(protocol, (_, arguments) => ConvertIfSequence(protocol, method.Invoke(instance, arguments))),
+        new DuplexCallback(name, protocol, (_, arguments) => ConvertIfSequence(name, protocol, method.Invoke(instance, arguments))),
         method.ReturnType,
         argExpressions);
     }
 
-    public static Expression CreateEnumerable(IQbservableProtocol protocol, object instance, Type dataType, Type type)
+    public static Expression CreateEnumerable(string name, IQbservableProtocol protocol, object instance, Type dataType, Type type)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(protocol != null);
       Contract.Requires(dataType != null);
       Contract.Requires(type != null);
       Contract.Ensures(Contract.Result<Expression>() != null);
 
       return Expression.Constant(
-        CreateRemoteEnumerable(protocol, (IEnumerable)instance, dataType),
+        CreateRemoteEnumerable(name, protocol, (IEnumerable)instance, dataType),
         type);
     }
 
-    public static Expression CreateObservable(IQbservableProtocol protocol, object instance, Type dataType, Type type)
+    public static Expression CreateObservable(string name, IQbservableProtocol protocol, object instance, Type dataType, Type type)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(protocol != null);
       Contract.Requires(dataType != null);
       Contract.Requires(type != null);
       Contract.Ensures(Contract.Result<Expression>() != null);
 
       return Expression.Constant(
-        CreateRemoteObservable(protocol, instance, dataType),
+        CreateRemoteObservable(name, protocol, instance, dataType),
         type);
     }
 
@@ -132,8 +161,9 @@ namespace Qactive
           (arguments == null ? new Expression[0] : arguments.Select(a => (Expression)Expression.Convert(a, typeof(object))))));
     }
 
-    private static object ConvertIfSequence(IQbservableProtocol protocol, object instance)
+    private static object ConvertIfSequence(string name, IQbservableProtocol protocol, object instance)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(protocol != null);
 
       if (instance != null)
@@ -148,7 +178,7 @@ namespace Qactive
 
           if (observableType != null)
           {
-            return CreateRemoteObservable(protocol, instance, observableType.GetGenericArguments()[0]);
+            return CreateRemoteObservable(name, protocol, instance, observableType.GetGenericArguments()[0]);
           }
 
           var enumerableType = type.GetGenericInterfaceFromDefinition(typeof(IEnumerable<>));
@@ -156,11 +186,11 @@ namespace Qactive
 
           if (enumerableType != null)
           {
-            return CreateRemoteEnumerable(protocol, enumerable, enumerableType.GetGenericArguments()[0]);
+            return CreateRemoteEnumerable(name, protocol, enumerable, enumerableType.GetGenericArguments()[0]);
           }
           else if (enumerable != null)
           {
-            return CreateRemoteEnumerable(protocol, enumerable.Cast<object>(), typeof(object));
+            return CreateRemoteEnumerable(name, protocol, enumerable.Cast<object>(), typeof(object));
           }
         }
       }
@@ -168,8 +198,9 @@ namespace Qactive
       return instance;
     }
 
-    private static object CreateRemoteEnumerable(IQbservableProtocol protocol, IEnumerable instance, Type dataType)
+    private static object CreateRemoteEnumerable(string name, IQbservableProtocol protocol, IEnumerable instance, Type dataType)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(protocol != null);
       Contract.Requires(instance != null);
       Contract.Requires(dataType != null);
@@ -177,14 +208,12 @@ namespace Qactive
 
       var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSink);
 
-      int id = 0;
-      id = sink.RegisterEnumerableCallback(instance.GetEnumerator);
-
-      return Activator.CreateInstance(typeof(DuplexCallbackEnumerable<>).MakeGenericType(dataType), id);
+      return sink.RegisterEnumerableCallback(clientId => (IEnumerableDuplexCallback)Activator.CreateInstance(typeof(DuplexCallbackEnumerable<>).MakeGenericType(dataType), name, clientId, protocol.ClientId, instance));
     }
 
-    private static object CreateRemoteObservable(IQbservableProtocol protocol, object instance, Type dataType)
+    private static object CreateRemoteObservable(string name, IQbservableProtocol protocol, object instance, Type dataType)
     {
+      Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(protocol != null);
       Contract.Requires(instance != null);
       Contract.Requires(dataType != null);
@@ -192,23 +221,7 @@ namespace Qactive
 
       var sink = protocol.GetOrAddSink(protocol.CreateClientDuplexSink);
 
-      int id = 0;
-      id = sink.RegisterObservableCallback(serverId => Subscribe(sink, new DuplexCallbackId(id, serverId), instance, dataType));
-
-      return Activator.CreateInstance(typeof(DuplexCallbackObservable<>).MakeGenericType(dataType), id);
-    }
-
-    private static IDisposable Subscribe(IClientDuplexQbservableProtocolSink sink, DuplexCallbackId id, object instance, Type dataType)
-    {
-      Contract.Requires(sink != null);
-      Contract.Requires(instance != null);
-      Contract.Requires(dataType != null);
-      Contract.Ensures(Contract.Result<IDisposable>() != null);
-
-      return dataType.UpCast(instance).Subscribe(
-        value => sink.SendOnNext(id, value),
-        ex => sink.SendOnError(id, ExceptionDispatchInfo.Capture(ex)),
-        () => sink.SendOnCompleted(id));
+      return sink.RegisterObservableCallback(clientId => (IObservableDuplexCallback)Activator.CreateInstance(typeof(DuplexCallbackObservable<>).MakeGenericType(dataType), name, clientId, protocol.ClientId, instance));
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", MessageId = "protocol", Justification = "It's setting the field.")]
@@ -235,13 +248,16 @@ namespace Qactive
       }
     }
 
+    object IInvokeDuplexCallback.Invoke(object[] arguments)
+      => invoke(Id, arguments);
+
     public TResult ServerInvoke<TResult>(object[] arguments)
     {
-      Contract.Requires(CanInvoke);
+      Contract.Requires(IsInitialized);
 
       try
       {
-        var value = (TResult)sink.Invoke(id, arguments);
+        var value = (TResult)sink.Invoke(Name, Id, arguments);
 
         var callback = value as DuplexCallback;
 
@@ -262,16 +278,19 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "There is no meaningful way to handle exceptions here other than passing them to a handler, and we cannot let them leave this context because they will be missed.")]
     public void ServerInvoke(object[] arguments)
     {
-      Contract.Requires(CanInvoke);
+      Contract.Requires(IsInitialized);
 
       try
       {
-        sink.Invoke(id, arguments);
+        sink.Invoke(Name, Id, arguments);
       }
       catch (Exception ex)
       {
         protocol.CancelAllCommunication(ExceptionDispatchInfo.Capture(ex));
       }
     }
+
+    public override string ToString()
+      => Name + " <- " + ClientId + "," + Id;
   }
 }

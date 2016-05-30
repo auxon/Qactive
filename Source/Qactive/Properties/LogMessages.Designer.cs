@@ -79,6 +79,105 @@ namespace Qactive.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current.
+        /// </summary>
+        internal static string Current {
+            get {
+                return ResourceManager.GetString("Current", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enumerated.
+        /// </summary>
+        internal static string Enumerated {
+            get {
+                return ResourceManager.GetString("Enumerated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enumerating.
+        /// </summary>
+        internal static string Enumerating {
+            get {
+                return ResourceManager.GetString("Enumerating", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invoked.
+        /// </summary>
+        internal static string Invoked {
+            get {
+                return ResourceManager.GetString("Invoked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invoking.
+        /// </summary>
+        internal static string Invoking {
+            get {
+                return ResourceManager.GetString("Invoking", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MoveNext.
+        /// </summary>
+        internal static string MoveNext {
+            get {
+                return ResourceManager.GetString("MoveNext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OnCompleted.
+        /// </summary>
+        internal static string OnCompleted {
+            get {
+                return ResourceManager.GetString("OnCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OnError.
+        /// </summary>
+        internal static string OnError {
+            get {
+                return ResourceManager.GetString("OnError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to OnNext.
+        /// </summary>
+        internal static string OnNext {
+            get {
+                return ResourceManager.GetString("OnNext", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Received.
+        /// </summary>
+        internal static string Received {
+            get {
+                return ResourceManager.GetString("Received", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sending.
+        /// </summary>
+        internal static string Sending {
+            get {
+                return ResourceManager.GetString("Sending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Server receiving expression.
         /// </summary>
         internal static string ServerReceivingExpression {
@@ -93,6 +192,42 @@ namespace Qactive.Properties {
         internal static string ServerRewrittenExpression {
             get {
                 return ResourceManager.GetString("ServerRewrittenExpression", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subscribed.
+        /// </summary>
+        internal static string Subscribed {
+            get {
+                return ResourceManager.GetString("Subscribed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subscribing.
+        /// </summary>
+        internal static string Subscribing {
+            get {
+                return ResourceManager.GetString("Subscribing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsubscribed.
+        /// </summary>
+        internal static string Unsubscribed {
+            get {
+                return ResourceManager.GetString("Unsubscribed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unsubscribing.
+        /// </summary>
+        internal static string Unsubscribing {
+            get {
+                return ResourceManager.GetString("Unsubscribing", resourceCulture);
             }
         }
     }

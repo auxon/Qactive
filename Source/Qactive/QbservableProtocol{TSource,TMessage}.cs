@@ -22,9 +22,10 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Reviewed")]
     protected IList<QbservableProtocolSink<TSource, TMessage>> Sinks { get; } = new List<QbservableProtocolSink<TSource, TMessage>>();
 
-    protected QbservableProtocol(TSource source, CancellationToken cancel)
-      : base(source, cancel)
+    protected QbservableProtocol(object clientId, TSource source, CancellationToken cancel)
+      : base(clientId, source, cancel)
     {
+      Contract.Requires(clientId != null);
       Contract.Requires(source != null);
       Contract.Ensures(IsClient);
     }
@@ -299,6 +300,41 @@ namespace Qactive
 
     protected abstract Task<TMessage> ReceiveMessageCoreAsync();
 
+    public IDisposable ServerSendSubscribeDuplexMessage(int clientId, Func<DuplexCallbackId, TMessage> messageFactory, Action<DuplexCallbackId> subscribed, Action<DuplexCallbackId, object> onNext, Action<DuplexCallbackId, ExceptionDispatchInfo> onError, Action<DuplexCallbackId> onCompleted, Action<DuplexCallbackId> dispose)
+    {
+      Contract.Requires(messageFactory != null);
+      Contract.Requires(subscribed != null);
+      Contract.Requires(onNext != null);
+      Contract.Requires(onError != null);
+      Contract.Requires(onCompleted != null);
+      Contract.Requires(dispose != null);
+      Contract.Ensures(Contract.Result<IDisposable>() != null);
+
+      var waitForResponse = new ManualResetEventSlim(false);
+
+      var duplexSink = FindSink<IServerDuplexQbservableProtocolSink>();
+
+      var registration = duplexSink.RegisterObservableCallbacks(
+        clientId,
+        onNext,
+        onError,
+        onCompleted,
+        dispose,
+        id =>
+        {
+          subscribed(id);
+          waitForResponse.Set();
+        });
+
+      var message = messageFactory(registration.Item1);
+
+      SendMessageSafeAsync(message).Wait(Cancel);
+
+      waitForResponse.Wait(Cancel);
+
+      return registration.Item2;
+    }
+
     public object ServerSendDuplexMessage(int clientId, Func<DuplexCallbackId, TMessage> messageFactory)
     {
       Contract.Requires(messageFactory != null);
@@ -354,32 +390,6 @@ namespace Qactive
 
       return result;
     }
-
-    public IDisposable ServerSendSubscribeDuplexMessage(
-     int clientId,
-     Action<object> onNext,
-     Action<ExceptionDispatchInfo> onError,
-     Action onCompleted,
-     Action<int> dispose)
-    {
-      Contract.Requires(onNext != null);
-      Contract.Requires(onError != null);
-      Contract.Requires(onCompleted != null);
-      Contract.Requires(dispose != null);
-
-      var duplexSink = FindSink<IServerDuplexQbservableProtocolSink>();
-
-      var registration = duplexSink.RegisterObservableCallbacks(clientId, onNext, onError, onCompleted, dispose);
-
-      var id = registration.Item1;
-      var subscription = registration.Item2;
-
-      SendMessageSafeAsync(CreateSubscribeDuplexMessage(id)).Wait(Cancel);
-
-      return subscription;
-    }
-
-    protected abstract TMessage CreateSubscribeDuplexMessage(DuplexCallbackId id);
 
     internal sealed override async Task InitializeSinksAsync()
     {
@@ -457,7 +467,7 @@ namespace Qactive
     where TMessage : IProtocolMessage
   {
     protected QbservableProtocolContract(TSource source, CancellationToken cancel)
-      : base(source, cancel)
+      : base(null, source, cancel)
     {
     }
 
@@ -501,12 +511,6 @@ namespace Qactive
     {
       Contract.Requires(message != null);
       return null;
-    }
-
-    protected override TMessage CreateSubscribeDuplexMessage(DuplexCallbackId id)
-    {
-      Contract.Ensures(Contract.Result<TMessage>() != null);
-      return default(TMessage);
     }
   }
 }
