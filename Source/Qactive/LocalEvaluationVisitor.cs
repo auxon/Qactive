@@ -324,8 +324,10 @@ namespace Qactive
       NewArrayExpression newNode = null;
 
       if (evaluator.EnsureKnownType(
-        node.Type,
-        genericArgumentsUpdated: updatedType => newNode = Expression.NewArrayInit(updatedType, Visit(node.Expressions))))
+        node.Type.GetElementType(),
+        replaceCompilerGeneratedType: updatedType => newNode = node.NodeType == ExpressionType.NewArrayInit
+                                                   ? Expression.NewArrayInit(typeof(CompilerGenerated), Visit(node.Expressions))
+                                                   : Expression.NewArrayBounds(typeof(CompilerGenerated), Visit(node.Expressions))))
       {
         return newNode;
       }
