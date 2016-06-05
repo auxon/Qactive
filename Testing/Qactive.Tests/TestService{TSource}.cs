@@ -44,21 +44,31 @@ namespace Qactive.Tests
       this.source = source;
     }
 
-    public async Task<IReadOnlyCollection<Notification<TResult>>> QueryAsync<TResult>(
+    public Task<IReadOnlyCollection<Notification<TResult>>> QueryAsync<TResult>(
       Func<IQbservable<TSource>, IQbservable<TResult>> query)
     {
       var p = provider ?? TestQactiveProvider.Create<TSource>(knownTypes);
-      var server = source.ServeQbservable(p, Options);
-      var client = query(p.CreateQuery<TSource>());
 
-      var both = server.Take(1).IgnoreElements().Cast<Notification<TResult>>().Merge(client.AsObservable().Materialize()).Publish();
+      return RunQueryAsync(Observable.Merge(
+        source.ServeQbservable(p, Options).Take(1).IgnoreElements().Cast<TResult>(),
+        query(p.CreateQuery<TSource>()).AsObservable()));
+    }
+
+    public Task<IReadOnlyCollection<Notification<TResult>>> InMemoryQueryAsync<TResult>(
+      Func<IObservable<TSource>, IObservable<TResult>> query)
+      => RunQueryAsync(query(source));
+
+    private async Task<IReadOnlyCollection<Notification<TResult>>> RunQueryAsync<TResult>(
+      IObservable<TResult> query)
+    {
       var results = new List<Notification<TResult>>();
+      var materialized = query.Materialize().Publish();
 
-      using (both.Subscribe(results.Add))
+      using (materialized.Subscribe(results.Add))
       {
-        var completed = both.Dematerialize().IgnoreElements().OnErrorResumeNext(Observable.Return(default(TResult))).ToTask();
+        var completed = materialized.Dematerialize().IgnoreElements().OnErrorResumeNext(Observable.Return(default(TResult))).ToTask();
 
-        using (both.Connect())
+        using (materialized.Connect())
         {
           await completed.ConfigureAwait(false);
         }
