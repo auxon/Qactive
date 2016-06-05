@@ -26,7 +26,7 @@ namespace Qactive.Tests.Queries
         new[] { typeof(RootObject), typeof(Node), typeof(Leaf), typeof(EnumerableEx) },
         Observable.Return(new ServiceContext(new[] { new RootObject("A", 1), new RootObject("B", 10), new RootObject("C", 100), new RootObject("D", 1000) })));
 
-      var results = await service.InMemoryQueryAsync(source =>
+      var results = await service.QueryAsync(source =>
         from leafPackResult in
           from leaf in
             (from context in source
