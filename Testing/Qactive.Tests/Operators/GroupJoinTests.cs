@@ -2,7 +2,6 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Qactive.Tests
@@ -23,7 +22,7 @@ namespace Qactive.Tests
                                                        where x == y
                                                        select x + y);
 
-      results.AssertEqual(OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -40,7 +39,7 @@ namespace Qactive.Tests
                                                        where x == y
                                                        select x + y);
 
-      results.AssertEqual(OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -58,7 +57,7 @@ namespace Qactive.Tests
                                                        where x == y
                                                        select x + y);
 
-      results.AssertEqual(OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -75,7 +74,7 @@ namespace Qactive.Tests
                                                        where x == y
                                                        select x + y);
 
-      results.AssertEqual(OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -93,7 +92,7 @@ namespace Qactive.Tests
                                                        where x == y
                                                        select x + y);
 
-      results.AssertEqual(OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     private sealed class TestContext

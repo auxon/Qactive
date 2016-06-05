@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Qactive.Tests.Queries
@@ -17,7 +16,7 @@ namespace Qactive.Tests.Queries
                                                    where x % 2 == 0
                                                    select x);
 
-      results.AssertEqual(OnNext(0), OnNext(2), OnNext(4), OnCompleted<int>());
+      AssertEqual(results, OnNext(0), OnNext(2), OnNext(4), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -30,7 +29,7 @@ namespace Qactive.Tests.Queries
                                                    where predicate(x)
                                                    select x);
 
-      results.AssertEqual(OnNext(0), OnNext(2), OnNext(4), OnCompleted<int>());
+      AssertEqual(results, OnNext(0), OnNext(2), OnNext(4), OnCompleted<int>());
     }
   }
 }

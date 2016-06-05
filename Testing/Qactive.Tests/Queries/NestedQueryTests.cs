@@ -2,7 +2,6 @@
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Qactive.Tests.Queries
@@ -19,7 +18,7 @@ namespace Qactive.Tests.Queries
                                                        where value == 123
                                                        select value);
 
-      results.AssertEqual(OnNext(123), OnCompleted<int>());
+      AssertEqual(results, OnNext(123), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -54,7 +53,7 @@ namespace Qactive.Tests.Queries
                                                                      select value
                                                        select value);
 
-      results.AssertEqual(OnNext(123), OnCompleted<int>());
+      AssertEqual(results, OnNext(123), OnCompleted<int>());
     }
 
     private sealed class TestContext

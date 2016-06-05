@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Qactive.Tests.Queries
@@ -24,7 +23,7 @@ namespace Qactive.Tests.Queries
                                                        where clientValue % 2 == 0
                                                        select clientValue);
 
-      results.AssertEqual(OnNext(2), OnNext(4), OnCompleted<int>());
+      AssertEqual(results, OnNext(2), OnNext(4), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -36,7 +35,7 @@ namespace Qactive.Tests.Queries
                                                        from serverValue in context.Singleton
                                                        select serverValue);
 
-      results.AssertEqual(OnNext(100), OnCompleted<int>());
+      AssertEqual(results, OnNext(100), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -51,7 +50,7 @@ namespace Qactive.Tests.Queries
                                                        where clientValue % 2 == 0
                                                        select clientValue);
 
-      results.AssertEqual(OnNext(2), OnNext(4), OnCompleted<int>());
+      AssertEqual(results, OnNext(2), OnNext(4), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -63,7 +62,7 @@ namespace Qactive.Tests.Queries
                                                        from serverValue in context.SingletonEnumerable
                                                        select serverValue);
 
-      results.AssertEqual(OnNext(1000), OnCompleted<int>());
+      AssertEqual(results, OnNext(1000), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -76,7 +75,7 @@ namespace Qactive.Tests.Queries
       var results = await service.QueryAsync(source => from context in source
                                                        select local());
 
-      results.AssertEqual(OnNext(123), OnCompleted<int>());
+      AssertEqual(results, OnNext(123), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -87,7 +86,7 @@ namespace Qactive.Tests.Queries
       var results = await service.QueryAsync(source => from context in source
                                                        select context.Value);
 
-      results.AssertEqual(OnNext(123), OnCompleted<int>());
+      AssertEqual(results, OnNext(123), OnCompleted<int>());
     }
 
     private sealed class TestContext
