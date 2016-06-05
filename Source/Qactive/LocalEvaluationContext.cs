@@ -249,6 +249,11 @@ namespace Qactive
           {
             genericTypeArguments[i] = typeof(CompilerGenerated);
             replacedAny = true;
+          },
+          genericArgumentsUpdated: updatedType =>
+          {
+            genericTypeArguments[i] = updatedType;
+            replacedAny = true;
           });
 
         if (!replaced && argument.GetIsGenericType() && EnsureGenericTypeArgumentsSerializable(ref argument))
