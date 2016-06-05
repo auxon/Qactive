@@ -105,6 +105,9 @@
     <Compile Include="..\Qactive.Tests\Operators\WhereTests.cs">
       <Link>Operators\WhereTests.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive.Tests\Queries\ComplexTests.cs">
+      <Link>Queries\ComplexTests.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive.Tests\Queries\DuplexTests.cs">
       <Link>Queries\DuplexTests.cs</Link>
     </Compile>

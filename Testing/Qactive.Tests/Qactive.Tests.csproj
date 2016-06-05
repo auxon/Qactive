@@ -90,6 +90,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Operators\GroupJoinTests.cs" />
     <Compile Include="Operators\JoinTests.cs" />
+    <Compile Include="Queries\ComplexTests.cs" />
     <Compile Include="Queries\DuplexTests.cs" />
     <Compile Include="Queries\NestedQueryTests.cs" />
     <Compile Include="Operators\SelectTests.cs" />
