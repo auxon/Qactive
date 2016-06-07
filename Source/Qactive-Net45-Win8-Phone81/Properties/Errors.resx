@@ -117,61 +117,79 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ClientRewrittenExpression" xml:space="preserve">
-    <value>Client rewritten expression</value>
+  <data name="CreateServiceDelegatesNotPublic" xml:space="preserve">
+    <value>The service and/or formatterFactory arguments could not be deserialized in the new AppDomain.  Make sure that their delegates point to publicly visible members.</value>
   </data>
-  <data name="ClientSendingExpression" xml:space="preserve">
-    <value>Client sending expression</value>
+  <data name="ExpressionCallLocalVoidFormat" xml:space="preserve">
+    <value>The query executes a void-returning method "{0}" on a local type "{1}".  Method calls in Qbservable queries are not permitted to be executed only for their local side-effects.</value>
   </data>
-  <data name="Current" xml:space="preserve">
-    <value>Current</value>
+  <data name="ExpressionCallMissingLocalArgumentFormat" xml:space="preserve">
+    <value>The query executes a method "{0}" on a local type "{1}" with an argument that is not available locally.</value>
   </data>
-  <data name="Enumerated" xml:space="preserve">
-    <value>Enumerated</value>
+  <data name="ExpressionCallMissingLocalInstanceFormat" xml:space="preserve">
+    <value>The query executes a method "{0}" on a local type "{1}" for which an instance is not available locally.</value>
   </data>
-  <data name="Enumerating" xml:space="preserve">
-    <value>Enumerating</value>
+  <data name="ExpressionCallOnUnknownTypeFormat" xml:space="preserve">
+    <value>The query executes a method "{0}" on an unknown type "{1}".</value>
   </data>
-  <data name="Invoked" xml:space="preserve">
-    <value>Invoked</value>
+  <data name="ExpressionClosureBug" xml:space="preserve">
+    <value>A closure was not replaced while visiting its members.  This may indicate a problem with the visitor.</value>
   </data>
-  <data name="Invoking" xml:space="preserve">
-    <value>Invoking</value>
+  <data name="ExpressionDelegateReturnsNonGenericAnonymousType" xml:space="preserve">
+    <value>A delegate used in the query has a non-generic anonymous return type.{0}Delegate type: {1}</value>
   </data>
-  <data name="MoveNext" xml:space="preserve">
-    <value>MoveNext</value>
+  <data name="ExpressionMemberMissingLocalInstanceFormat" xml:space="preserve">
+    <value>The query uses a field or property "{0}" on a local type "{1}" for which an instance is not available locally.</value>
   </data>
-  <data name="OnCompleted" xml:space="preserve">
-    <value>OnCompleted</value>
+  <data name="ExpressionUnknownBaseType" xml:space="preserve">
+    <value>The type "{0}" cannot be used in the query because it derives from type "{1}", which was not specified as a known type.</value>
   </data>
-  <data name="OnError" xml:space="preserve">
-    <value>OnError</value>
+  <data name="ExpressionUnknownType" xml:space="preserve">
+    <value>The type "{0}" cannot be used in the query because it was not specified as a known type.</value>
   </data>
-  <data name="OnNext" xml:space="preserve">
-    <value>OnNext</value>
+  <data name="ExpressionUnsupportedCompilerType" xml:space="preserve">
+    <value>A compiler-generated type is referenced at an unsupported position in the query.</value>
   </data>
-  <data name="Received" xml:space="preserve">
-    <value>Received</value>
+  <data name="ExpressionUnsupportedCompilerTypeAsMethodTypeArg" xml:space="preserve">
+    <value>A compiler-generated type is referenced as a method's generic type argument at an unsupported position in the query.</value>
   </data>
-  <data name="Sending" xml:space="preserve">
-    <value>Sending</value>
+  <data name="ExpressionUnsupportedCompilerTypeAsTypeArg" xml:space="preserve">
+    <value>A compiler-generated type is referenced as a generic type argument at an unsupported position in the query.</value>
   </data>
-  <data name="ServerReceivingExpression" xml:space="preserve">
-    <value>Server receiving expression</value>
+  <data name="ExpressionVisitedCompilerTypeTwice" xml:space="preserve">
+    <value>A compiler-generated type was visited twice.</value>
   </data>
-  <data name="ServerRewrittenExpression" xml:space="preserve">
-    <value>Server rewritten expression</value>
+  <data name="ProtocolDuplexSinkUnavailableForClientCallback" xml:space="preserve">
+    <value>The client has sent a query that requires duplex communication, which is currently disabled on the server.  To enable duplex communication, specify the EnableDuplex option when creating the service.</value>
   </data>
-  <data name="Subscribed" xml:space="preserve">
-    <value>Subscribed</value>
+  <data name="ProtocolDuplicateDuplexId" xml:space="preserve">
+    <value>Duplicate duplex callback identifier.</value>
   </data>
-  <data name="Subscribing" xml:space="preserve">
-    <value>Subscribing</value>
+  <data name="ProtocolDuplicateDuplexIdForEnumerator" xml:space="preserve">
+    <value>The duplex callback enumerator identifier is a duplicate.</value>
   </data>
-  <data name="Unsubscribed" xml:space="preserve">
-    <value>Unsubscribed</value>
+  <data name="ProtocolDuplicateDuplexIdForInvoke" xml:space="preserve">
+    <value>The duplex callback invocation identifier is a duplicate.</value>
   </data>
-  <data name="Unsubscribing" xml:space="preserve">
-    <value>Unsubscribing</value>
+  <data name="ProtocolDuplicateDuplexIdForObservable" xml:space="preserve">
+    <value>The duplex callback observable identifier is a duplicate.</value>
+  </data>
+  <data name="ProtocolExpectedMessageSubscribeFormat" xml:space="preserve">
+    <value>Protocol expected Subscribe message but received {0} instead.</value>
+  </data>
+  <data name="ProtocolInvalidDuplexId" xml:space="preserve">
+    <value>The duplex callback identifier is invalid.</value>
+  </data>
+  <data name="ProtocolInvalidDuplexIdForEnumerator" xml:space="preserve">
+    <value>The duplex callback enumerator identifier is invalid.</value>
+  </data>
+  <data name="ProtocolInvalidDuplexIdForInvoke" xml:space="preserve">
+    <value>The duplex callback invocation identifier is invalid.</value>
+  </data>
+  <data name="ProtocolInvalidDuplexIdForObservable" xml:space="preserve">
+    <value>The duplex callback observable identifier is invalid.</value>
+  </data>
+  <data name="ProtocolUnknownMessageKindFormat" xml:space="preserve">
+    <value>Unknown message kind received: {0}</value>
   </data>
 </root>

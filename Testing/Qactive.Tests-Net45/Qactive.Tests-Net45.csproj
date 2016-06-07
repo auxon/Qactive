@@ -142,7 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Qactive-Net45\Qactive-Net45.csproj">
-      <Project>{fdfe9523-bb5d-4e3f-a2da-aec88ec556eb}</Project>
+      <Project>{c2c6d4c9-20a4-4273-b9e8-30595956b03b}</Project>
       <Name>Qactive-Net45</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Qactive.Expressions-Net45\Qactive.Expressions-Net45.csproj">

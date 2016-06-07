@@ -21,7 +21,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;TRACING;CAS;REFLECTION;CAS_IN_STREAMING</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\..\Build\Properties\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
@@ -73,7 +73,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;REMOTING;SERIALIZATION;TRACING;CAS;REFLECTION;CAS_IN_STREAMING</DefineConstants>
+    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\..\Build\Properties\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
@@ -198,7 +198,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Qactive-Net45\Qactive-Net45.csproj">
-      <Project>{fdfe9523-bb5d-4e3f-a2da-aec88ec556eb}</Project>
+      <Project>{c2c6d4c9-20a4-4273-b9e8-30595956b03b}</Project>
       <Name>Qactive-Net45</Name>
     </ProjectReference>
     <ProjectReference Include="..\Qactive.Providers.Streaming-Net45\Qactive.Providers.Streaming-Net45.csproj">

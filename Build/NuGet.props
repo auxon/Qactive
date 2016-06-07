@@ -9,37 +9,47 @@
     <NuSpecTags>Rx, reactive, Reactive Extensions, Rx.NET, IObservable, IQbservable, queryable, service, stream</NuSpecTags>
   </PropertyGroup>
 
+  <!-- 
+  The following flavors must correspond exactly to the project name suffixes under the Source/Flavors solution folder.
+  -->
   <ItemGroup>
-    <Flavors Include="Net45" />
+    <FlavorSuffix Include="Net45" />
+    <FlavorSuffix Include="Net45-Win8-Phone81" />
   </ItemGroup>
 
   <Choose>
     <When Condition=" '$(MSBuildProjectName)' == 'Qactive' ">
       <ItemGroup>
-        <NuGetFlavor Include="@(Flavors->'..\Qactive-%(Identity)\Qactive-%(Identity).csproj')" />
+        <CandidateNuGetFlavor Include="@(FlavorSuffix->'..\Qactive-%(Identity)\Qactive-%(Identity).csproj')" />
       </ItemGroup>
     </When>
-    
+
     <When Condition=" '$(MSBuildProjectName)' == 'Qactive.Expressions' ">
       <ItemGroup>
-        <NuGetFlavor Include="@(Flavors->'..\Qactive.Expressions-%(Identity)\Qactive.Expressions-%(Identity).csproj')" />
+        <CandidateNuGetFlavor Include="@(FlavorSuffix->'..\Qactive.Expressions-%(Identity)\Qactive.Expressions-%(Identity).csproj')" />
       </ItemGroup>
     </When>
 
     <When Condition=" '$(MSBuildProjectName)' == 'Qactive.Providers.Streaming' ">
       <ItemGroup>
-        <NuGetFlavor Include="@(Flavors->'..\Qactive.Providers.Streaming-%(Identity)\Qactive.Providers.Streaming-%(Identity).csproj')" />
+        <CandidateNuGetFlavor Include="@(FlavorSuffix->'..\Qactive.Providers.Streaming-%(Identity)\Qactive.Providers.Streaming-%(Identity).csproj')" />
       </ItemGroup>
     </When>
 
     <When Condition=" '$(MSBuildProjectName)' == 'Qactive.Providers.Tcp' ">
       <ItemGroup>
-        <NuGetFlavor Include="@(Flavors->'..\Qactive.Providers.Tcp-%(Identity)\Qactive.Providers.Tcp-%(Identity).csproj')" />
+        <CandidateNuGetFlavor Include="@(FlavorSuffix->'..\Qactive.Providers.Tcp-%(Identity)\Qactive.Providers.Tcp-%(Identity).csproj')" />
       </ItemGroup>
     </When>
 
   </Choose>
 
-  <Target Name="_nop" />
+  <Target Name="SetNuGetFlavor" BeforeTargets="Build">
+
+    <ItemGroup>
+      <NuGetFlavor Include="@(CandidateNuGetFlavor)" Condition=" Exists('%(Identity)') " />
+    </ItemGroup>
+
+  </Target>
 
 </Project>
