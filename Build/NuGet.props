@@ -44,7 +44,7 @@
 
   </Choose>
 
-  <Target Name="SetNuGetFlavor" BeforeTargets="Build">
+  <Target Name="SetNuGetFlavor" BeforeTargets="BeforeBuild">
 
     <ItemGroup>
       <NuGetFlavor Include="@(CandidateNuGetFlavor)" Condition=" Exists('%(Identity)') " />
