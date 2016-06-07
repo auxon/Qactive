@@ -2,26 +2,26 @@
 A reactive queryable observable framework.
 <img align="right" src="https://raw.githubusercontent.com/RxDave/Qactive/master/Artifacts/Logo2.png" />
 
-* **Runtime:** .NET Framework 4.6.1, .NET Framework 4.5 (portable)
+* **Runtime:** .NET Framework 4.6.1, .NET Framework 4.5.2 (portable)
 * **Development:** Visual Studio 2015 and C# 6
 * **Dependencies:** [Reactive Extensions (Rx.NET)](https://github.com/Reactive-Extensions/Rx.NET)
 
 ## Download from NuGet
 > [Qactive.Providers.Tcp](https://www.nuget.org/packages/qactive.providers.tcp)  
 > Depends on Rx, Qactive.Providers.Streaming, Qactive.Expressions and Qactive  
-> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5
+> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5.2
 
 > [Qactive.Providers.Streaming](https://www.nuget.org/packages/qactive.providers.streaming)  
 > Depends on Rx, Qactive.Expressions and Qactive  
-> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5
+> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5.2
 
 > [Qactive](https://www.nuget.org/packages/qactive)  
 > Depends on Rx  
-> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5, ASP.NET Core 1.0, Windows 8, Windows Phone 8.1, Xamarin.Android, Xamarin.iOS
+> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5.2, ASP.NET Core 1.0, Windows 8, Windows Phone 8.1, Xamarin.Android, Xamarin.iOS
 
 > [Qactive.Expressions](https://www.nuget.org/packages/qactive.expressions)  
 > No dependencies  
-> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5
+> Runtimes: .NET Framework 4.6.1, .NET Framework 4.5.2
 
 Add a reference to the **Qactive.Providers.Tcp** package in your Visual Studio project. That package references the other packages as dependencies, so NuGet will automatically download all of them for you.
 
