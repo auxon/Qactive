@@ -310,8 +310,6 @@ namespace Qactive
       Contract.Requires(dispose != null);
       Contract.Ensures(Contract.Result<IDisposable>() != null);
 
-      var waitForResponse = new ManualResetEventSlim(false);
-
       var duplexSink = FindSink<IServerDuplexQbservableProtocolSink>();
 
       var registration = duplexSink.RegisterObservableCallbacks(
@@ -320,17 +318,11 @@ namespace Qactive
         onError,
         onCompleted,
         dispose,
-        id =>
-        {
-          subscribed(id);
-          waitForResponse.Set();
-        });
+        subscribed);
 
       var message = messageFactory(registration.Item1);
 
       SendMessageSafeAsync(message).Wait(Cancel);
-
-      waitForResponse.Wait(Cancel);
 
       return registration.Item2;
     }
