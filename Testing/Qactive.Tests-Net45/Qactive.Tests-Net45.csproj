@@ -114,6 +114,21 @@
     <Compile Include="..\Qactive.Tests\Queries\NestedQueryTests.cs">
       <Link>Queries\NestedQueryTests.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\Queries\TcpComplexTests.cs">
+      <Link>Tcp\Queries\TcpComplexTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\Queries\TcpDuplexTests.cs">
+      <Link>Tcp\Queries\TcpDuplexTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\Queries\TcpNestedQueryTests.cs">
+      <Link>Tcp\Queries\TcpNestedQueryTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\TcpTestService.cs">
+      <Link>Tcp\TcpTestService.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\TcpTestService{TSource}.cs">
+      <Link>Tcp\TcpTestService{TSource}.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive.Tests\TestBase.cs">
       <Link>TestBase.cs</Link>
     </Compile>
@@ -131,6 +146,9 @@
     </Compile>
     <Compile Include="..\Qactive.Tests\TestService.cs">
       <Link>TestService.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestServiceBase.cs">
+      <Link>TestServiceBase.cs</Link>
     </Compile>
     <Compile Include="..\Qactive.Tests\TestService{TSource}.cs">
       <Link>TestService{TSource}.cs</Link>
@@ -161,6 +179,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
