@@ -93,6 +93,7 @@ namespace Qactive.Tests.Tcp.Queries
         => string.Join(",", RootObjects);
     }
 
+    [Serializable]
     private sealed class RootObjectClient : IDisposable
     {
       private readonly RootObject root;
@@ -124,6 +125,7 @@ namespace Qactive.Tests.Tcp.Queries
       }
     }
 
+    [Serializable]
     private sealed class RootObject
     {
       public RootObject(string id, decimal multiplier)
@@ -146,6 +148,7 @@ namespace Qactive.Tests.Tcp.Queries
       public override string ToString() => Id;
     }
 
+    [Serializable]
     private sealed class Node
     {
       private readonly IObservable<Leaf> leaves;
@@ -175,6 +178,7 @@ namespace Qactive.Tests.Tcp.Queries
       public override string ToString() => Id;
     }
 
+    [Serializable]
     private sealed class Leaf
     {
       public Leaf(string id, decimal size)
