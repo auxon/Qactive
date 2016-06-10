@@ -114,6 +114,18 @@
     <Compile Include="..\Qactive.Tests\Queries\NestedQueryTests.cs">
       <Link>Queries\NestedQueryTests.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\Operators\GroupJoinTests.cs">
+      <Link>Tcp\Operators\GroupJoinTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\Operators\JoinTests.cs">
+      <Link>Tcp\Operators\JoinTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\Operators\SelectTests.cs">
+      <Link>Tcp\Operators\SelectTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\Operators\WhereTests.cs">
+      <Link>Tcp\Operators\WhereTests.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive.Tests\Tcp\Queries\TcpComplexTests.cs">
       <Link>Tcp\Queries\TcpComplexTests.cs</Link>
     </Compile>

@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Qactive.Tests.Operators
+namespace Qactive.Tests.Tcp.Operators
 {
   [TestClass]
   public class WhereTests : TestBase
@@ -11,7 +11,7 @@ namespace Qactive.Tests.Operators
     [TestMethod]
     public async Task Where()
     {
-      var service = TestService.Create(Observable.Range(0, 5));
+      var service = TcpTestService.Create(Observable.Range(0, 5));
       var results = await service.QueryAsync(xs => from x in xs
                                                    where x % 2 == 0
                                                    select x);
@@ -24,7 +24,7 @@ namespace Qactive.Tests.Operators
     {
       Func<int, bool> predicate = x => x % 2 == 0;
 
-      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Range(0, 5));
+      var service = TcpTestService.Create(TcpTestService.UnrestrictedOptions, Observable.Range(0, 5));
       var results = await service.QueryAsync(xs => from x in xs
                                                    where predicate(x)
                                                    select x);

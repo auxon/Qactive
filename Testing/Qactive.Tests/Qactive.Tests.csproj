@@ -95,6 +95,10 @@
     <Compile Include="Queries\NestedQueryTests.cs" />
     <Compile Include="Operators\SelectTests.cs" />
     <Compile Include="Operators\WhereTests.cs" />
+    <Compile Include="Tcp\Operators\GroupJoinTests.cs" />
+    <Compile Include="Tcp\Operators\JoinTests.cs" />
+    <Compile Include="Tcp\Operators\SelectTests.cs" />
+    <Compile Include="Tcp\Operators\WhereTests.cs" />
     <Compile Include="Tcp\Queries\TcpComplexTests.cs" />
     <Compile Include="Tcp\Queries\TcpDuplexTests.cs" />
     <Compile Include="Tcp\Queries\TcpNestedQueryTests.cs" />
