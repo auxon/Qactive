@@ -24,11 +24,11 @@ namespace Qactive
 #endif
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Qactive.Log.SemanticObject(System.Diagnostics.TraceSource,Qactive.SemanticTrace,System.Diagnostics.TraceEventType,System.Object,System.String,System.Object)", Justification = "It's just a separator.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Qactive.Log.SemanticObjectUnsafe(System.Diagnostics.TraceSource,Qactive.SemanticTrace,System.Diagnostics.TraceEventType,System.Object,System.String,System.Object)", Justification = "It's just a separator.")]
     [Conditional("TRACE")]
     public static void OnNext<T>(string observable, T value, bool isServer, bool isReceiving, object sourceId, [CallerMemberName]string label = null)
 #if TRACING
-      => QactiveTraceSources.Qactive.SemanticObject(
+      => QactiveTraceSources.Qactive.SemanticObjectUnsafe(
           isServer
         ? isReceiving
           ? SemanticTrace.ServerClientOnNext
@@ -45,11 +45,11 @@ namespace Qactive
     }
 #endif
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Qactive.Log.SemanticObject(System.Diagnostics.TraceSource,Qactive.SemanticTrace,System.Diagnostics.TraceEventType,System.Object,System.String,System.Object)", Justification = "It's just a separator.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Qactive.Log.SemanticObjectUnsafe(System.Diagnostics.TraceSource,Qactive.SemanticTrace,System.Diagnostics.TraceEventType,System.Object,System.String,System.Object)", Justification = "It's just a separator.")]
     [Conditional("TRACE")]
     public static void OnError(string observable, Exception error, bool isServer, bool isReceiving, object sourceId, [CallerMemberName]string label = null)
 #if TRACING
-      => QactiveTraceSources.Qactive.SemanticObject(
+      => QactiveTraceSources.Qactive.SemanticObjectUnsafe(
           isServer
         ? isReceiving
           ? SemanticTrace.ServerClientOnError
@@ -66,11 +66,11 @@ namespace Qactive
     }
 #endif
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Qactive.Log.SemanticObject(System.Diagnostics.TraceSource,Qactive.SemanticTrace,System.Diagnostics.TraceEventType,System.Object,System.String,System.Object)", Justification = "It's just a separator.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Qactive.Log.SemanticObjectUnsafe(System.Diagnostics.TraceSource,Qactive.SemanticTrace,System.Diagnostics.TraceEventType,System.Object,System.String,System.Object)", Justification = "It's just a separator.")]
     [Conditional("TRACE")]
     public static void OnCompleted(string observable, bool isServer, bool isReceiving, object sourceId, [CallerMemberName]string label = null)
 #if TRACING
-      => QactiveTraceSources.Qactive.SemanticObject(
+      => QactiveTraceSources.Qactive.SemanticObjectUnsafe(
           isServer
         ? isReceiving
           ? SemanticTrace.ServerClientOnCompleted
@@ -87,11 +87,11 @@ namespace Qactive
     }
 #endif
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Qactive.Log.SemanticObject(System.Diagnostics.TraceSource,Qactive.SemanticTrace,System.Diagnostics.TraceEventType,System.Object,System.String,System.Object)", Justification = "It's just a separator.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Qactive.Log.SemanticObjectUnsafe(System.Diagnostics.TraceSource,Qactive.SemanticTrace,System.Diagnostics.TraceEventType,System.Object,System.String,System.Object)", Justification = "It's just a separator.")]
     [Conditional("TRACE")]
     public static void MoveNext(string enumerable, bool isServer, object sourceId, [CallerMemberName]string label = null)
 #if TRACING
-      => QactiveTraceSources.Qactive.SemanticObject(
+      => QactiveTraceSources.Qactive.SemanticObjectUnsafe(
           isServer
         ? SemanticTrace.ServerMoveNext
         : SemanticTrace.ClientServerMoveNext,
@@ -104,11 +104,11 @@ namespace Qactive
     }
 #endif
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Qactive.Log.SemanticObject(System.Diagnostics.TraceSource,Qactive.SemanticTrace,System.Diagnostics.TraceEventType,System.Object,System.String,System.Object)", Justification = "It's just a separator.")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Qactive.Log.SemanticObjectUnsafe(System.Diagnostics.TraceSource,Qactive.SemanticTrace,System.Diagnostics.TraceEventType,System.Object,System.String,System.Object)", Justification = "It's just a separator.")]
     [Conditional("TRACE")]
     public static void Current(string enumerable, object value, bool isServer, object sourceId, [CallerMemberName]string label = null)
 #if TRACING
-      => QactiveTraceSources.Qactive.SemanticObject(
+      => QactiveTraceSources.Qactive.SemanticObjectUnsafe(
           isServer
         ? SemanticTrace.ServerCurrent
         : SemanticTrace.ClientServerCurrent,
