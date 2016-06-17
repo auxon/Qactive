@@ -66,9 +66,14 @@ namespace Qactive
       {
         try
         {
-          int read = await Source.ReadAsync(buffer, offset, count, Cancel).ConfigureAwait(false);
+          int read, totalRead = 0;
+          while (count > 0 && (read = await Source.ReadAsync(buffer, offset + totalRead, count, Cancel).ConfigureAwait(false)) > 0)
+          {
+            count -= read;
+            totalRead += read;
+          }
 
-          if (read != count)
+          if (count > 0)
           {
             throw new InvalidOperationException("The connection was closed without sending all of the data.");
           }
