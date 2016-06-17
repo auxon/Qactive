@@ -394,7 +394,14 @@ namespace Qactive
       Log.OnNext(name, value, false, false, sourceId, LogMessages.Sending);
 #endif
 
-      await Protocol.SendMessageSafeAsync(CreateOnNext(id, value)).ConfigureAwait(false);
+      try
+      {
+        await Protocol.SendMessageSafeAsync(CreateOnNext(id, value)).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
@@ -406,7 +413,14 @@ namespace Qactive
       Log.OnError(name, error.SourceException, false, false, sourceId, LogMessages.Sending);
 #endif
 
-      await Protocol.SendMessageSafeAsync(CreateOnError(id, error)).ConfigureAwait(false);
+      try
+      {
+        await Protocol.SendMessageSafeAsync(CreateOnError(id, error)).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
     }
 
     public virtual async void SendOnCompleted(string name, DuplexCallbackId id)
@@ -417,39 +431,105 @@ namespace Qactive
       Log.OnCompleted(name, false, false, sourceId, LogMessages.Sending);
 #endif
 
-      await Protocol.SendMessageSafeAsync(CreateOnCompleted(id)).ConfigureAwait(false);
+      try
+      {
+        await Protocol.SendMessageSafeAsync(CreateOnCompleted(id)).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
     }
 
     protected virtual async void SendResponse(DuplexCallbackId id, object result)
-      => await Protocol.SendMessageSafeAsync(CreateResponse(id, result)).ConfigureAwait(false);
+    {
+      try
+      {
+        await Protocol.SendMessageSafeAsync(CreateResponse(id, result)).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
+    }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected virtual async void SendError(DuplexCallbackId id, ExceptionDispatchInfo error)
-      => await Protocol.SendMessageSafeAsync(CreateErrorResponse(id, error)).ConfigureAwait(false);
+    {
+      try
+      {
+        await Protocol.SendMessageSafeAsync(CreateErrorResponse(id, error)).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
+    }
 
     protected virtual async void SendSubscribeResponse(DuplexCallbackId id, int clientSubscriptionId)
-      => await Protocol.SendMessageSafeAsync(CreateSubscribeResponse(id, clientSubscriptionId)).ConfigureAwait(false);
+    {
+      try
+      {
+        await Protocol.SendMessageSafeAsync(CreateSubscribeResponse(id, clientSubscriptionId)).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
+    }
 
     protected virtual async void SendGetEnumeratorResponse(DuplexCallbackId id, int clientEnumeratorId)
-      => await Protocol.SendMessageSafeAsync(CreateGetEnumeratorResponse(id, clientEnumeratorId)).ConfigureAwait(false);
+    {
+      try
+      {
+        await Protocol.SendMessageSafeAsync(CreateGetEnumeratorResponse(id, clientEnumeratorId)).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
+    }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected virtual async void SendGetEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       Contract.Requires(error != null);
 
-      await Protocol.SendMessageSafeAsync(CreateGetEnumeratorError(id, error)).ConfigureAwait(false);
+      try
+      {
+        await Protocol.SendMessageSafeAsync(CreateGetEnumeratorError(id, error)).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
     }
 
     protected virtual async void SendEnumeratorResponse(DuplexCallbackId id, bool result, object current)
-      => await Protocol.SendMessageSafeAsync(CreateEnumeratorResponse(id, result, current)).ConfigureAwait(false);
+    {
+      try
+      {
+        await Protocol.SendMessageSafeAsync(CreateEnumeratorResponse(id, result, current)).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
+    }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Error", Justification = "Standard naming in Rx.")]
     protected virtual async void SendEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error)
     {
       Contract.Requires(error != null);
 
-      await Protocol.SendMessageSafeAsync(CreateEnumeratorError(id, error)).ConfigureAwait(false);
+      try
+      {
+        await Protocol.SendMessageSafeAsync(CreateEnumeratorError(id, error)).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
     }
 
     protected abstract TMessage CreateOnNext(DuplexCallbackId id, object value);

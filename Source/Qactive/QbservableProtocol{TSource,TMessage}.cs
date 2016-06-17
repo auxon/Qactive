@@ -389,6 +389,8 @@ namespace Qactive
       {
         foreach (var sink in CreateClientSinks())
         {
+          sink.Exceptions.Subscribe(CancelAllCommunication);
+
           Sinks.Add(sink);
         }
       }
@@ -396,12 +398,18 @@ namespace Qactive
       {
         foreach (var sink in CreateServerSinks())
         {
+          sink.Exceptions.Subscribe(CancelAllCommunication);
+
           Sinks.Add(sink);
         }
 
         if (ServiceOptions.EnableDuplex)
         {
-          Sinks.Add(CreateServerDuplexSink());
+          var sink = CreateServerDuplexSink();
+
+          sink.Exceptions.Subscribe(CancelAllCommunication);
+
+          Sinks.Add(sink);
         }
       }
 
@@ -447,7 +455,12 @@ namespace Qactive
       if (sink == null)
       {
         sink = createSink();
-        Sinks.Add((QbservableProtocolSink<TSource, TMessage>)(object)sink);
+
+        var protocolSink = (QbservableProtocolSink<TSource, TMessage>)(object)sink;
+
+        protocolSink.Exceptions.Subscribe(CancelAllCommunication);
+
+        Sinks.Add(protocolSink);
       }
 
       return sink;

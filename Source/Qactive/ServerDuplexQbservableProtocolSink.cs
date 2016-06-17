@@ -363,7 +363,14 @@ namespace Qactive
       Log.Enumerated(name, true, sourceId, LogMessages.Sending);
 #endif
 
-      await Protocol.SendMessageSafeAsync(message).ConfigureAwait(false);
+      try
+      {
+        await Protocol.SendMessageSafeAsync(message).ConfigureAwait(false);
+      }
+      catch (Exception ex)
+      {
+        Fail(ExceptionDispatchInfo.Capture(ex));
+      }
     }
 
     protected abstract TMessage CreateSubscribe(DuplexCallbackId clientId);
