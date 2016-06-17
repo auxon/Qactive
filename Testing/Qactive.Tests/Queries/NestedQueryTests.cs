@@ -18,7 +18,7 @@ namespace Qactive.Tests.Queries
                                                        where value == 123
                                                        select value);
 
-      AssertEqual(results, OnNext(123), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(123), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -53,7 +53,7 @@ namespace Qactive.Tests.Queries
                                                                      select value
                                                        select value);
 
-      AssertEqual(results, OnNext(123), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(123), OnCompleted<int>());
     }
 
     private sealed class TestContext

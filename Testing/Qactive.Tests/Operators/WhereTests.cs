@@ -16,7 +16,7 @@ namespace Qactive.Tests.Operators
                                                    where x % 2 == 0
                                                    select x);
 
-      AssertEqual(results, OnNext(0), OnNext(2), OnNext(4), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(0), OnNext(2), OnNext(4), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -29,7 +29,7 @@ namespace Qactive.Tests.Operators
                                                    where predicate(x)
                                                    select x);
 
-      AssertEqual(results, OnNext(0), OnNext(2), OnNext(4), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(0), OnNext(2), OnNext(4), OnCompleted<int>());
     }
   }
 }

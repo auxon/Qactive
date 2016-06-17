@@ -74,7 +74,7 @@ namespace Qactive.Tests.Queries
 
         });
 
-      AssertEqual(results,
+      QactiveAssert.AreEqual(results,
         OnNext(new { Node = new Node("2"), SmallestGreen = new Leaf("2", 6), LargestBrown = new Leaf("5", 9) }),
         OnNext(new { Node = new Node("4"), SmallestGreen = new Leaf("2", 6), LargestBrown = new Leaf("5", 9) }),
         OnCompleted(new { Node = default(Node), SmallestGreen = default(Leaf), LargestBrown = default(Leaf) }));

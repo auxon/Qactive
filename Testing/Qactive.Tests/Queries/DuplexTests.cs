@@ -23,7 +23,7 @@ namespace Qactive.Tests.Queries
                                                        where clientValue % 2 == 0
                                                        select clientValue);
 
-      AssertEqual(results, OnNext(2), OnNext(4), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(2), OnNext(4), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -35,7 +35,7 @@ namespace Qactive.Tests.Queries
                                                        from serverValue in context.Singleton
                                                        select serverValue);
 
-      AssertEqual(results, OnNext(100), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(100), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -50,7 +50,7 @@ namespace Qactive.Tests.Queries
                                                        where clientValue % 2 == 0
                                                        select clientValue);
 
-      AssertEqual(results, OnNext(2), OnNext(4), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(2), OnNext(4), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -62,7 +62,7 @@ namespace Qactive.Tests.Queries
                                                        from serverValue in context.SingletonEnumerable
                                                        select serverValue);
 
-      AssertEqual(results, OnNext(1000), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(1000), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -75,7 +75,7 @@ namespace Qactive.Tests.Queries
       var results = await service.QueryAsync(source => from context in source
                                                        select local());
 
-      AssertEqual(results, OnNext(123), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(123), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -86,7 +86,22 @@ namespace Qactive.Tests.Queries
       var results = await service.QueryAsync(source => from context in source
                                                        select context.Value);
 
-      AssertEqual(results, OnNext(123), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(123), OnCompleted<int>());
+    }
+
+    [TestMethod]
+    public async Task DuplexObservableWithNonSerializablePayload()
+    {
+      var service = TestService.Create(TestService.DuplexOptions, new[] { typeof(NonSerializableObject) }, Observable.Return(new TestContext()));
+
+      var obj = new NonSerializableObject();
+      var local = Observable.Return(obj);
+
+      var results = await service.QueryAsync(source => from context in source
+                                                       from value in local
+                                                       select value);
+
+      QactiveAssert.AreEqual(results, OnNext(obj), OnCompleted<NonSerializableObject>());
     }
 
     private sealed class TestContext

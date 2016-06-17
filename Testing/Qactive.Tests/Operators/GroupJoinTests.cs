@@ -22,7 +22,7 @@ namespace Qactive.Tests.Operators
                                                        where x == y
                                                        select x + y);
 
-      AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -39,7 +39,7 @@ namespace Qactive.Tests.Operators
                                                        where x == y
                                                        select x + y);
 
-      AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -57,7 +57,7 @@ namespace Qactive.Tests.Operators
                                                        where x == y
                                                        select x + y);
 
-      AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -74,7 +74,7 @@ namespace Qactive.Tests.Operators
                                                        where x == y
                                                        select x + y);
 
-      AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -92,7 +92,7 @@ namespace Qactive.Tests.Operators
                                                        where x == y
                                                        select x + y);
 
-      AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     private sealed class TestContext

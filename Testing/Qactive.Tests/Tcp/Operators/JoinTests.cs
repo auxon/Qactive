@@ -22,8 +22,8 @@ namespace Qactive.Tests.Tcp.Operators
                                                        select x + y);
 
       // TODO: The second parameter of Qbservable.Join is an IObservable<T> rather than an IQbservable<T>. Consider exposing various built-in serializable observable generators.
-      AssertEqual(results, OnError<int>(new SerializationException("Type 'System.Reactive.Linq.ObservableImpl.Range' in Assembly 'System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' is not marked as serializable.")));
-      //ssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnError<int>(new SerializationException("Type 'System.Reactive.Linq.ObservableImpl.Range' in Assembly 'System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' is not marked as serializable.")));
+      //QactiveAssert.Equal(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -39,8 +39,8 @@ namespace Qactive.Tests.Tcp.Operators
                                                        select x + y);
 
       // TODO: The second parameter of Qbservable.Join is an IObservable<T> rather than an IQbservable<T>. Consider exposing various built-in serializable observable generators.
-      AssertEqual(results, OnError<int>(new SerializationException("Type 'System.Reactive.Linq.ObservableImpl.Range' in Assembly 'System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' is not marked as serializable.")));
-      //AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnError<int>(new SerializationException("Type 'System.Reactive.Linq.ObservableImpl.Range' in Assembly 'System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' is not marked as serializable.")));
+      //QactiveAssert.Equal(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -57,8 +57,8 @@ namespace Qactive.Tests.Tcp.Operators
                                                        select x + y);
 
       // TODO: The second parameter of Qbservable.Join is an IObservable<T> rather than an IQbservable<T>. Consider exposing various built-in serializable observable generators.
-      AssertEqual(results, OnError<int>(new SerializationException("Type 'System.Reactive.Linq.ObservableImpl.Range' in Assembly 'System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' is not marked as serializable.")));
-      //AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnError<int>(new SerializationException("Type 'System.Reactive.Linq.ObservableImpl.Range' in Assembly 'System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' is not marked as serializable.")));
+      //QactiveAssert.Equal(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -74,8 +74,8 @@ namespace Qactive.Tests.Tcp.Operators
                                                        select x + y);
 
       // TODO: The second parameter of Qbservable.Join is an IObservable<T> rather than an IQbservable<T>. Consider exposing various built-in serializable observable generators.
-      AssertEqual(results, OnError<int>(new SerializationException("Type 'System.Reactive.Linq.ObservableImpl.Range' in Assembly 'System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' is not marked as serializable.")));
-      //AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnError<int>(new SerializationException("Type 'System.Reactive.Linq.ObservableImpl.Range' in Assembly 'System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' is not marked as serializable.")));
+      //QactiveAssert.Equal(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -92,8 +92,8 @@ namespace Qactive.Tests.Tcp.Operators
                                                        select x + y);
 
       // TODO: The second parameter of Qbservable.Join is an IObservable<T> rather than an IQbservable<T>. Consider exposing various built-in serializable observable generators.
-      AssertEqual(results, OnError<int>(new SerializationException("Type 'System.Reactive.Linq.ObservableImpl.Range' in Assembly 'System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' is not marked as serializable.")));
-      //AssertEqual(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnError<int>(new SerializationException("Type 'System.Reactive.Linq.ObservableImpl.Range' in Assembly 'System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35' is not marked as serializable.")));
+      //QactiveAssert.Equal(results, OnNext(6), OnNext(8), OnNext(10), OnCompleted<int>());
     }
 
     private sealed class TestContext

@@ -15,7 +15,7 @@ namespace Qactive.Tests.Operators
       var results = await service.QueryAsync(xs => from x in xs
                                                    select x * 5);
 
-      AssertEqual(results, OnNext(0), OnNext(5), OnNext(10), OnNext(15), OnNext(20), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(0), OnNext(5), OnNext(10), OnNext(15), OnNext(20), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -27,7 +27,7 @@ namespace Qactive.Tests.Operators
       var results = await service.QueryAsync(xs => from x in xs
                                                    select selector(x));
 
-      AssertEqual(results, OnNext(0), OnNext(5), OnNext(10), OnNext(15), OnNext(20), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(0), OnNext(5), OnNext(10), OnNext(15), OnNext(20), OnCompleted<int>());
     }
   }
 }

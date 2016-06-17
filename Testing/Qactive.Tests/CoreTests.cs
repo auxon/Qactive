@@ -14,7 +14,7 @@ namespace Qactive.Tests
       var service = TestService.Create(Observable.Return(123));
       var results = await service.QueryAsync(xs => xs);
 
-      AssertEqual(results, OnNext(123), OnCompleted<int>());
+      QactiveAssert.AreEqual(results, OnNext(123), OnCompleted<int>());
     }
 
     [TestMethod]
@@ -24,7 +24,7 @@ namespace Qactive.Tests
       var results = await service.QueryAsync(xs => from x in xs
                                                    select new { Value = x });
 
-      AssertEqual(results, OnNext(new { Value = 123 }), OnCompleted(new { Value = default(int) }));
+      QactiveAssert.AreEqual(results, OnNext(new { Value = 123 }), OnCompleted(new { Value = default(int) }));
     }
 
     [TestMethod]
@@ -34,7 +34,7 @@ namespace Qactive.Tests
       var results = await service.QueryAsync(xs => from x in xs
                                                    select new { Value = x, ValueDoubled = x * 2 });
 
-      AssertEqual(results, OnNext(new { Value = 123, ValueDoubled = 246 }), OnCompleted(new { Value = default(int), ValueDoubled = default(int) }));
+      QactiveAssert.AreEqual(results, OnNext(new { Value = 123, ValueDoubled = 246 }), OnCompleted(new { Value = default(int), ValueDoubled = default(int) }));
     }
 
     [TestMethod]
@@ -46,7 +46,7 @@ namespace Qactive.Tests
         from _ in source
         select new[] { new { Value = "test" } }.First());
 
-      AssertEqual(results,
+      QactiveAssert.AreEqual(results,
         OnNext(new { Value = "test" }),
         OnCompleted(new { Value = default(string) }));
     }
@@ -63,7 +63,7 @@ namespace Qactive.Tests
                 select result)
                 .First());
 
-      AssertEqual(results,
+      QactiveAssert.AreEqual(results,
         OnNext(new { Value = "test" }),
         OnCompleted(new { Value = default(string) }));
     }
