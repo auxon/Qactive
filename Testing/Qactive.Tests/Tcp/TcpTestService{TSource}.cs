@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Runtime.Remoting.Messaging;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Qactive.Tests.Tcp
 {
-  internal sealed class TcpTestService<TSource> : TestServiceBase<TSource>
+  internal sealed class TcpTestService<TSource> : TestServiceBase<TSource>, ITcpQactiveProviderTransportInitializer
   {
     private static readonly IPEndPoint DefaultEndPoint = new IPEndPoint(IPAddress.Loopback, 24142);
 
@@ -40,9 +43,15 @@ namespace Qactive.Tests.Tcp
     }
 
     protected override IObservable<ClientTermination> ServeQbservable(IObservable<TSource> source)
-      => source.ServeQbservableTcp(endPoint, options);
+      => source.ServeQbservableTcp(endPoint, this, options);
 
     protected override IQbservable<TSource> CreateQuery()
-      => new TcpQbservableClient<TSource>(endPoint, knownTypes).Query();
+      => new TcpQbservableClient<TSource>(endPoint, knownTypes).Query(Prepare);
+
+    public void Prepare(Socket socket)
+      => socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+
+    public IRemotingFormatter CreateFormatter()
+      => new BinaryFormatter();
   }
 }
