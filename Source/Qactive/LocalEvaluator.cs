@@ -15,7 +15,7 @@ namespace Qactive
     {
     }
 
-    public Expression EvaluateCompilerGenerated(MemberExpression member, IQbservableProtocol protocol)
+    public Expression EvaluateCompilerGenerated(MemberExpression member, Type expectedType, IQbservableProtocol protocol)
     {
       Contract.Requires(member != null);
       Contract.Requires(protocol != null);
@@ -50,7 +50,7 @@ namespace Qactive
         value = property.GetValue(instance);
       }
 
-      var result = TryEvaluateSequences(name, value, type, protocol);
+      var result = TryEvaluateSequences(name, value, type, expectedType, protocol);
 
       return result == null
            ? Expression.Constant(value, type)
@@ -86,7 +86,7 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Call", Justification = "Reviewed")]
     public abstract Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, IQbservableProtocol protocol);
 
-    protected Either<object, Expression> TryEvaluateSequences(string name, object value, Type type, IQbservableProtocol protocol)
+    protected Either<object, Expression> TryEvaluateSequences(string name, object value, Type type, Type expectedType, IQbservableProtocol protocol)
     {
       Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(type != null);
@@ -94,14 +94,15 @@ namespace Qactive
 
       if (value != null)
       {
-        var isSequence = type == typeof(IEnumerable)
-                      || (type.GetIsGenericType()
-                         && (type.GetGenericTypeDefinition() == typeof(IEnumerable<>)
-                          || type.GetGenericTypeDefinition() == typeof(IObservable<>)));
+        var evaluatedType = expectedType ?? type;
+        var isSequence = evaluatedType == typeof(IEnumerable)
+                      || (evaluatedType.GetIsGenericType()
+                          && (evaluatedType.GetGenericTypeDefinition() == typeof(IEnumerable<>)
+                              || evaluatedType.GetGenericTypeDefinition() == typeof(IObservable<>)));
 
         if (isSequence || !IsTypeKnown(value))
         {
-          var result = TryEvaluateEnumerable(name, value, type, protocol);
+          var result = TryEvaluateEnumerable(name, value, evaluatedType, protocol);
 
           if (result != null)
           {
@@ -109,7 +110,7 @@ namespace Qactive
           }
           else
           {
-            var expression = TryEvaluateObservable(name, value, type, protocol);
+            var expression = TryEvaluateObservable(name, value, evaluatedType, protocol);
 
             if (expression != null)
             {

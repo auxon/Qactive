@@ -24,7 +24,7 @@ namespace Qactive
 
       var value = property.GetValue(instance);
 
-      var either = TryEvaluateSequences(property.DeclaringType.Name + "." + property.Name, value, property.PropertyType, protocol);
+      var either = TryEvaluateSequences(property.DeclaringType.Name + "." + property.Name, value, member.Type, property.PropertyType, protocol);
 
       return either == null
         ? Expression.Constant(value, property.PropertyType)
@@ -39,7 +39,7 @@ namespace Qactive
 
       var value = field.GetValue(instance);
 
-      var either = TryEvaluateSequences(field.DeclaringType.Name + "." + field.Name, value, field.FieldType, protocol);
+      var either = TryEvaluateSequences(field.DeclaringType.Name + "." + field.Name, value, member.Type, field.FieldType, protocol);
 
       return either == null
         ? Expression.Constant(value, field.FieldType)
@@ -59,7 +59,7 @@ namespace Qactive
 
       var result = call.Method.Invoke(instance, EvaluateArguments(call, visitor).ToArray());
 
-      var either = TryEvaluateSequences(call.Method.DeclaringType.Name + "." + call.Method.Name, result, call.Type, protocol);
+      var either = TryEvaluateSequences(call.Method.DeclaringType.Name + "." + call.Method.Name, result, call.Type, call.Method.ReturnType, protocol);
 
       return either == null
           ? Expression.Constant(result, call.Type)
