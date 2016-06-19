@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -12,6 +14,12 @@ namespace Qactive
   {
     private readonly LocalEvaluator evaluator;
     private readonly IQbservableProtocol protocol;
+    private readonly Stack<Type> expectedTypes = new Stack<Type>();
+
+    public bool IsStackEmpty
+    {
+      get { return expectedTypes.Count == 0; }
+    }
 
     public LocalEvaluationVisitor(LocalEvaluator evaluator, IQbservableProtocol protocol)
     {
@@ -30,6 +38,68 @@ namespace Qactive
       Contract.Invariant(protocol != null);
     }
 
+    /// <param name="expectedType">The actual type that is expected for this exprssion's result rather than the concrete type that may be present, or null if no particular type is expected.</param>
+    private Expression Visit(Expression expression, Type expectedType)
+    {
+      expectedTypes.Push(expectedType);
+
+      try
+      {
+        return Visit(expression);
+      }
+      finally
+      {
+        expectedTypes.Pop();
+      }
+    }
+
+    /// <param name="expectedType">The actual type that is expected for this exprssion's result rather than the concrete type that may be present, or null if no particular type is expected.</param>
+    private ReadOnlyCollection<Expression> Visit(ReadOnlyCollection<Expression> expressions, Type expectedType)
+    {
+      expectedTypes.Push(expectedType);
+
+      try
+      {
+        return Visit(expressions);
+      }
+      finally
+      {
+        expectedTypes.Pop();
+      }
+    }
+
+    /// <param name="expectedType">The actual type that is expected for this exprssion's result rather than the concrete type that may be present, or null if no particular type is expected.</param>
+    private T VisitAndConvert<T>(T node, string callerName, Type expectedType)
+      where T : Expression
+    {
+      expectedTypes.Push(expectedType);
+
+      try
+      {
+        return VisitAndConvert(node, callerName);
+      }
+      finally
+      {
+        expectedTypes.Pop();
+      }
+    }
+
+    /// <param name="expectedType">The actual type that is expected for this exprssion's result rather than the concrete type that may be present, or null if no particular type is expected.</param>
+    private ReadOnlyCollection<T> VisitAndConvert<T>(ReadOnlyCollection<T> nodes, string callerName, Type expectedType)
+      where T : Expression
+    {
+      expectedTypes.Push(expectedType);
+
+      try
+      {
+        return VisitAndConvert(nodes, callerName);
+      }
+      finally
+      {
+        expectedTypes.Pop();
+      }
+    }
+
     protected override Expression VisitBinary(BinaryExpression node)
     {
       if (node.NodeType == ExpressionType.Assign)
@@ -38,7 +108,7 @@ namespace Qactive
 
         if (evaluator.EnsureKnownType(
           node.Left.Type,
-          replaceCompilerGeneratedType: _ => newNode = CompilerGenerated.Set(Visit(node.Left), Visit(node.Right))))
+          replaceCompilerGeneratedType: _ => newNode = CompilerGenerated.Set(Visit(node.Left, node.Method.GetParameters()[0].ParameterType), Visit(node.Right, node.Method.GetParameters()[1].ParameterType))))
         {
           return newNode;
         }
@@ -53,8 +123,8 @@ namespace Qactive
         node.Type,
         genericArgumentsUpdated: updatedType => node = Expression.Block(
           updatedType,
-          VisitAndConvert(node.Variables, "VisitBlock-Variables"),
-          Visit(node.Expressions))))
+          VisitAndConvert(node.Variables, "VisitBlock-Variables", null),
+          Visit(node.Expressions, null))))
       {
         return node;
       }
@@ -70,9 +140,9 @@ namespace Qactive
         node.Test,
         genericArgumentsUpdated: updatedType => node = Expression.MakeCatchBlock(
           updatedType,
-          VisitAndConvert(node.Variable, "VisitCatchBlock-Variable"),
-          Visit(node.Body),
-          Visit(node.Filter))))
+          VisitAndConvert(node.Variable, "VisitCatchBlock-Variable", null),
+          Visit(node.Body, null),
+          Visit(node.Filter, null))))
       {
         return node;
       }
@@ -87,9 +157,9 @@ namespace Qactive
       if (evaluator.EnsureKnownType(
         node.Type,
         genericArgumentsUpdated: updatedType => node = Expression.Condition(
-          Visit(node.Test),
-          Visit(node.IfTrue),
-          Visit(node.IfFalse),
+          Visit(node.Test, typeof(bool)),
+          Visit(node.IfTrue, node.Type),
+          Visit(node.IfFalse, node.Type),
           updatedType)))
       {
         return node;
@@ -175,7 +245,7 @@ namespace Qactive
           Type unboundReturnType;
 
           if (!delegateType.GetIsGenericType()
-            || !(unboundReturnType = delegateType.GetGenericTypeDefinition().GetMethod("Invoke").ReturnType).IsGenericParameter)
+            || !(unboundReturnType = node.ReturnType).IsGenericParameter)
           {
             throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Errors.ExpressionDelegateReturnsNonGenericAnonymousType, Environment.NewLine, delegateType));
           }
@@ -188,24 +258,29 @@ namespace Qactive
 
           newNode = Expression.Lambda(
             delegateType,
-            Visit(node.Body),
+            Visit(node.Body, node.ReturnType),
             node.Name,
             node.TailCall,
-            VisitAndConvert(node.Parameters, "VisitLambda-Parameters"));
+            VisitAndConvert(node.Parameters, "VisitLambda-Parameters", null));
         },
         genericArgumentsUpdated: updatedType =>
           newNode = Expression.Lambda(
             updatedType,
-            Visit(node.Body),
+            Visit(node.Body, node.ReturnType),
             node.Name,
             node.TailCall,
-            VisitAndConvert(node.Parameters, "VisitLambda-Parameters"))))
+            VisitAndConvert(node.Parameters, "VisitLambda-Parameters", null))))
       {
         return newNode;
       }
       else
       {
-        return base.VisitLambda<T>(node);
+        return Expression.Lambda(
+          delegateType,
+          Visit(node.Body, node.ReturnType),
+          node.Name,
+          node.TailCall,
+          VisitAndConvert(node.Parameters, "VisitLambda-Parameters", null));
       }
     }
 
@@ -232,9 +307,9 @@ namespace Qactive
         node.Member,
         replaceCompilerGeneratedType: _ =>
         {
-          newNode = evaluator.EvaluateCompilerGenerated(node, protocol)
+          newNode = evaluator.EvaluateCompilerGenerated(node, expectedTypes.Count == 0 ? null : expectedTypes.Peek(), protocol)
                  ?? CompilerGenerated.Get(
-                      Visit(node.Expression),
+                      Visit(node.Expression, null),
                       node.Member,
                       type =>
                       {
@@ -282,7 +357,7 @@ namespace Qactive
       if (evaluator.EnsureKnownType(
         node.Method,
         unknownType: (_, __) => newNode = evaluator.Invoke(node, this, protocol),
-        genericMethodArgumentsUpdated: updatedMethod => newNode = Expression.Call(Visit(node.Object), updatedMethod, Visit(node.Arguments))))
+        genericMethodArgumentsUpdated: updatedMethod => newNode = Expression.Call(Visit(node.Object, null), updatedMethod, Visit(node.Arguments, null))))
       {
         return newNode;
       }
@@ -298,7 +373,7 @@ namespace Qactive
 
       if (evaluator.EnsureKnownType(
         node.Constructor,
-        replaceCompilerGeneratedType: _ => newNode = CompilerGenerated.New(node.Members, Visit(node.Arguments)),
+        replaceCompilerGeneratedType: _ => newNode = CompilerGenerated.New(node.Members, Visit(node.Arguments, null)),
         genericArgumentsUpdated: updatedType =>
         {
           /* Overload resolution should be unaffected here, so keep the same constructor index.  We're just swapping a 
@@ -310,7 +385,7 @@ namespace Qactive
           var oldConstructorIndex = Array.IndexOf(node.Constructor.DeclaringType.GetConstructors(flags), node.Constructor);
           var newConstructor = updatedType.GetConstructors(flags)[oldConstructorIndex];
 
-          newNode = Expression.New(newConstructor, Visit(node.Arguments), node.Members);
+          newNode = Expression.New(newConstructor, Visit(node.Arguments, null), node.Members);
         }))
       {
         return newNode;
@@ -326,8 +401,8 @@ namespace Qactive
       if (evaluator.EnsureKnownType(
         node.Type.GetElementType(),
         replaceCompilerGeneratedType: updatedType => newNode = node.NodeType == ExpressionType.NewArrayInit
-                                                   ? Expression.NewArrayInit(typeof(CompilerGenerated), Visit(node.Expressions))
-                                                   : Expression.NewArrayBounds(typeof(CompilerGenerated), Visit(node.Expressions))))
+                                                   ? Expression.NewArrayInit(typeof(CompilerGenerated), Visit(node.Expressions, node.Type))
+                                                   : Expression.NewArrayBounds(typeof(CompilerGenerated), Visit(node.Expressions, null))))
       {
         return newNode;
       }
@@ -372,8 +447,8 @@ namespace Qactive
         node.Type,
         genericArgumentsUpdated: updatedType => newNode = Expression.Switch(
           updatedType,
-          Visit(node.SwitchValue),
-          Visit(node.DefaultBody),
+          Visit(node.SwitchValue, node.Type),
+          Visit(node.DefaultBody, node.Type),
           node.Comparison,
           Visit(node.Cases, VisitSwitchCase))))
       {
@@ -393,9 +468,9 @@ namespace Qactive
         node.Type,
         genericArgumentsUpdated: updatedType => newNode = Expression.MakeTry(
           updatedType,
-          Visit(node.Body),
-          Visit(node.Finally),
-          Visit(node.Fault),
+          Visit(node.Body, node.Type),
+          Visit(node.Finally, null),
+          Visit(node.Fault, null),
           Visit(node.Handlers, VisitCatchBlock))))
       {
         return newNode;
@@ -412,7 +487,7 @@ namespace Qactive
 
       if (evaluator.EnsureKnownType(
         node.TypeOperand,
-        genericArgumentsUpdated: updatedType => Expression.TypeIs(Visit(node.Expression), updatedType)))
+        genericArgumentsUpdated: updatedType => Expression.TypeIs(Visit(node.Expression, null), updatedType)))
       {
         return newNode;
       }
@@ -433,7 +508,7 @@ namespace Qactive
           node.Type,
           genericArgumentsUpdated: updatedType => newNode = Expression.MakeUnary(
             node.NodeType,
-            Visit(node.Operand),
+            Visit(node.Operand, node.Method.GetParameters()[0].ParameterType),
             updatedType,
             node.Method)))
       {

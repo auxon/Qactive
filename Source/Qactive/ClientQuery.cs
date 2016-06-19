@@ -74,6 +74,8 @@ namespace Qactive
 
       var preparedExpression = evaluationVisitor.Visit(result);
 
+      Contract.Assume(evaluationVisitor.IsStackEmpty);
+
       Log.ClientRewrittenExpression(clientId, preparedExpression);
 
       return preparedExpression;

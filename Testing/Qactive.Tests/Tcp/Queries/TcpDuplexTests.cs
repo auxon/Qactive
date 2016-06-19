@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -87,6 +88,26 @@ namespace Qactive.Tests.Tcp.Queries
                                                        select context.Value);
 
       QactiveAssert.AreEqual(results, OnNext(123), OnCompleted<int>());
+    }
+
+    [TestMethod]
+    public async Task DuplexSubjectAsObservable()
+    {
+      var service = TcpTestService.Create(TestService.DuplexOptions, Observable.Return(new TestContext()));
+
+      var local = new ReplaySubject<int>();
+
+      Enumerable.Range(1, 5).ForEach(local.OnNext);
+      local.OnCompleted();
+
+      var task = service.QueryAsync(source => from context in source
+                                              from clientValue in local
+                                              where clientValue % 2 == 0
+                                              select clientValue);
+
+      var results = await task;
+
+      QactiveAssert.AreEqual(results, OnNext(2), OnNext(4), OnCompleted<int>());
     }
 
     [TestMethod]
