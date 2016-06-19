@@ -19,7 +19,11 @@ namespace Qactive.Tests
     public TestServiceBase(params Notification<TSource>[] notifications)
       : this(notifications.ToObservable().Dematerialize())
     {
+#if READONLYCOLLECTIONS
       Notifications = notifications;
+#else
+      Notifications = notifications.AsReadOnly();
+#endif
     }
 
     public TestServiceBase(IObservable<TSource> source)
@@ -66,7 +70,11 @@ namespace Qactive.Tests
         }
       }
 
+#if READONLYCOLLECTIONS
       return results.AsReadOnly();
+#else
+      return results.AsReadOnly().AsInterface();
+#endif
     }
   }
 }

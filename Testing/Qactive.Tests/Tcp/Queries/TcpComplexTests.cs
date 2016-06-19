@@ -84,7 +84,11 @@ namespace Qactive.Tests.Tcp.Queries
     {
       public ServiceContext(IEnumerable<RootObject> roots)
       {
+#if READONLYCOLLECTIONS
         RootObjects = roots.ToList().AsReadOnly();
+#else
+        RootObjects = roots.ToList().AsReadOnly().AsInterface();
+#endif
       }
 
       public IReadOnlyCollection<RootObject> RootObjects { get; }

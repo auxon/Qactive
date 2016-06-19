@@ -26,21 +26,48 @@ namespace Qactive.Tests
 
     public override long Position { get { throw new NotSupportedException(); } set { throw new NotSupportedException(); } }
 
+#if ASYNCAWAIT
     public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+#else
+    public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+      => ReadAsync(buffer, offset, count, CancellationToken.None).ContinueWith(task => callback(new Task<int>(_ => task.Result, state)), TaskContinuationOptions.ExecuteSynchronously);
+
+    public override int EndRead(IAsyncResult asyncResult)
+    {
+      using (var task = (Task<int>)asyncResult)
+      {
+        return task.Result;
+      }
+    }
+
+    private async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+#endif
     {
       await dataAvailable.Where(b => b).Take(1);
 
       return Read(buffer, offset, count);
     }
 
+#if ASYNCAWAIT
     public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+#else
+    public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+      => WriteAsync(buffer, offset, count, CancellationToken.None).ContinueWith(task => callback(new Task(_ => { }, state)), TaskContinuationOptions.ExecuteSynchronously);
+
+    public override void EndWrite(IAsyncResult asyncResult)
+      => ((Task)asyncResult).Dispose();
+
+    private Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+#endif
     {
       Write(buffer, offset, count);
 
 #if TPL
       return Task.CompletedTask;
-#else
+#elif ASYNCAWAIT
       return Task.FromResult(true);
+#else
+      return TaskEx.FromResult(true);
 #endif
     }
 

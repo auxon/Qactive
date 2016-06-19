@@ -3,12 +3,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F11D6D7D-8D29-43E4-A865-BF34F400E522}</ProjectGuid>
+    <ProjectGuid>{C2460690-AF6A-4E7C-89BF-AA2E6D9D1D94}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Qactive.Tests</RootNamespace>
-    <AssemblyName>Qactive.Tests-Net45</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <AssemblyName>Qactive.Tests-Net40</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -16,52 +16,65 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;ASYNCAWAIT;READONLYCOLLECTIONS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;ASYNCAWAIT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;ASYNCAWAIT;READONLYCOLLECTIONS</DefineConstants>
+    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;ASYNCAWAIT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Reactive.Testing, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Rx-Testing.2.2.5\lib\net45\Microsoft.Reactive.Testing.dll</HintPath>
+      <HintPath>..\..\packages\Rx-Testing.2.2.5\lib\net40\Microsoft.Reactive.Testing.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\PublicAssemblies\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Interactive, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Ix-Main.1.2.5\lib\net45\System.Interactive.dll</HintPath>
+      <HintPath>..\..\packages\Ix-Main.1.2.5\lib\net40\System.Interactive.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Net" />
     <Reference Include="System.Reactive.Core, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Rx-Core.2.2.5\lib\net45\System.Reactive.Core.dll</HintPath>
+      <HintPath>..\..\packages\Rx-Core.2.2.5\lib\net40\System.Reactive.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Reactive.Interfaces, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Rx-Interfaces.2.2.5\lib\net45\System.Reactive.Interfaces.dll</HintPath>
+      <HintPath>..\..\packages\Rx-Interfaces.2.2.5\lib\net40\System.Reactive.Interfaces.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Reactive.Linq, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Rx-Linq.2.2.5\lib\net45\System.Reactive.Linq.dll</HintPath>
+      <HintPath>..\..\packages\Rx-Linq.2.2.5\lib\net40\System.Reactive.Linq.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Reactive.PlatformServices, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Rx-PlatformServices.2.2.5\lib\net45\System.Reactive.PlatformServices.dll</HintPath>
+      <HintPath>..\..\packages\Rx-PlatformServices.2.2.5\lib\net40\System.Reactive.PlatformServices.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Reactive.Providers, Version=2.2.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Rx-Providers.2.2.5\lib\net45\System.Reactive.Providers.dll</HintPath>
+      <HintPath>..\..\packages\Rx-Providers.2.2.5\lib\net40\System.Reactive.Providers.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -71,11 +84,7 @@
         <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
       </ItemGroup>
     </When>
-    <Otherwise>
-      <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
-      </ItemGroup>
-    </Otherwise>
+    <Otherwise />
   </Choose>
   <ItemGroup>
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
@@ -93,61 +102,61 @@
     <Compile Include="..\Qactive.Tests\DuplexSubject.cs">
       <Link>DuplexSubject.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Extensions\ObservableExtensions.cs">
+    <Compile Include="..\qactive.tests\extensions\ObservableExtensions.cs">
       <Link>Extensions\ObservableExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Qactive.Tests\NonSerializableObject.cs">
       <Link>NonSerializableObject.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Operators\GroupJoinTests.cs">
+    <Compile Include="..\qactive.tests\operators\GroupJoinTests.cs">
       <Link>Operators\GroupJoinTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Operators\JoinTests.cs">
+    <Compile Include="..\qactive.tests\operators\JoinTests.cs">
       <Link>Operators\JoinTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Operators\SelectTests.cs">
+    <Compile Include="..\qactive.tests\operators\SelectTests.cs">
       <Link>Operators\SelectTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Operators\WhereTests.cs">
+    <Compile Include="..\qactive.tests\operators\WhereTests.cs">
       <Link>Operators\WhereTests.cs</Link>
     </Compile>
     <Compile Include="..\Qactive.Tests\QactiveAssert.cs">
       <Link>QactiveAssert.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Queries\ComplexTests.cs">
+    <Compile Include="..\qactive.tests\queries\ComplexTests.cs">
       <Link>Queries\ComplexTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Queries\DuplexTests.cs">
+    <Compile Include="..\qactive.tests\queries\DuplexTests.cs">
       <Link>Queries\DuplexTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Queries\NestedQueryTests.cs">
+    <Compile Include="..\qactive.tests\queries\NestedQueryTests.cs">
       <Link>Queries\NestedQueryTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Tcp\Operators\GroupJoinTests.cs">
+    <Compile Include="..\qactive.tests\tcp\operators\GroupJoinTests.cs">
       <Link>Tcp\Operators\GroupJoinTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Tcp\Operators\JoinTests.cs">
+    <Compile Include="..\qactive.tests\tcp\operators\JoinTests.cs">
       <Link>Tcp\Operators\JoinTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Tcp\Operators\SelectTests.cs">
+    <Compile Include="..\qactive.tests\tcp\operators\SelectTests.cs">
       <Link>Tcp\Operators\SelectTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Tcp\Operators\WhereTests.cs">
+    <Compile Include="..\qactive.tests\tcp\operators\WhereTests.cs">
       <Link>Tcp\Operators\WhereTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Tcp\Queries\TcpComplexTests.cs">
+    <Compile Include="..\qactive.tests\tcp\queries\TcpComplexTests.cs">
       <Link>Tcp\Queries\TcpComplexTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Tcp\Queries\TcpDuplexTests.cs">
+    <Compile Include="..\qactive.tests\tcp\queries\TcpDuplexTests.cs">
       <Link>Tcp\Queries\TcpDuplexTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Tcp\Queries\TcpNestedQueryTests.cs">
+    <Compile Include="..\qactive.tests\tcp\queries\TcpNestedQueryTests.cs">
       <Link>Tcp\Queries\TcpNestedQueryTests.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Tcp\TcpTestService.cs">
+    <Compile Include="..\qactive.tests\tcp\TcpTestService.cs">
       <Link>Tcp\TcpTestService.cs</Link>
     </Compile>
-    <Compile Include="..\Qactive.Tests\Tcp\TcpTestService{TSource}.cs">
+    <Compile Include="..\qactive.tests\tcp\TcpTestService{TSource}.cs">
       <Link>Tcp\TcpTestService{TSource}.cs</Link>
     </Compile>
     <Compile Include="..\Qactive.Tests\TestBase.cs">
@@ -177,30 +186,47 @@
     <Compile Include="..\Qactive.Tests\TransportStream.cs">
       <Link>TransportStream.cs</Link>
     </Compile>
+    <Compile Include="Extensions\AwaitableAsyncSubject.cs" />
+    <Compile Include="Extensions\EnumerableExtensions.cs" />
+    <Compile Include="Extensions\ImmutableList.cs" />
+    <Compile Include="Extensions\IReadOnlyCollection.cs" />
+    <Compile Include="Extensions\ObservableExtensions2.cs" />
+    <Compile Include="Extensions\SemaphoreSlimExtensions.cs" />
+    <Compile Include="Extensions\SubjectBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Qactive-Net45\Qactive-Net45.csproj">
-      <Project>{c2c6d4c9-20a4-4273-b9e8-30595956b03b}</Project>
-      <Name>Qactive-Net45</Name>
+    <ProjectReference Include="..\..\Source\Qactive-Net40\Qactive-Net40.csproj">
+      <Project>{eb6fed60-9fe1-424d-92a1-6ec1253c18ae}</Project>
+      <Name>Qactive-Net40</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\Qactive.Expressions-Net45\Qactive.Expressions-Net45.csproj">
-      <Project>{49736eb0-e17e-42c2-a9d1-01f5c45e853c}</Project>
-      <Name>Qactive.Expressions-Net45</Name>
+    <ProjectReference Include="..\..\Source\Qactive.Expressions-Net40\Qactive.Expressions-Net40.csproj">
+      <Project>{e168a596-3af9-4970-a482-fee07b305973}</Project>
+      <Name>Qactive.Expressions-Net40</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\Qactive.Providers.Streaming-Net45\Qactive.Providers.Streaming-Net45.csproj">
-      <Project>{2325c60c-fc0e-46b5-ba1b-9bab8979eaee}</Project>
-      <Name>Qactive.Providers.Streaming-Net45</Name>
+    <ProjectReference Include="..\..\Source\Qactive.Providers.Streaming-Net40\Qactive.Providers.Streaming-Net40.csproj">
+      <Project>{620727c8-f690-4c1d-a6f0-50ed0c4365c9}</Project>
+      <Name>Qactive.Providers.Streaming-Net40</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Source\Qactive.Providers.Tcp-Net45\Qactive.Providers.Tcp-Net45.csproj">
-      <Project>{ff10503f-4e3a-427d-b935-abd5c85a826c}</Project>
-      <Name>Qactive.Providers.Tcp-Net45</Name>
+    <ProjectReference Include="..\..\Source\Qactive.Providers.Tcp-Net40\Qactive.Providers.Tcp-Net40.csproj">
+      <Project>{e8a21122-0117-4f50-9f88-243ae918e9d1}</Project>
+      <Name>Qactive.Providers.Tcp-Net40</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="..\..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Runtime.dll">
+      <Link>System.Runtime.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Threading.Tasks.dll">
+      <Link>System.Threading.Tasks.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
