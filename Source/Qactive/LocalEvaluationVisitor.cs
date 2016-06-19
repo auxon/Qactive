@@ -16,6 +16,7 @@ namespace Qactive
     private readonly IQbservableProtocol protocol;
     private readonly Stack<Type> expectedTypes = new Stack<Type>();
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Used by Contract.Assume")]
     public bool IsStackEmpty
     {
       get { return expectedTypes.Count == 0; }
