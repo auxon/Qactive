@@ -13,6 +13,7 @@
   The following flavors must correspond exactly to the project name suffixes under the Source/Flavors solution folder.
   -->
   <ItemGroup>
+    <FlavorSuffix Include="Net40" />
     <FlavorSuffix Include="Net45" />
     <FlavorSuffix Include="Net45-Win8-Phone81" />
   </ItemGroup>

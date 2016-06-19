@@ -32,7 +32,11 @@ namespace Qactive
 
     public override Task<TMessage> SendingAsync(TMessage message, CancellationToken cancel)
     {
+#if ASYNCAWAIT
       return Task.FromResult(message);
+#else
+      return TaskEx.FromResult(message);
+#endif
     }
 
     public override Task<TMessage> ReceivingAsync(TMessage message, CancellationToken cancel)
@@ -73,7 +77,11 @@ namespace Qactive
         duplexMessage.Handled = true;
       }
 
+#if ASYNCAWAIT
       return Task.FromResult(message);
+#else
+      return TaskEx.FromResult(message);
+#endif
     }
 
     protected abstract IDuplexProtocolMessage TryParseDuplexMessage(TMessage message);

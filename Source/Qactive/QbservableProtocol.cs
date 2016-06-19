@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
@@ -27,7 +28,11 @@ namespace Qactive
 
     public QbservableServiceOptions ServiceOptions { get; }
 
+#if READONLYCOLLECTIONS
     public IReadOnlyCollection<ExceptionDispatchInfo> Exceptions => exceptions.ToList().AsReadOnly();
+#else
+    public ReadOnlyCollection<ExceptionDispatchInfo> Exceptions => exceptions.ToList().AsReadOnly();
+#endif
 
     public QbservableProtocolShutdownReason ShutdownReason { get; internal set; }
 
