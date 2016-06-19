@@ -33,8 +33,10 @@ namespace Qactive
 
 #if TPL
       return Task.CompletedTask;
-#else
+#elif ASYNCAWAIT
       return Task.FromResult(true);
+#else
+      return TaskEx.FromResult(true);
 #endif
     }
 

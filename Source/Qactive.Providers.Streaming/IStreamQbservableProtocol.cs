@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
@@ -41,7 +42,11 @@ namespace Qactive
 
     public object ClientId { get; set; }
 
+#if READONLYCOLLECTIONS
     public IReadOnlyCollection<ExceptionDispatchInfo> Exceptions { get; }
+#else
+    public ReadOnlyCollection<ExceptionDispatchInfo> Exceptions { get; }
+#endif
 
     public QbservableProtocolShutdownReason ShutdownReason { get; }
 
