@@ -93,7 +93,7 @@ namespace Qactive.Tests.Tcp.Queries
     [TestMethod]
     public async Task DuplexSubjectAsObservable()
     {
-      var service = TcpTestService.Create(TestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TcpTestService.Create(TcpTestService.DuplexOptions, Observable.Return(new TestContext()));
 
       var local = new ReplaySubject<int>();
 
@@ -113,7 +113,7 @@ namespace Qactive.Tests.Tcp.Queries
     [TestMethod]
     public async Task DuplexObservableWithNonSerializablePayload()
     {
-      var service = TcpTestService.Create(TestService.DuplexOptions, new[] { typeof(NonSerializableObject) }, Observable.Return(new TestContext()));
+      var service = TcpTestService.Create(TcpTestService.DuplexOptions, new[] { typeof(NonSerializableObject) }, Observable.Return(new TestContext()));
 
       var local = Observable.Return(new NonSerializableObject());
 
