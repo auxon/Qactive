@@ -109,6 +109,7 @@
     <Compile Include="Tcp\TcpTestService{TSource}.cs" />
     <Compile Include="TestBase.cs" />
     <Compile Include="TestDuplexMessage.cs" />
+    <Compile Include="TestAssemblyInitialize.cs" />
     <Compile Include="TestMessage.cs" />
     <Compile Include="TestQactiveProvider.cs" />
     <Compile Include="TestQbservableProtocol.cs" />

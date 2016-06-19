@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -23,16 +22,12 @@ namespace Qactive.Tests
 
       Left = Observer.Create<TestMessage>(message =>
       {
-        Debug.WriteLine("Sending (<-): " + message);
-
         left.Enqueue(message);
         leftEvent.Release();
       });
 
       Right = Observer.Create<TestMessage>(message =>
       {
-        Debug.WriteLine("Sending (->): " + message);
-
         right.Enqueue(message);
         rightEvent.Release();
       });
@@ -56,8 +51,6 @@ namespace Qactive.Tests
         }
 
         var message = messages.Dequeue();
-
-        Debug.WriteLine("Receive (" + side + "): " + message);
 
         observer.OnNext(message);
         observer.OnCompleted();
