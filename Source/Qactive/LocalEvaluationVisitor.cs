@@ -22,6 +22,8 @@ namespace Qactive
       get { return expectedTypes.Count == 0; }
     }
 
+    private Type CurrentExpectedType => expectedTypes.Count == 0 ? null : expectedTypes.Peek();
+
     public LocalEvaluationVisitor(LocalEvaluator evaluator, IQbservableProtocol protocol)
     {
       Contract.Requires(evaluator != null);
@@ -186,7 +188,8 @@ namespace Qactive
       }
       else
       {
-        return base.VisitConstant(node);
+        return evaluator.TryEvaluateSequences((node.Value?.GetType() ?? node.Type).Name, node.Value, node.Type, CurrentExpectedType, protocol)
+            ?? base.VisitConstant(node);
       }
     }
 
@@ -308,7 +311,7 @@ namespace Qactive
         node.Member,
         replaceCompilerGeneratedType: _ =>
         {
-          newNode = evaluator.EvaluateCompilerGenerated(node, expectedTypes.Count == 0 ? null : expectedTypes.Peek(), protocol)
+          newNode = evaluator.EvaluateCompilerGenerated(node, CurrentExpectedType, protocol)
                  ?? CompilerGenerated.Get(
                       Visit(node.Expression, null),
                       node.Member,

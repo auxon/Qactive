@@ -24,13 +24,7 @@ namespace Qactive
 
       var value = property.GetValue(instance);
 
-      var either = TryEvaluateSequences(property.DeclaringType.Name + "." + property.Name, value, member.Type, property.PropertyType, protocol);
-
-      return either == null
-        ? Expression.Constant(value, property.PropertyType)
-        : either.IsLeft
-          ? Expression.Constant(either.Left, property.PropertyType)
-          : either.Right;
+      return TryEvaluateSequences(property.DeclaringType.Name + "." + property.Name, value, member.Type, property.PropertyType, protocol);
     }
 
     public override Expression GetValue(FieldInfo field, MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
@@ -39,13 +33,7 @@ namespace Qactive
 
       var value = field.GetValue(instance);
 
-      var either = TryEvaluateSequences(field.DeclaringType.Name + "." + field.Name, value, member.Type, field.FieldType, protocol);
-
-      return either == null
-        ? Expression.Constant(value, field.FieldType)
-        : either.IsLeft
-          ? Expression.Constant(either.Left, field.FieldType)
-          : either.Right;
+      return TryEvaluateSequences(field.DeclaringType.Name + "." + field.Name, value, member.Type, field.FieldType, protocol);
     }
 
     public override Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, IQbservableProtocol protocol)
@@ -59,13 +47,7 @@ namespace Qactive
 
       var result = call.Method.Invoke(instance, EvaluateArguments(call, visitor).ToArray());
 
-      var either = TryEvaluateSequences(call.Method.DeclaringType.Name + "." + call.Method.Name, result, call.Type, call.Method.ReturnType, protocol);
-
-      return either == null
-          ? Expression.Constant(result, call.Type)
-          : either.IsLeft
-            ? Expression.Constant(either.Left, call.Type)
-            : either.Right;
+      return TryEvaluateSequences(call.Method.DeclaringType.Name + "." + call.Method.Name, result, call.Type, call.Method.ReturnType, protocol);
     }
 
     private static object[] EvaluateArguments(MethodCallExpression call, ExpressionVisitor visitor)

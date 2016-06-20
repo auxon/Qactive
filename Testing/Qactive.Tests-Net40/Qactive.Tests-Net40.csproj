@@ -108,6 +108,9 @@
     <Compile Include="..\Qactive.Tests\NonSerializableObject.cs">
       <Link>NonSerializableObject.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive.Tests\Operators\CustomTests.cs">
+      <Link>Operators\CustomTests.cs</Link>
+    </Compile>
     <Compile Include="..\qactive.tests\operators\GroupJoinTests.cs">
       <Link>Operators\GroupJoinTests.cs</Link>
     </Compile>
@@ -131,6 +134,9 @@
     </Compile>
     <Compile Include="..\qactive.tests\queries\NestedQueryTests.cs">
       <Link>Queries\NestedQueryTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\Operators\CustomTests.cs">
+      <Link>Tcp\Operators\CustomTests.cs</Link>
     </Compile>
     <Compile Include="..\qactive.tests\tcp\operators\GroupJoinTests.cs">
       <Link>Tcp\Operators\GroupJoinTests.cs</Link>
@@ -199,18 +205,22 @@
     <ProjectReference Include="..\..\Source\Qactive-Net40\Qactive-Net40.csproj">
       <Project>{eb6fed60-9fe1-424d-92a1-6ec1253c18ae}</Project>
       <Name>Qactive-Net40</Name>
+      <Properties>SkipValidatePackageReferences=true</Properties>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Qactive.Expressions-Net40\Qactive.Expressions-Net40.csproj">
       <Project>{e168a596-3af9-4970-a482-fee07b305973}</Project>
       <Name>Qactive.Expressions-Net40</Name>
+      <Properties>SkipValidatePackageReferences=true</Properties>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Qactive.Providers.Streaming-Net40\Qactive.Providers.Streaming-Net40.csproj">
       <Project>{620727c8-f690-4c1d-a6f0-50ed0c4365c9}</Project>
       <Name>Qactive.Providers.Streaming-Net40</Name>
+      <Properties>SkipValidatePackageReferences=true</Properties>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Qactive.Providers.Tcp-Net40\Qactive.Providers.Tcp-Net40.csproj">
       <Project>{e8a21122-0117-4f50-9f88-243ae918e9d1}</Project>
       <Name>Qactive.Providers.Tcp-Net40</Name>
+      <Properties>SkipValidatePackageReferences=true</Properties>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

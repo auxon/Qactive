@@ -99,6 +99,9 @@
     <Compile Include="..\Qactive.Tests\NonSerializableObject.cs">
       <Link>NonSerializableObject.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive.Tests\Operators\CustomTests.cs">
+      <Link>Operators\CustomTests.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive.Tests\Operators\GroupJoinTests.cs">
       <Link>Operators\GroupJoinTests.cs</Link>
     </Compile>
@@ -122,6 +125,9 @@
     </Compile>
     <Compile Include="..\Qactive.Tests\Queries\NestedQueryTests.cs">
       <Link>Queries\NestedQueryTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\Operators\CustomTests.cs">
+      <Link>Tcp\Operators\CustomTests.cs</Link>
     </Compile>
     <Compile Include="..\Qactive.Tests\Tcp\Operators\GroupJoinTests.cs">
       <Link>Tcp\Operators\GroupJoinTests.cs</Link>

@@ -50,13 +50,7 @@ namespace Qactive
         value = property.GetValue(instance);
       }
 
-      var result = TryEvaluateSequences(name, value, type, expectedType, protocol);
-
-      return result == null
-           ? Expression.Constant(value, type)
-           : result.IsLeft
-             ? Expression.Constant(result.Left, type)
-             : result.Right;
+      return TryEvaluateSequences(name, value, type, expectedType, protocol);
     }
 
     internal Expression GetValue(MemberExpression member, ExpressionVisitor visitor, IQbservableProtocol protocol)
@@ -86,7 +80,7 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Call", Justification = "Reviewed")]
     public abstract Expression Invoke(MethodCallExpression call, ExpressionVisitor visitor, IQbservableProtocol protocol);
 
-    protected Either<object, Expression> TryEvaluateSequences(string name, object value, Type type, Type expectedType, IQbservableProtocol protocol)
+    public Expression TryEvaluateSequences(string name, object value, Type type, Type expectedType, IQbservableProtocol protocol)
     {
       Contract.Requires(!string.IsNullOrEmpty(name));
       Contract.Requires(type != null);
@@ -106,7 +100,9 @@ namespace Qactive
 
           if (result != null)
           {
-            return result;
+            return result.IsLeft
+                 ? Expression.Constant(result.Left, type)
+                 : result.Right;
           }
           else
           {
@@ -114,13 +110,13 @@ namespace Qactive
 
             if (expression != null)
             {
-              return Either.Right<object, Expression>(expression);
+              return expression;
             }
           }
         }
       }
 
-      return null;
+      return Expression.Constant(value, type);
     }
 
     protected abstract Either<object, Expression> TryEvaluateEnumerable(string name, object value, Type type, IQbservableProtocol protocol);
