@@ -176,7 +176,7 @@ namespace Qactive
                                     var s = Observable.Using(
                                       () => new NetworkStream(e2.ConnectSocket, ownsSocket: false),
                                       stream => ReadObservable<TResult>(stream, prepareExpression, cancel.Token))
-                                      .Subscribe(innerObserver);
+                                      .SubscribeSafe(innerObserver);
 
                                     return new CompositeDisposable(s, cancel);
                                   })

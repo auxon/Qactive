@@ -20,7 +20,7 @@ namespace Qactive
       {
         Subscribing(name, isServer, isReceiving, sourceId, label);
 
-        var subscription = source.Subscribe(observer);
+        var subscription = source.SubscribeSafe(observer);
 
         Subscribed(name, isServer, isReceiving, sourceId, label);
 

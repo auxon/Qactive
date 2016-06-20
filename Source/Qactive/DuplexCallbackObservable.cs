@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Runtime.ExceptionServices;
 
@@ -29,7 +30,7 @@ namespace Qactive
     /// Called client-side.
     /// </summary>
     IDisposable IObservableDuplexCallback.Subscribe(Action<object> onNext, Action<Exception> onError, Action onCompleted)
-      => typeof(T).UpCast(instance).Subscribe(onNext, onError, onCompleted);
+      => typeof(T).UpCast(instance).SubscribeSafe(Observer.Create(onNext, onError, onCompleted));
 
     /// <summary>
     /// Called server-side.
