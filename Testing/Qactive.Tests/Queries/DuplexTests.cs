@@ -15,7 +15,7 @@ namespace Qactive.Tests.Queries
     [TestMethod]
     public async Task DuplexObservable()
     {
-      var service = TestService.Create(TestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var local = Observable.Range(1, 5);
 
@@ -30,7 +30,7 @@ namespace Qactive.Tests.Queries
     [TestMethod]
     public async Task ContextualObservable()
     {
-      var service = TestService.Create(TestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var results = await service.QueryAsync(source => from context in source
                                                        from serverValue in context.Singleton
@@ -42,7 +42,7 @@ namespace Qactive.Tests.Queries
     [TestMethod]
     public async Task DuplexEnumerable()
     {
-      var service = TestService.Create(TestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var local = Enumerable.Range(1, 5);
 
@@ -57,7 +57,7 @@ namespace Qactive.Tests.Queries
     [TestMethod]
     public async Task ContextualEnumerable()
     {
-      var service = TestService.Create(TestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var results = await service.QueryAsync(source => from context in source
                                                        from serverValue in context.SingletonEnumerable
@@ -69,7 +69,7 @@ namespace Qactive.Tests.Queries
     [TestMethod]
     public async Task DuplexMethod()
     {
-      var service = TestService.Create(TestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var local = new Func<int>(() => 123);
 
@@ -82,7 +82,7 @@ namespace Qactive.Tests.Queries
     [TestMethod]
     public async Task ContextualMethod()
     {
-      var service = TestService.Create(TestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var results = await service.QueryAsync(source => from context in source
                                                        select context.Value);
@@ -93,7 +93,7 @@ namespace Qactive.Tests.Queries
     [TestMethod]
     public async Task DuplexObservableWithNonSerializablePayload()
     {
-      var service = TestService.Create(TestService.DuplexOptions, new[] { typeof(NonSerializableObject) }, Observable.Return(new TestContext()));
+      var service = TestService.Create(TestService.UnrestrictedOptions, new[] { typeof(NonSerializableObject) }, Observable.Return(new TestContext()));
 
       var obj = new NonSerializableObject();
       var local = Observable.Return(obj);
@@ -108,7 +108,7 @@ namespace Qactive.Tests.Queries
     [TestMethod]
     public async Task DuplexSubjectAsObservable()
     {
-      var service = TestService.Create(TestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var local = new ReplaySubject<int>();
 

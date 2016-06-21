@@ -21,7 +21,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL;ASYNCAWAIT;READONLYCOLLECTIONS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL;ASYNCAWAIT;READONLYCOLLECTIONS;DYNAMIC</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\..\Build\Properties\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
@@ -73,7 +73,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL;ASYNCAWAIT;READONLYCOLLECTIONS</DefineConstants>
+    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL;ASYNCAWAIT;READONLYCOLLECTIONS;DYNAMIC</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -173,6 +173,9 @@
     </Compile>
     <Compile Include="..\Qactive\CompilerGenerated.cs">
       <Link>CompilerGenerated.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive\ContextualExpressionVisitor.cs">
+      <Link>ContextualExpressionVisitor.cs</Link>
     </Compile>
     <Compile Include="..\Qactive\DuplexCallback.cs">
       <Link>DuplexCallback.cs</Link>

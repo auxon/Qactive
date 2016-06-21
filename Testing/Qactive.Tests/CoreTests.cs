@@ -40,7 +40,7 @@ namespace Qactive.Tests
     [TestMethod]
     public async Task AnonymousTypeInSubQueryArray()
     {
-      var service = TestService.Create(TestService.DuplexOptions, new[] { typeof(EnumerableEx) }, Observable.Return(123));
+      var service = TestService.Create(TestService.UnrestrictedOptions, new[] { typeof(EnumerableEx) }, Observable.Return(123));
 
       var results = await service.QueryAsync(source =>
         from _ in source
@@ -54,7 +54,7 @@ namespace Qactive.Tests
     [TestMethod]
     public async Task AnonymousTypeInSubQueryProjection()
     {
-      var service = TestService.Create(TestService.DuplexOptions, new[] { typeof(EnumerableEx) }, Observable.Return(new[] { 123 }));
+      var service = TestService.Create(TestService.UnrestrictedOptions, new[] { typeof(EnumerableEx) }, Observable.Return(new[] { 123 }));
 
       var results = await service.QueryAsync(source =>
         from values in source

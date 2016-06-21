@@ -15,7 +15,7 @@ namespace Qactive.Tests.Tcp.Queries
     [TestMethod]
     public async Task DuplexObservable()
     {
-      var service = TcpTestService.Create(TcpTestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TcpTestService.Create(TcpTestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var local = Observable.Range(1, 5);
 
@@ -30,7 +30,7 @@ namespace Qactive.Tests.Tcp.Queries
     [TestMethod]
     public async Task ContextualObservable()
     {
-      var service = TcpTestService.Create(TcpTestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TcpTestService.Create(TcpTestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var results = await service.QueryAsync(source => from context in source
                                                        from serverValue in context.Singleton
@@ -42,7 +42,7 @@ namespace Qactive.Tests.Tcp.Queries
     [TestMethod]
     public async Task DuplexEnumerable()
     {
-      var service = TcpTestService.Create(TcpTestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TcpTestService.Create(TcpTestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var local = Enumerable.Range(1, 5);
 
@@ -57,7 +57,7 @@ namespace Qactive.Tests.Tcp.Queries
     [TestMethod]
     public async Task ContextualEnumerable()
     {
-      var service = TcpTestService.Create(TcpTestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TcpTestService.Create(TcpTestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var results = await service.QueryAsync(source => from context in source
                                                        from serverValue in context.SingletonEnumerable
@@ -69,7 +69,7 @@ namespace Qactive.Tests.Tcp.Queries
     [TestMethod]
     public async Task DuplexMethod()
     {
-      var service = TcpTestService.Create(TcpTestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TcpTestService.Create(TcpTestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var local = new Func<int>(() => 123);
 
@@ -82,7 +82,7 @@ namespace Qactive.Tests.Tcp.Queries
     [TestMethod]
     public async Task ContextualMethod()
     {
-      var service = TcpTestService.Create(TcpTestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TcpTestService.Create(TcpTestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var results = await service.QueryAsync(source => from context in source
                                                        select context.Value);
@@ -93,7 +93,7 @@ namespace Qactive.Tests.Tcp.Queries
     [TestMethod]
     public async Task DuplexSubjectAsObservable()
     {
-      var service = TcpTestService.Create(TcpTestService.DuplexOptions, Observable.Return(new TestContext()));
+      var service = TcpTestService.Create(TcpTestService.UnrestrictedOptions, Observable.Return(new TestContext()));
 
       var local = new ReplaySubject<int>();
 
@@ -113,7 +113,7 @@ namespace Qactive.Tests.Tcp.Queries
     [TestMethod]
     public async Task DuplexObservableWithNonSerializablePayload()
     {
-      var service = TcpTestService.Create(TcpTestService.DuplexOptions, new[] { typeof(NonSerializableObject) }, Observable.Return(new TestContext()));
+      var service = TcpTestService.Create(TcpTestService.UnrestrictedOptions, new[] { typeof(NonSerializableObject) }, Observable.Return(new TestContext()));
 
       var local = Observable.Return(new NonSerializableObject());
 

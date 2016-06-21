@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -10,19 +8,10 @@ using Qactive.Properties;
 
 namespace Qactive
 {
-  internal sealed class LocalEvaluationVisitor : ExpressionVisitor
+  internal sealed class LocalEvaluationVisitor : ContextualExpressionVisitor
   {
     private readonly LocalEvaluator evaluator;
     private readonly IQbservableProtocol protocol;
-    private readonly Stack<Type> expectedTypes = new Stack<Type>();
-
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Used by Contract.Assume")]
-    public bool IsStackEmpty
-    {
-      get { return expectedTypes.Count == 0; }
-    }
-
-    private Type CurrentExpectedType => expectedTypes.Count == 0 ? null : expectedTypes.Peek();
 
     public LocalEvaluationVisitor(LocalEvaluator evaluator, IQbservableProtocol protocol)
     {
@@ -41,69 +30,7 @@ namespace Qactive
       Contract.Invariant(protocol != null);
     }
 
-    /// <param name="expectedType">The actual type that is expected for this exprssion's result rather than the concrete type that may be present, or null if no particular type is expected.</param>
-    private Expression Visit(Expression expression, Type expectedType)
-    {
-      expectedTypes.Push(expectedType);
-
-      try
-      {
-        return Visit(expression);
-      }
-      finally
-      {
-        expectedTypes.Pop();
-      }
-    }
-
-    /// <param name="expectedType">The actual type that is expected for this exprssion's result rather than the concrete type that may be present, or null if no particular type is expected.</param>
-    private ReadOnlyCollection<Expression> Visit(ReadOnlyCollection<Expression> expressions, Type expectedType)
-    {
-      expectedTypes.Push(expectedType);
-
-      try
-      {
-        return Visit(expressions);
-      }
-      finally
-      {
-        expectedTypes.Pop();
-      }
-    }
-
-    /// <param name="expectedType">The actual type that is expected for this exprssion's result rather than the concrete type that may be present, or null if no particular type is expected.</param>
-    private T VisitAndConvert<T>(T node, string callerName, Type expectedType)
-      where T : Expression
-    {
-      expectedTypes.Push(expectedType);
-
-      try
-      {
-        return VisitAndConvert(node, callerName);
-      }
-      finally
-      {
-        expectedTypes.Pop();
-      }
-    }
-
-    /// <param name="expectedType">The actual type that is expected for this exprssion's result rather than the concrete type that may be present, or null if no particular type is expected.</param>
-    private ReadOnlyCollection<T> VisitAndConvert<T>(ReadOnlyCollection<T> nodes, string callerName, Type expectedType)
-      where T : Expression
-    {
-      expectedTypes.Push(expectedType);
-
-      try
-      {
-        return VisitAndConvert(nodes, callerName);
-      }
-      finally
-      {
-        expectedTypes.Pop();
-      }
-    }
-
-    protected override Expression VisitBinary(BinaryExpression node)
+    protected override Expression VisitBinary(BinaryExpression node, Type expectedType)
     {
       if (node.NodeType == ExpressionType.Assign)
       {
@@ -117,45 +44,45 @@ namespace Qactive
         }
       }
 
-      return base.VisitBinary(node);
+      return base.VisitBinary(node, expectedType);
     }
 
-    protected override Expression VisitBlock(BlockExpression node)
+    protected override Expression VisitBlock(BlockExpression node, Type expectedType)
     {
       if (evaluator.EnsureKnownType(
         node.Type,
         genericArgumentsUpdated: updatedType => node = Expression.Block(
           updatedType,
           VisitAndConvert(node.Variables, "VisitBlock-Variables", null),
-          Visit(node.Expressions, null))))
+          Visit(node.Expressions, (Type)null))))
       {
         return node;
       }
       else
       {
-        return base.VisitBlock(node);
+        return base.VisitBlock(node, expectedType);
       }
     }
 
-    protected override CatchBlock VisitCatchBlock(CatchBlock node)
+    protected override CatchBlock VisitCatchBlock(CatchBlock node, Type expectedType)
     {
       if (evaluator.EnsureKnownType(
         node.Test,
         genericArgumentsUpdated: updatedType => node = Expression.MakeCatchBlock(
           updatedType,
           VisitAndConvert(node.Variable, "VisitCatchBlock-Variable", null),
-          Visit(node.Body, null),
-          Visit(node.Filter, null))))
+          Visit(node.Body, expectedType),
+          Visit(node.Filter, typeof(bool)))))
       {
         return node;
       }
       else
       {
-        return base.VisitCatchBlock(node);
+        return base.VisitCatchBlock(node, expectedType);
       }
     }
 
-    protected override Expression VisitConditional(ConditionalExpression node)
+    protected override Expression VisitConditional(ConditionalExpression node, Type expectedType)
     {
       if (evaluator.EnsureKnownType(
         node.Type,
@@ -169,11 +96,11 @@ namespace Qactive
       }
       else
       {
-        return base.VisitConditional(node);
+        return base.VisitConditional(node, expectedType);
       }
     }
 
-    protected override Expression VisitConstant(ConstantExpression node)
+    protected override Expression VisitConstant(ConstantExpression node, Type expectedType)
     {
       var type = node.Value == null ? null : node.Value.GetType();
 
@@ -188,12 +115,12 @@ namespace Qactive
       }
       else
       {
-        return evaluator.TryEvaluateSequences((node.Value?.GetType() ?? node.Type).Name, node.Value, node.Type, CurrentExpectedType, protocol)
-            ?? base.VisitConstant(node);
+        return evaluator.TryEvaluateSequences((node.Value?.GetType() ?? node.Type).Name, node.Value, node.Type, expectedType, protocol)
+            ?? base.VisitConstant(node, expectedType);
       }
     }
 
-    protected override Expression VisitDefault(DefaultExpression node)
+    protected override Expression VisitDefault(DefaultExpression node, Type expectedType)
     {
       if (evaluator.EnsureKnownType(
         node.Type,
@@ -203,40 +130,40 @@ namespace Qactive
       }
       else
       {
-        return base.VisitDefault(node);
+        return base.VisitDefault(node, expectedType);
       }
     }
 
-    protected override Expression VisitGoto(GotoExpression node)
+    protected override Expression VisitGoto(GotoExpression node, Type expectedType)
     {
       evaluator.EnsureKnownType(node.Type);
       evaluator.EnsureKnownType(node.Target);
 
-      return base.VisitGoto(node);
+      return base.VisitGoto(node, expectedType);
     }
 
-    protected override Expression VisitIndex(IndexExpression node)
+    protected override Expression VisitIndex(IndexExpression node, Type expectedType)
     {
       evaluator.EnsureKnownType(node.Indexer);
 
-      return base.VisitIndex(node);
+      return base.VisitIndex(node, expectedType);
     }
 
-    protected override Expression VisitInvocation(InvocationExpression node)
+    protected override Expression VisitInvocation(InvocationExpression node, Type expectedType)
     {
       evaluator.EnsureKnownType(node.Type);
 
-      return base.VisitInvocation(node);
+      return base.VisitInvocation(node, expectedType);
     }
 
-    protected override Expression VisitLabel(LabelExpression node)
+    protected override Expression VisitLabel(LabelExpression node, Type expectedType)
     {
       evaluator.EnsureKnownType(node.Target);
 
-      return base.VisitLabel(node);
+      return base.VisitLabel(node, expectedType);
     }
 
-    protected override Expression VisitLambda<T>(Expression<T> node)
+    protected override Expression VisitLambda<T>(Expression<T> node, Type expectedType)
     {
       LambdaExpression newNode = null;
 
@@ -288,22 +215,22 @@ namespace Qactive
       }
     }
 
-    protected override Expression VisitListInit(ListInitExpression node)
+    protected override Expression VisitListInit(ListInitExpression node, Type expectedType)
     {
       evaluator.EnsureKnownTypes(node.Initializers.Select(i => i.AddMethod));
 
-      return base.VisitListInit(node);
+      return base.VisitListInit(node, expectedType);
     }
 
-    protected override Expression VisitLoop(LoopExpression node)
+    protected override Expression VisitLoop(LoopExpression node, Type expectedType)
     {
       evaluator.EnsureKnownType(node.BreakLabel);
       evaluator.EnsureKnownType(node.ContinueLabel);
 
-      return base.VisitLoop(node);
+      return base.VisitLoop(node, expectedType);
     }
 
-    protected override Expression VisitMember(MemberExpression node)
+    protected override Expression VisitMember(MemberExpression node, Type expectedType)
     {
       Expression newNode = null;
 
@@ -311,9 +238,9 @@ namespace Qactive
         node.Member,
         replaceCompilerGeneratedType: _ =>
         {
-          newNode = evaluator.EvaluateCompilerGenerated(node, CurrentExpectedType, protocol)
+          newNode = evaluator.EvaluateCompilerGenerated(node, expectedType, protocol)
                  ?? CompilerGenerated.Get(
-                      Visit(node.Expression, null),
+                      Visit(node.Expression, (node.Member as FieldInfo)?.FieldType ?? (node.Member as PropertyInfo)?.PropertyType),
                       node.Member,
                       type =>
                       {
@@ -331,11 +258,11 @@ namespace Qactive
       }
       else
       {
-        return base.VisitMember(node);
+        return base.VisitMember(node, expectedType);
       }
     }
 
-    protected override Expression VisitMemberInit(MemberInitExpression node)
+    protected override Expression VisitMemberInit(MemberInitExpression node, Type expectedType)
     {
       evaluator.EnsureKnownType(node.Type, replaceCompilerGeneratedType: _ => { });
 
@@ -351,10 +278,10 @@ namespace Qactive
         }
       }
 
-      return base.VisitMemberInit(node);
+      return base.VisitMemberInit(node, expectedType);
     }
 
-    protected override Expression VisitMethodCall(MethodCallExpression node)
+    protected override Expression VisitMethodCall(MethodCallExpression node, Type expectedType)
     {
       Expression newNode = null;
 
@@ -367,11 +294,11 @@ namespace Qactive
       }
       else
       {
-        return base.VisitMethodCall(node);
+        return base.VisitMethodCall(node, expectedType);
       }
     }
 
-    protected override Expression VisitNew(NewExpression node)
+    protected override Expression VisitNew(NewExpression node, Type expectedType)
     {
       NewExpression newNode = null;
 
@@ -395,10 +322,10 @@ namespace Qactive
         return newNode;
       }
 
-      return base.VisitNew(node);
+      return base.VisitNew(node, expectedType);
     }
 
-    protected override Expression VisitNewArray(NewArrayExpression node)
+    protected override Expression VisitNewArray(NewArrayExpression node, Type expectedType)
     {
       NewArrayExpression newNode = null;
 
@@ -412,11 +339,11 @@ namespace Qactive
       }
       else
       {
-        return base.VisitNewArray(node);
+        return base.VisitNewArray(node, expectedType);
       }
     }
 
-    protected override Expression VisitParameter(ParameterExpression node)
+    protected override Expression VisitParameter(ParameterExpression node, Type expectedType)
     {
       // TODO: The current caching implementation is weak.  It must support name scopes, instead of just globally keying by name.
       if (evaluator.ReplacedParameters.ContainsKey(node.Name))
@@ -437,11 +364,11 @@ namespace Qactive
       }
       else
       {
-        return base.VisitParameter(node);
+        return base.VisitParameter(node, expectedType);
       }
     }
 
-    protected override Expression VisitSwitch(SwitchExpression node)
+    protected override Expression VisitSwitch(SwitchExpression node, Type expectedType)
     {
       evaluator.EnsureKnownType(node.Comparison);
 
@@ -452,19 +379,19 @@ namespace Qactive
         genericArgumentsUpdated: updatedType => newNode = Expression.Switch(
           updatedType,
           Visit(node.SwitchValue, node.Type),
-          Visit(node.DefaultBody, node.Type),
+          Visit(node.DefaultBody, expectedType),
           node.Comparison,
-          Visit(node.Cases, VisitSwitchCase))))
+          Visit(node.Cases, _ => node.Type, VisitSwitchCase))))
       {
         return newNode;
       }
       else
       {
-        return base.VisitSwitch(node);
+        return base.VisitSwitch(node, expectedType);
       }
     }
 
-    protected override Expression VisitTry(TryExpression node)
+    protected override Expression VisitTry(TryExpression node, Type expectedType)
     {
       TryExpression newNode = null;
 
@@ -472,20 +399,20 @@ namespace Qactive
         node.Type,
         genericArgumentsUpdated: updatedType => newNode = Expression.MakeTry(
           updatedType,
-          Visit(node.Body, node.Type),
+          Visit(node.Body, expectedType),
           Visit(node.Finally, null),
           Visit(node.Fault, null),
-          Visit(node.Handlers, VisitCatchBlock))))
+          Visit(node.Handlers, _ => null, VisitCatchBlock))))
       {
         return newNode;
       }
       else
       {
-        return base.VisitTry(node);
+        return base.VisitTry(node, expectedType);
       }
     }
 
-    protected override Expression VisitTypeBinary(TypeBinaryExpression node)
+    protected override Expression VisitTypeBinary(TypeBinaryExpression node, Type expectedType)
     {
       TypeBinaryExpression newNode = null;
 
@@ -497,11 +424,11 @@ namespace Qactive
       }
       else
       {
-        return base.VisitTypeBinary(node);
+        return base.VisitTypeBinary(node, expectedType);
       }
     }
 
-    protected override Expression VisitUnary(UnaryExpression node)
+    protected override Expression VisitUnary(UnaryExpression node, Type expectedType)
     {
       evaluator.EnsureKnownType(node.Method);
 
@@ -512,7 +439,7 @@ namespace Qactive
           node.Type,
           genericArgumentsUpdated: updatedType => newNode = Expression.MakeUnary(
             node.NodeType,
-            Visit(node.Operand, node.Method.GetParameters()[0].ParameterType),
+            Visit(node.Operand, node.Method?.GetParameters()[0].ParameterType),
             updatedType,
             node.Method)))
       {
@@ -520,7 +447,7 @@ namespace Qactive
       }
       else
       {
-        return base.VisitUnary(node);
+        return base.VisitUnary(node, expectedType);
       }
     }
   }

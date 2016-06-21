@@ -7,7 +7,11 @@ namespace Qactive.Tests.Tcp
   {
     public static readonly QbservableServiceOptions DefaultOptions = TestService.DefaultOptions;
     public static readonly QbservableServiceOptions UnrestrictedOptions = TestService.UnrestrictedOptions;
-    public static readonly QbservableServiceOptions DuplexOptions = TestService.DuplexOptions;
+
+    /// <summary>
+    /// Same as <see cref="UnrestrictedOptions"/> except that <see cref="QbservableServiceOptions.EnableDuplex"/> is false.
+    /// </summary>
+    public static readonly QbservableServiceOptions UnrestrictedExpressionsOptions = TestService.UnrestrictedExpressionsOptions;
 
     public static TcpTestService<TSource> Create<TSource>(params Notification<TSource>[] notifications)
       => new TcpTestService<TSource>(DefaultOptions, (Type[])null, notifications);

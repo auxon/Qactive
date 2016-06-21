@@ -22,7 +22,7 @@ namespace Qactive.Tests.Queries
       var nodeIds = new[] { new[] { "2", "4" } }.ToObservable().Do(p => p.ForEach(id => Debug.WriteLine("Node: " + id)));
 
       var service = TestService.Create(
-        TestService.DuplexOptions,
+        TestService.UnrestrictedOptions,
         new[] { typeof(RootObject), typeof(Node), typeof(Leaf), typeof(EnumerableEx) },
         Observable.Return(new ServiceContext(new[] { new RootObject("A", 1), new RootObject("B", 10), new RootObject("C", 100), new RootObject("D", 1000) })));
 

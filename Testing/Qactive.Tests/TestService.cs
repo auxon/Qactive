@@ -17,10 +17,12 @@ namespace Qactive.Tests
     }
     .Freeze();
 
-    public static readonly QbservableServiceOptions DuplexOptions = new QbservableServiceOptions()
+    /// <summary>
+    /// Same as <see cref="UnrestrictedOptions"/> except that <see cref="QbservableServiceOptions.EnableDuplex"/> is false.
+    /// </summary>
+    public static readonly QbservableServiceOptions UnrestrictedExpressionsOptions = new QbservableServiceOptions(QbservableServiceOptions.Default)
     {
       AllowExpressionsUnrestricted = true,
-      EnableDuplex = true,
       SendServerErrorsToClients = true
     }
     .Freeze();

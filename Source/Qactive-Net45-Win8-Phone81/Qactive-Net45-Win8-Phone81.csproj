@@ -148,6 +148,9 @@
     <Compile Include="..\Qactive\CompilerGenerated.cs">
       <Link>CompilerGenerated.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive\ContextualExpressionVisitor.cs">
+      <Link>ContextualExpressionVisitor.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive\DuplexCallback.cs">
       <Link>DuplexCallback.cs</Link>
     </Compile>
