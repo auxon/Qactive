@@ -135,6 +135,11 @@ namespace Qactive
 
       preparedExpression = visitor.Visit(preparedExpression);
 
+      foreach (var customVisitor in Provider.Options.Visitors)
+      {
+        preparedExpression = customVisitor.Visit(preparedExpression);
+      }
+
       Log.ServerRewrittenExpression(clientId, preparedExpression);
 
       return preparedExpression;

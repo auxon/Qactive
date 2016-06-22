@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
+using System.Linq.Expressions;
 
 namespace Qactive
 {
@@ -11,25 +14,34 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "It's immutable due to the frozen flag.")]
     public static readonly QbservableServiceOptions Default = new QbservableServiceOptions()
     {
-      frozen = true,
+      IsFrozen = true,
       evaluationContext = new ServiceEvaluationContext()
     };
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "It's immutable due to the frozen flag.")]
     public static readonly QbservableServiceOptions Unrestricted = new QbservableServiceOptions()
     {
-      frozen = true,
+      IsFrozen = true,
       allowExpressionsUnrestricted = true,
       enableDuplex = true,
       evaluationContext = new ServiceEvaluationContext()
     };
 
-    private bool frozen;
+    private readonly List<ExpressionVisitor> visitors = new List<ExpressionVisitor>();
     private bool sendServerErrorsToClients;
     private bool enableDuplex;
     private bool allowExpressionsUnrestricted;
     private ExpressionOptions expressionOptions;
     private ServiceEvaluationContext evaluationContext;
+
+    [ContractInvariantMethod]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
+    private void ObjectInvariant()
+    {
+      Contract.Invariant(visitors != null);
+    }
+
+    public bool IsFrozen { get; private set; }
 
     public bool SendServerErrorsToClients
     {
@@ -39,10 +51,7 @@ namespace Qactive
       }
       set
       {
-        if (frozen)
-        {
-          throw new NotSupportedException();
-        }
+        Contract.Requires(!IsFrozen);
 
         sendServerErrorsToClients = value;
       }
@@ -56,10 +65,7 @@ namespace Qactive
       }
       set
       {
-        if (frozen)
-        {
-          throw new NotSupportedException();
-        }
+        Contract.Requires(!IsFrozen);
 
         enableDuplex = value;
       }
@@ -73,14 +79,17 @@ namespace Qactive
       }
       set
       {
-        if (frozen)
-        {
-          throw new NotSupportedException();
-        }
+        Contract.Requires(!IsFrozen);
 
         allowExpressionsUnrestricted = value;
       }
     }
+
+#if READONLYCOLLECTIONS
+    public IReadOnlyList<ExpressionVisitor> Visitors => visitors.AsReadOnly();
+#else
+    public ReadOnlyCollection<ExpressionVisitor> Visitors => visitors.AsReadOnly();
+#endif
 
     public ExpressionOptions ExpressionOptions
     {
@@ -90,10 +99,7 @@ namespace Qactive
       }
       set
       {
-        if (frozen)
-        {
-          throw new NotSupportedException();
-        }
+        Contract.Requires(!IsFrozen);
 
         expressionOptions = value;
       }
@@ -114,10 +120,7 @@ namespace Qactive
       }
       set
       {
-        if (frozen)
-        {
-          throw new NotSupportedException();
-        }
+        Contract.Requires(!IsFrozen);
 
         evaluationContext = value;
       }
@@ -125,11 +128,13 @@ namespace Qactive
 
     public QbservableServiceOptions()
     {
+      Contract.Ensures(!IsFrozen);
     }
 
     public QbservableServiceOptions(QbservableServiceOptions clone)
     {
       Contract.Requires(clone != null);
+      Contract.Ensures(!IsFrozen);
 
       sendServerErrorsToClients = clone.sendServerErrorsToClients;
       enableDuplex = clone.enableDuplex;
@@ -138,17 +143,32 @@ namespace Qactive
       evaluationContext = clone.evaluationContext;
     }
 
+    public QbservableServiceOptions Add(ExpressionVisitor visitor)
+    {
+      Contract.Requires(visitor != null);
+      Contract.Requires(!IsFrozen);
+      Contract.Ensures(Contract.Result<QbservableServiceOptions>() == this);
+      Contract.Ensures(Visitors.Count == Contract.OldValue(Visitors.Count) + 1);
+      Contract.Ensures(Contract.Exists(Visitors, v => v == visitor));
+
+      visitors.Add(visitor);
+
+      return this;
+    }
+
     public QbservableServiceOptions Freeze()
     {
-      Contract.Ensures(Contract.Result<QbservableServiceOptions>() != null);
+      Contract.Ensures(Contract.Result<QbservableServiceOptions>() == this);
+      Contract.Ensures(IsFrozen);
 
-      frozen = true;
+      IsFrozen = true;
       return this;
     }
 
     public QbservableServiceOptions Clone()
     {
       Contract.Ensures(Contract.Result<QbservableServiceOptions>() != null);
+      Contract.Ensures(!Contract.Result<QbservableServiceOptions>().IsFrozen);
 
       return new QbservableServiceOptions(this);
     }

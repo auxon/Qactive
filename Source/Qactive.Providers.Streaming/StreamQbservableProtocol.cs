@@ -19,7 +19,7 @@ namespace Qactive
     private readonly IRemotingFormatter formatter;
 
     public StreamQbservableProtocol(object clientId, Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
-    : base(clientId, stream, cancel)
+      : base(clientId, stream, cancel)
     {
       Contract.Requires(clientId != null);
       Contract.Requires(stream != null);
@@ -32,7 +32,7 @@ namespace Qactive
     }
 
     public StreamQbservableProtocol(Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
-    : base(stream, serviceOptions, cancel)
+      : base(stream, serviceOptions, cancel)
     {
       Contract.Requires(stream != null);
       Contract.Requires(formatter != null);
