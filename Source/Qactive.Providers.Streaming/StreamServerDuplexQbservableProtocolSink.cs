@@ -66,8 +66,12 @@ namespace Qactive
       Since the current thread was an I/O completion port (received for OnNext), it seems that blocking it prevented any 
       further data from being received, even via the Stream.AsyncRead method. Apparently the only solution is to ensure 
       that observable callbacks occur on pooled threads to prevent I/O completion ports from inadvertantly being blocked.
+
+      June 25, 2016 - D.S.
+      Replaced TaskPoolScheduler usage with EventLoopScheduler. Unit testing revealed that pushing values through TaskPoolScheduler
+      without using ObserveOn introduced a race condition that could cause values to be received in the wrong order.
       */
-      var scheduler = TaskPoolScheduler.Default;
+      var scheduler = new EventLoopScheduler();
 
       return base.Subscribe(
         name,
