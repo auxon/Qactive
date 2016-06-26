@@ -110,6 +110,7 @@
     <Compile Include="Tcp\Queries\TcpComplexTests.cs" />
     <Compile Include="Tcp\Queries\TcpDuplexTests.cs" />
     <Compile Include="Tcp\Queries\TcpNestedQueryTests.cs" />
+    <Compile Include="Tcp\ServiceOptions\VisitorTests.cs" />
     <Compile Include="Tcp\TcpTestService.cs" />
     <Compile Include="Tcp\TcpTestService{TSource}.cs" />
     <Compile Include="TestBase.cs" />

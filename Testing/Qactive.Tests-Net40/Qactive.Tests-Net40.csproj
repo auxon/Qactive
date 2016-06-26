@@ -168,6 +168,9 @@
     <Compile Include="..\qactive.tests\tcp\queries\TcpNestedQueryTests.cs">
       <Link>Tcp\Queries\TcpNestedQueryTests.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive.Tests\Tcp\ServiceOptions\VisitorTests.cs">
+      <Link>Tcp\ServiceOptions\VisitorTests.cs</Link>
+    </Compile>
     <Compile Include="..\qactive.tests\tcp\TcpTestService.cs">
       <Link>Tcp\TcpTestService.cs</Link>
     </Compile>
