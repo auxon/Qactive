@@ -21,7 +21,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;READONLYCOLLECTIONS;DYNAMIC</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>false</RunCodeAnalysis>
@@ -74,7 +74,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION</DefineConstants>
+    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;READONLYCOLLECTIONS;DYNAMIC</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -142,6 +142,12 @@
   <ItemGroup>
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\EqualityExpressionVisitor.cs">
+      <Link>EqualityExpressionVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\ExpressionEqualityComparer.cs">
+      <Link>ExpressionEqualityComparer.cs</Link>
     </Compile>
     <Compile Include="..\Qactive.Expressions\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>

@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL;READONLYCOLLECTIONS;DYNAMIC</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>..\..\Build\Properties\CodeAnalysis.ruleset</CodeAnalysisRuleSet>
@@ -74,7 +74,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL</DefineConstants>
+    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;TPL;READONLYCOLLECTIONS;DYNAMIC</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -143,6 +143,8 @@
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
+    <Compile Include="EqualityExpressionVisitor.cs" />
+    <Compile Include="ExpressionEqualityComparer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerializableBinaryExpression.cs" />
