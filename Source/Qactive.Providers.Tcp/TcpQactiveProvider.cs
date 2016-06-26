@@ -30,6 +30,7 @@ namespace Qactive
     private static int lastServerNumber = -1;
     private static int lastClientNumber = -1;
 
+    private readonly ITcpQactiveProviderTransportInitializer transportInitializer;
     private readonly Func<IRemotingFormatter> formatterFactory;
     private readonly Action<Socket> prepareSocket;
     private readonly int? serverNumber, clientNumber;
@@ -40,6 +41,7 @@ namespace Qactive
       Contract.Requires(endPoint != null);
 
       EndPoint = endPoint;
+      this.transportInitializer = transportInitializer;
       serverNumber = Interlocked.Increment(ref lastServerNumber);
 
       if (transportInitializer != null)
@@ -215,8 +217,26 @@ namespace Qactive
     public override IObservable<ClientTermination> Listen(QbservableServiceOptions options, Func<IQbservableProtocol, IParameterizedQbservableProvider> providerFactory)
     {
       return from listener in Observable.Return(new TcpListener(EndPoint))
-             .Do(listener => listener.Start())
-             from client in Observable.FromAsync(listener.AcceptTcpClientAsync).Repeat().Finally(listener.Stop)
+             .Do(listener =>
+               {
+                 listener.Start();
+
+                 if (transportInitializer != null)
+                 {
+                   transportInitializer.StartedListener(serverNumber.Value, listener.LocalEndpoint);
+                 }
+               })
+             from client in Observable.FromAsync(listener.AcceptTcpClientAsync).Repeat().Finally(() =>
+             {
+               var endPoint = listener.LocalEndpoint;
+
+               listener.Stop();
+
+               if (transportInitializer != null)
+               {
+                 transportInitializer.StoppedListener(serverNumber.Value, endPoint);
+               }
+             })
              let number = Interlocked.Increment(ref lastServerClientNumber)
              from result in Observable.StartAsync(async cancel =>
              {

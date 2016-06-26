@@ -102,6 +102,14 @@ namespace QbservableServer
       {
         return null;
       }
+
+      public void StartedListener(int serverNumber, EndPoint endPoint)
+      {
+      }
+
+      public void StoppedListener(int serverNumber, EndPoint endPoint)
+      {
+      }
     }
   }
 }

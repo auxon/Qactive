@@ -11,11 +11,11 @@ namespace Qactive.Tests.Tcp
 {
   internal sealed class TcpTestService<TSource> : TestServiceBase<TSource>, ITcpQactiveProviderTransportInitializer
   {
-    private static readonly IPEndPoint DefaultEndPoint = new IPEndPoint(IPAddress.Loopback, 24142);
+    private static readonly IPEndPoint DefaultEndPoint = new IPEndPoint(IPAddress.Loopback, 0);
 
     private readonly QbservableServiceOptions options;
     private readonly Type[] knownTypes;
-    private readonly IPEndPoint endPoint;
+    private IPEndPoint endPoint;
 
     public TcpTestService(QbservableServiceOptions options, Type[] knownTypes, params Notification<TSource>[] notifications)
       : this(DefaultEndPoint, options, knownTypes, notifications)
@@ -48,6 +48,15 @@ namespace Qactive.Tests.Tcp
 
     protected override IQbservable<TSource> CreateQuery()
       => new TcpQbservableClient<TSource>(endPoint, knownTypes).Query(Prepare);
+
+    public void StartedListener(int serverNumber, EndPoint endPoint)
+    {
+      this.endPoint = (IPEndPoint)endPoint;
+    }
+
+    public void StoppedListener(int serverNumber, EndPoint endPoint)
+    {
+    }
 
     public void Prepare(Socket socket)
       => socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
