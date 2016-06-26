@@ -83,6 +83,8 @@
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
+    <Compile Include="Any - Exceptions.cs" />
+    <Compile Include="Any - Expressions.cs" />
     <Compile Include="Any.cs" />
     <Compile Include="CoreTests.cs" />
     <Compile Include="DuplexStream.cs" />
@@ -99,6 +101,7 @@
     <Compile Include="Queries\NestedQueryTests.cs" />
     <Compile Include="Operators\SelectTests.cs" />
     <Compile Include="Operators\WhereTests.cs" />
+    <Compile Include="ServiceOptions\VisitorTests.cs" />
     <Compile Include="Tcp\Operators\CustomTests.cs" />
     <Compile Include="Tcp\Operators\GroupJoinTests.cs" />
     <Compile Include="Tcp\Operators\JoinTests.cs" />
@@ -112,12 +115,15 @@
     <Compile Include="TestBase.cs" />
     <Compile Include="TestDuplexMessage.cs" />
     <Compile Include="TestAssemblyInitialize.cs" />
+    <Compile Include="TestEqualityExpressionVisitor.cs" />
+    <Compile Include="TestExpressionEqualityComparer.cs" />
     <Compile Include="TestMessage.cs" />
     <Compile Include="TestQactiveProvider.cs" />
     <Compile Include="TestQbservableProtocol.cs" />
     <Compile Include="TestService.cs" />
     <Compile Include="TestServiceBase.cs" />
     <Compile Include="TestService{TSource}.cs" />
+    <Compile Include="TestExpressionVisitor.cs" />
     <Compile Include="TransportStream.cs" />
   </ItemGroup>
   <ItemGroup>

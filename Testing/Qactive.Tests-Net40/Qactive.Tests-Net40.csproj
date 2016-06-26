@@ -90,6 +90,12 @@
     <Compile Include="..\..\Build\Properties\AssemblyInfoShared.cs">
       <Link>Properties\AssemblyInfoShared.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive.Tests\Any - Exceptions.cs">
+      <Link>Any - Exceptions.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\Any - Expressions.cs">
+      <Link>Any - Expressions.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive.Tests\Any.cs">
       <Link>Any.cs</Link>
     </Compile>
@@ -135,6 +141,9 @@
     <Compile Include="..\qactive.tests\queries\NestedQueryTests.cs">
       <Link>Queries\NestedQueryTests.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive.Tests\ServiceOptions\VisitorTests.cs">
+      <Link>ServiceOptions\VisitorTests.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive.Tests\Tcp\Operators\CustomTests.cs">
       <Link>Tcp\Operators\CustomTests.cs</Link>
     </Compile>
@@ -170,6 +179,15 @@
     </Compile>
     <Compile Include="..\Qactive.Tests\TestDuplexMessage.cs">
       <Link>TestDuplexMessage.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestEqualityExpressionVisitor.cs">
+      <Link>TestEqualityExpressionVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestExpressionEqualityComparer.cs">
+      <Link>TestExpressionEqualityComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Tests\TestExpressionVisitor.cs">
+      <Link>TestExpressionVisitor.cs</Link>
     </Compile>
     <Compile Include="..\Qactive.Tests\TestMessage.cs">
       <Link>TestMessage.cs</Link>

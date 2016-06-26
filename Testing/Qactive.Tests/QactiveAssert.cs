@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reactive;
 using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -40,6 +41,50 @@ namespace Qactive.Tests
       actual.AssertEqual(expected);
     }
 
+    public static void AreEqual<T>(IEnumerable<Notification<T>> actual, params Notification<T>[] expected)
+      => AreEqual(actual, (IEnumerable<Notification<T>>)expected);
+
+    public static void AreEqual(IEnumerable<Expression> actual, IEnumerable<Expression> expected, bool reflectionNamesOnly = true)
+    {
+      if (actual == null && expected == null)
+      {
+        return;
+      }
+
+      Action<string, bool, IEnumerable<Expression>, IEnumerable<Expression>, TestExpressionEqualityComparer> fail = (message, includeIndices, a2, e2, comp) =>
+        Assert.Fail(message + Environment.NewLine
+                  + "Actual: " + Environment.NewLine + string.Join(Environment.NewLine, a2.Select((e, i) => (includeIndices ? i + ": " : string.Empty) + e.GetType().Name + ": " + e)) + Environment.NewLine
+                  + "Expected: " + Environment.NewLine + string.Join(Environment.NewLine, e2.Select((e, i) => (includeIndices ? i + ": " : string.Empty) + e.GetType().Name + ": " + e)) + Environment.NewLine
+                  + (comp == null || comp.InequalityNodes.Count == 0 ? string.Empty : Environment.NewLine
+                  + "-Differences-" + Environment.NewLine
+                  + "Actual: " + Environment.NewLine + string.Join(Environment.NewLine, comp.InequalityNodes.Select(e => e.GetType().Name + ": " + e)) + Environment.NewLine
+                  + "Expected: " + Environment.NewLine + string.Join(Environment.NewLine, comp.InequalityOthers.Select(e => e.GetType().Name + ": " + e))));
+
+      var actualList = actual?.ToList() ?? new List<Expression>(0);
+      var expectedList = expected?.ToList() ?? new List<Expression>(0);
+
+      if (actualList.Count != expectedList.Count)
+      {
+        fail("The actual expressions count is different from the expected expressions count.", true, actualList, expectedList, null);
+      }
+
+      var index = 0;
+      foreach (var pair in actualList.Zip(expectedList, (a, e) => new { a, e }))
+      {
+        var comparer = new TestExpressionEqualityComparer(reflectionNamesOnly);
+
+        if (!comparer.Equals(pair.a, pair.e))
+        {
+          fail($"The actual expression at index {index} is different from the expected expression.", false, new[] { pair.a }, new[] { pair.e }, comparer);
+        }
+
+        index++;
+      }
+    }
+
+    public static void AreEqual(IEnumerable<Expression> actual, params Expression[] expected)
+      => AreEqual(actual, (IEnumerable<Expression>)expected);
+
     public static void AreEqual(IEnumerable<Exception> actual, IEnumerable<Exception> expected)
     {
       var expectedErrors = (expected ?? new Exception[0]).Select((ex, index) => new { Error = ex, index }).ToList();
@@ -72,16 +117,13 @@ namespace Qactive.Tests
       }
     }
 
-    public static void AreEqual<T>(IEnumerable<Notification<T>> actual, params Notification<T>[] expected)
-      => AreEqual(actual, (IEnumerable<Notification<T>>)expected);
-
     public static void AreEqual(Exception actual, Exception expected, string message = "The actual exception differs from the expected exception.")
       => Assert.IsTrue(GetEquality(actual, expected), message);
 
     public static bool GetEquality(Exception actual, Exception expected)
       => (actual == null && expected == null)
       || (actual != null && expected != null
-        && (expected == Any.Exception || expected.GetType().IsAssignableFrom(actual.GetType()))
+        && (expected.IsAny() || expected.GetType().IsAssignableFrom(actual.GetType()))
         && (expected.Message == Any.Message || expected.Message.Equals(actual.Message)));
 
     public static void NoOnError<T>(IEnumerable<Notification<T>> results)

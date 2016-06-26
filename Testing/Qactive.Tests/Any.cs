@@ -1,21 +1,13 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Qactive.Tests
 {
-  internal static class Any
+  internal static partial class Any
   {
     public const string Message = "Any.Message";
-    public static readonly Exception Exception = new AnyException();
-
-    public static Exception ExceptionWithMessage(string message)
-      => new AnyException(message);
-
-    private sealed class AnyException : Exception
-    {
-      public AnyException(string message = null)
-        : base(message ?? Any.Message)
-      {
-      }
-    }
+    public const string Name = "Any.Name";
+    public static readonly Type Type = typeof(Any);
+    public static readonly MemberInfo Member = typeof(Any).GetField("Member");
   }
 }
