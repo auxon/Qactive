@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -25,7 +26,7 @@ namespace Qactive.Tests
     }
 
     public static TestQactiveProvider Create<T>(params Type[] knownTypes)
-      => new TestQactiveProvider(typeof(T), new ImmediateLocalEvaluator(knownTypes));
+      => new TestQactiveProvider(typeof(T), new ImmediateLocalEvaluator((knownTypes ?? Enumerable.Empty<Type>()).Concat(new[] { typeof(ObservableExtensions) }).ToArray()));
 
     public static TestQactiveProvider Create<T>(LocalEvaluator localEvaluator)
       => new TestQactiveProvider(typeof(T), localEvaluator);

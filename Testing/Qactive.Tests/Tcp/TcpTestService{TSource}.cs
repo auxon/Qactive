@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive;
@@ -31,7 +32,7 @@ namespace Qactive.Tests.Tcp
     {
       this.endPoint = endPoint;
       this.options = options;
-      this.knownTypes = knownTypes;
+      this.knownTypes = (knownTypes ?? Enumerable.Empty<Type>()).Concat(new[] { typeof(ObservableExtensions) }).ToArray();
     }
 
     public TcpTestService(IPEndPoint endPoint, QbservableServiceOptions options, Type[] knownTypes, IObservable<TSource> source)
@@ -39,7 +40,7 @@ namespace Qactive.Tests.Tcp
     {
       this.endPoint = endPoint;
       this.options = options;
-      this.knownTypes = knownTypes;
+      this.knownTypes = (knownTypes ?? Enumerable.Empty<Type>()).Concat(new[] { typeof(ObservableExtensions) }).ToArray();
     }
 
     protected override IObservable<ClientTermination> ServeQbservable(IObservable<TSource> source)
