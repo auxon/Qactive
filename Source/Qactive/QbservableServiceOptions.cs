@@ -146,14 +146,12 @@ namespace Qactive
     public QbservableServiceOptions Add(ExpressionVisitor visitor)
     {
       Contract.Requires(visitor != null);
-      Contract.Requires(!IsFrozen);
-      Contract.Ensures(Contract.Result<QbservableServiceOptions>() == this);
-      Contract.Ensures(Visitors.Count == Contract.OldValue(Visitors.Count) + 1);
-      Contract.Ensures(Contract.Exists(Visitors, v => v == visitor));
 
-      visitors.Add(visitor);
+      var options = IsFrozen ? Clone() : this;
 
-      return this;
+      options.visitors.Add(visitor);
+
+      return options;
     }
 
     public QbservableServiceOptions Freeze()
