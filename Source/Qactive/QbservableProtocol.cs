@@ -115,11 +115,8 @@ namespace Qactive
 
                   return Observable.Throw<TResult>(ex);
                 })
-#if TRACE
              .TraceSubscriptions(ServiceObservableName, false, false, ClientId)
-             .TraceNotifications(ServiceObservableName, false, false, ClientId)
-#endif
-             ;
+             .TraceNotifications(ServiceObservableName, false, false, ClientId);
     }
 
     public async Task ExecuteServerAsync(IQbservableProvider provider)
@@ -145,10 +142,7 @@ namespace Qactive
         }
         catch (Exception ex)
         {
-          if (ShutdownReason == QbservableProtocolShutdownReason.None)
-          {
-            ShutdownReason = QbservableProtocolShutdownReason.BadClientRequest;
-          }
+          ShutdownReason |= QbservableProtocolShutdownReason.BadClientRequest;
 
           fatalException = ExceptionDispatchInfo.Capture(ex);
 
@@ -161,18 +155,12 @@ namespace Qactive
 
         if (exception != null)
         {
-          if (ShutdownReason == QbservableProtocolShutdownReason.None)
-          {
-            ShutdownReason = QbservableProtocolShutdownReason.ServerError;
-          }
+          ShutdownReason |= QbservableProtocolShutdownReason.ServerError;
 
           fatalException = exception;
         }
 
-        if (ShutdownReason == QbservableProtocolShutdownReason.None)
-        {
-          ShutdownReason = QbservableProtocolShutdownReason.ClientTerminated;
-        }
+        ShutdownReason |= QbservableProtocolShutdownReason.ClientTerminated;
 
         fatalException = ExceptionDispatchInfo.Capture(ex);
       }
@@ -206,48 +194,42 @@ namespace Qactive
 
     private async Task ExecuteServerQueryAsync(Tuple<Expression, object> input, IQbservableProvider provider)
     {
+      Contract.Requires(input != null);
       Contract.Requires(provider != null);
 
       var shutdownReason = QbservableProtocolShutdownReason.ObservableTerminated;
 
       ExceptionDispatchInfo createQueryError = null;
 
-      if (input == null)
+      var expression = input.Item1;
+      var argument = input.Item2;
+
+      if (expression == null)
       {
-        shutdownReason = QbservableProtocolShutdownReason.ProtocolTerminated;
+        shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationCanceled;
       }
       else
       {
-        var expression = input.Item1;
-        var argument = input.Item2;
+        Type dataType = null;
+        object observable = null;
 
-        if (expression == null)
+        try
         {
-          shutdownReason = QbservableProtocolShutdownReason.ProtocolTerminated;
+          observable = CreateQuery(provider, expression, argument, out dataType);
         }
-        else
+        catch (Exception ex)
         {
-          Type dataType = null;
-          object observable = null;
+          shutdownReason = QbservableProtocolShutdownReason.ServerError;
+          createQueryError = ExceptionDispatchInfo.Capture(ex);
+        }
 
-          try
-          {
-            observable = CreateQuery(provider, expression, argument, out dataType);
-          }
-          catch (Exception ex)
-          {
-            shutdownReason = QbservableProtocolShutdownReason.ServerError;
-            createQueryError = ExceptionDispatchInfo.Capture(ex);
-          }
-
-          if (createQueryError == null)
-          {
-            await SendObservableAsync(observable, dataType, ServiceOptions.SendServerErrorsToClients, Cancel).ConfigureAwait(false);
-          }
-          else if (ServiceOptions.SendServerErrorsToClients)
-          {
-            await ServerSendAsync(NotificationKind.OnError, createQueryError.SourceException).ConfigureAwait(false);
-          }
+        if (createQueryError == null)
+        {
+          await SendObservableAsync(observable, dataType, ServiceOptions.SendServerErrorsToClients, Cancel).ConfigureAwait(false);
+        }
+        else if (ServiceOptions.SendServerErrorsToClients)
+        {
+          await ServerSendAsync(NotificationKind.OnError, createQueryError.SourceException).ConfigureAwait(false);
         }
       }
 
@@ -296,10 +278,8 @@ namespace Qactive
         }
 
         await observable
-#if TRACE
           .TraceSubscriptions(ServiceObservableName, true, true, ClientId)
           .TraceNotifications(ServiceObservableName, true, true, ClientId)
-#endif
           .ForEachAsync(
             async data =>
             {
@@ -464,14 +444,14 @@ namespace Qactive
     {
       Contract.Ensures(Contract.Result<Task>() != null);
 
-      ShutdownReason = reason;
+      ShutdownReason |= reason;
 
       return ShutdownCoreAsync();
     }
 
     protected void ShutdownWithoutResponse(QbservableProtocolShutdownReason reason)
     {
-      ShutdownReason = reason;
+      ShutdownReason |= reason;
 
       CancelAllCommunication();
     }
@@ -499,10 +479,7 @@ namespace Qactive
 
       if (!protocolCancellation.IsCancellationRequested)
       {
-        if (ShutdownReason == QbservableProtocolShutdownReason.None)
-        {
-          ShutdownReason = QbservableProtocolShutdownReason.ServerError;
-        }
+        ShutdownReason |= QbservableProtocolShutdownReason.ServerError;
 
         CancelAllCommunication();
       }
