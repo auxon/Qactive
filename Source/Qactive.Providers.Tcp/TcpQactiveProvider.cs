@@ -20,6 +20,8 @@ namespace Qactive
 {
   internal sealed class TcpQactiveProvider : QactiveProvider
   {
+    private const int LingerTimeInSeconds = 5;
+
     public IPEndPoint EndPoint { get; }
 
     protected override object Id
@@ -159,6 +161,8 @@ namespace Qactive
 
           subscription = connected.Connect();
 
+          Starting();
+
           if (!socket.ConnectAsync(e))
           {
             completedSynchronously.OnNext(e);
@@ -167,7 +171,7 @@ namespace Qactive
 
         return Observable.Using(
             () => new CompositeDisposable(subscription, socket),
-            _ => (from e2 in connected
+            _ => (from e2 in connected.Do(__ => Started())
                   from result in e2.SocketError != SocketError.Success
                                ? Observable.Throw<TResult>(new SocketException((int)e2.SocketError))
                                : Observable.Create<TResult>(
@@ -182,7 +186,7 @@ namespace Qactive
 
                                     return new CompositeDisposable(s, cancel);
                                   })
-                                  .Finally(e2.ConnectSocket.Close)
+                                  .Finally(() => Shutdown(e2.ConnectSocket))
                   select result));
       }
       catch
@@ -219,15 +223,22 @@ namespace Qactive
       return from listener in Observable.Return(new TcpListener(EndPoint))
              .Do(listener =>
                {
+                 Starting();
+
                  listener.Start();
 
                  if (transportInitializer != null)
                  {
                    transportInitializer.StartedListener(serverNumber.Value, listener.LocalEndpoint);
                  }
+
+                 Started();
                })
-             from client in Observable.FromAsync(listener.AcceptTcpClientAsync).Repeat().Finally(() =>
+             from client in Observable.FromAsync(listener.AcceptTcpClientAsync).Repeat()
+             .Finally(() =>
              {
+               Stopping();
+
                var endPoint = listener.LocalEndpoint;
 
                listener.Stop();
@@ -236,10 +247,25 @@ namespace Qactive
                {
                  transportInitializer.StoppedListener(serverNumber.Value, endPoint);
                }
+
+               Stopped();
              })
              let number = Interlocked.Increment(ref lastServerClientNumber)
              from result in Observable.StartAsync(async cancel =>
              {
+               ReceivingConnection();
+
+               // These default settings enable a proper graceful shutdown. DisconnectAsync is used instead of Close on the server-side to request 
+               // that the client terminates the connection ASAP. This is important because it prevents the server-side socket from going into a 
+               // TIME_WAIT state rather than the client. The linger option is meant to ensure that any outgoing data, such as an exception, is 
+               // completely transmitted to the client before the socket terminates. The seconds specified is arbitrary, though chosen to be large 
+               // enough to transfer any remaining data successfully and small enough to cause a timely disconnection. A custom prepareSocket 
+               // implementation can always change it via SetSocketOption, if necessary.
+               //
+               // https://msdn.microsoft.com/en-us/library/system.net.sockets.socket.disconnect(v=vs.110).aspx
+               client.LingerState.Enabled = true;
+               client.LingerState.LingerTime = LingerTimeInSeconds;
+
                prepareSocket(client.Client);
 
                var watch = Stopwatch.StartNew();
@@ -252,10 +278,12 @@ namespace Qactive
 
                try
                {
-                 using (var stream = client.GetStream())
+                 using (var stream = new NetworkStream(client.Client, ownsSocket: false))
                  using (var protocol = await NegotiateServerAsync(Id + " C" + number + " " + remoteEndPoint, stream, formatterFactory(), options, cancel).ConfigureAwait(false))
                  {
                    var provider = providerFactory(protocol);
+
+                   ReceivedConnection();
 
                    try
                    {
@@ -268,6 +296,10 @@ namespace Qactive
                    {
                      exceptions.Add(ExceptionDispatchInfo.Capture(ex));
                    }
+                   finally
+                   {
+                     shutdownReason = protocol.ShutdownReason;
+                   }
 
                    var protocolExceptions = protocol.Exceptions;
 
@@ -278,8 +310,6 @@ namespace Qactive
                        exceptions.Add(exception);
                      }
                    }
-
-                   shutdownReason = protocol.ShutdownReason;
                  }
                }
                catch (OperationCanceledException)
@@ -295,7 +325,7 @@ namespace Qactive
 
                return new TcpClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
              })
-             .Finally(client.Close)
+             .Finally(() => Shutdown(client.Client))
              select result;
     }
 
@@ -353,6 +383,134 @@ namespace Qactive
       protocol.ClientId = baseId + " (" + clientId + ")";
 
       return protocol;
+    }
+
+    private static bool IsConnectedSafe(Socket socket)
+    {
+      try
+      {
+        // Yep, the Connected property can throw ObjectDisposedException, and it's undocumented.
+        return socket != null && socket.Connected;
+      }
+      catch (ObjectDisposedException)
+      {
+        return false;
+      }
+    }
+
+    private async void Shutdown(Socket socket)
+    {
+      Contract.Requires(socket != null);
+
+      try
+      {
+        if (IsConnectedSafe(socket))
+        {
+          if (IsServer)
+          {
+            Disconnecting();
+          }
+          else
+          {
+            Stopping();
+          }
+
+          socket.Shutdown(SocketShutdown.Both);
+        }
+      }
+      catch (ObjectDisposedException)
+      {
+      }
+      catch (SocketException ex)
+      {
+        QactiveTraceSources.Qactive.TraceEvent(TraceEventType.Warning, 0, Id + " - " + ex);
+      }
+      finally
+      {
+        if (IsServer)
+        {
+          try
+          {
+            await DisconnectAsync(socket).ConfigureAwait(false);
+#if TPL
+            await Task.Delay(TimeSpan.FromSeconds(LingerTimeInSeconds)).ConfigureAwait(false);
+#else
+            await TaskEx.Delay(TimeSpan.FromSeconds(LingerTimeInSeconds)).ConfigureAwait(false);
+#endif
+          }
+          catch (ObjectDisposedException)
+          {
+          }
+          catch (SocketException ex)
+          {
+            QactiveTraceSources.Qactive.TraceEvent(TraceEventType.Warning, 0, Id + " - " + ex);
+          }
+          finally
+          {
+            socket.Close();
+          }
+
+          Disconnected();
+        }
+        else
+        {
+          socket.Close();
+
+          Stopped();
+        }
+      }
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The SocketAsyncEventArgs instance is either disposed before returning or by the observable's Finally operator.")]
+    private async Task DisconnectAsync(Socket socket)
+    {
+      Contract.Requires(socket != null);
+
+      SocketAsyncEventArgs e = null;
+      try
+      {
+        e = new SocketAsyncEventArgs()
+        {
+          DisconnectReuseSocket = false
+        };
+
+        IConnectableObservable<SocketAsyncEventArgs> disconnected;
+        IDisposable subscription;
+
+        using (var completedSynchronously = new Subject<SocketAsyncEventArgs>())
+        {
+          disconnected = Observable.FromEventPattern<SocketAsyncEventArgs>(
+            handler => e.Completed += handler,
+            handler => e.Completed -= handler)
+            .Select(e2 => e2.EventArgs)
+            .Amb(completedSynchronously)
+            .Take(1)
+            .Finally(e.Dispose)
+            .PublishLast();
+
+          subscription = disconnected.Connect();
+
+          if (!socket.DisconnectAsync(e))
+          {
+            completedSynchronously.OnNext(e);
+          }
+        }
+
+#if ASYNCAWAIT
+        await disconnected;
+#else
+        await disconnected.ToTask().ConfigureAwait(false);
+#endif
+      }
+      catch
+      {
+        if (e != null)
+        {
+          e.Dispose();
+        }
+
+        throw;
+      }
     }
 
     // This class avoids a compiler-generated closure, which was causing the Code Contract rewriter to generate invalid code.

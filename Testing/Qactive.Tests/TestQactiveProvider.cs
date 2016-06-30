@@ -72,6 +72,10 @@ namespace Qactive.Tests
                {
                  exceptions.Add(ExceptionDispatchInfo.Capture(ex));
                }
+               finally
+               {
+                 shutdownReason = protocol.ShutdownReason;
+               }
 
                var protocolExceptions = protocol.Exceptions;
 
@@ -82,8 +86,6 @@ namespace Qactive.Tests
                    exceptions.Add(exception);
                  }
                }
-
-               shutdownReason = protocol.ShutdownReason;
              }
            }
            catch (OperationCanceledException)
