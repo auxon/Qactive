@@ -123,8 +123,20 @@
   <data name="ClientSendingExpression" xml:space="preserve">
     <value>Client sending expression</value>
   </data>
+  <data name="Connected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>Connecting</value>
+  </data>
   <data name="Current" xml:space="preserve">
     <value>Current</value>
+  </data>
+  <data name="Disconnected" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="Disconnecting" xml:space="preserve">
+    <value>Disconnecting</value>
   </data>
   <data name="Enumerated" xml:space="preserve">
     <value>Enumerated</value>
@@ -161,6 +173,18 @@
   </data>
   <data name="ServerRewrittenExpression" xml:space="preserve">
     <value>Server rewritten expression</value>
+  </data>
+  <data name="Started" xml:space="preserve">
+    <value>Started</value>
+  </data>
+  <data name="Starting" xml:space="preserve">
+    <value>Starting</value>
+  </data>
+  <data name="Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Stopping" xml:space="preserve">
+    <value>Stopping</value>
   </data>
   <data name="Subscribed" xml:space="preserve">
     <value>Subscribed</value>

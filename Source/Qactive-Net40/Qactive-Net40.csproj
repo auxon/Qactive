@@ -294,6 +294,9 @@
     <Compile Include="..\Qactive\LocalEvaluator.cs">
       <Link>LocalEvaluator.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive\Log - Connectivity.cs">
+      <Link>Log - Connectivity.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive\Log - Expressions.cs">
       <Link>Log - Expressions.cs</Link>
     </Compile>

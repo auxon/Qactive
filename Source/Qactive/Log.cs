@@ -104,14 +104,14 @@ namespace Qactive
     }
     */
 
-    private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string message, object data)
+    private static void SemanticObject(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string message, object data = null)
     {
       Contract.Requires(trace != null);
 
-      trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + " " + message + " = " + data);
+      trace.TraceEvent(type, (int)id, FormatObjectId(objectId) + " " + message + (data == null ? string.Empty : " = " + data));
     }
 
-    private static void SemanticObjectUnsafe(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string message, object data)
+    private static void SemanticObjectUnsafe(this TraceSource trace, SemanticTrace id, TraceEventType type, object objectId, string message, object data = null)
     {
       Contract.Requires(trace != null);
 

@@ -1,20 +1,24 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Qactive
 {
   [ContractClass(typeof(QactiveProviderContract))]
   public abstract class QactiveProvider :
 #if REMOTING
-    MarshalByRefObject, 
+    MarshalByRefObject,
 #endif
     IQactiveProvider
   {
     public Type SourceType { get; }
 
     public LocalEvaluator ClientEvaluator { get; }
+
+    public bool IsServer => ClientEvaluator == null;
 
     public object Argument { get; }
 
@@ -63,6 +67,46 @@ namespace Qactive
     public abstract IObservable<TResult> Connect<TResult>(Func<IQbservableProtocol, Expression> prepareExpression);
 
     public abstract IObservable<ClientTermination> Listen(QbservableServiceOptions options, Func<IQbservableProtocol, IParameterizedQbservableProvider> providerFactory);
+
+    [Conditional("TRACE")]
+    protected void Starting(object data = null, [CallerMemberName]string label = null)
+      => Log.Starting(IsServer, isServerReceiving: false, sourceId: Id, label: label, data: data);
+
+    [Conditional("TRACE")]
+    protected void Started(object data = null, [CallerMemberName]string label = null)
+      => Log.Started(IsServer, isServerReceiving: false, sourceId: Id, label: label, data: data);
+
+    [Conditional("TRACE")]
+    protected void ReceivingConnection(object data = null, [CallerMemberName]string label = null)
+      => Log.Starting(isServer: true, isServerReceiving: true, sourceId: Id, label: label, data: data);
+
+    [Conditional("TRACE")]
+    protected void ReceivedConnection(object data = null, [CallerMemberName]string label = null)
+      => Log.Started(isServer: true, isServerReceiving: true, sourceId: Id, label: label, data: data);
+
+    [Conditional("TRACE")]
+    protected void Stopping(object data = null, [CallerMemberName]string label = null)
+      => Log.Stopping(IsServer, isServerReceiving: false, sourceId: Id, label: label, data: data);
+
+    [Conditional("TRACE")]
+    protected void Stopped(object data = null, [CallerMemberName]string label = null)
+      => Log.Stopped(IsServer, isServerReceiving: false, sourceId: Id, label: label, data: data);
+
+    [Conditional("TRACE")]
+    protected void Disconnecting(object data = null, [CallerMemberName]string label = null)
+      => Log.DuplexDisconnecting(IsServer, isClientReceiving: false, sourceId: Id, label: label, data: data);
+
+    [Conditional("TRACE")]
+    protected void Disconnected(object data = null, [CallerMemberName]string label = null)
+      => Log.DuplexDisconnected(IsServer, isClientReceiving: false, sourceId: Id, label: label, data: data);
+
+    [Conditional("TRACE")]
+    protected void ReceivingDisconnection(object data = null, [CallerMemberName]string label = null)
+      => Log.DuplexDisconnecting(IsServer, isClientReceiving: true, sourceId: Id, label: label, data: data);
+
+    [Conditional("TRACE")]
+    protected void ReceivedDisconnection(object data = null, [CallerMemberName]string label = null)
+      => Log.DuplexDisconnected(IsServer, isClientReceiving: true, sourceId: Id, label: label, data: data);
 
     void IQactiveProvider.InitializeSecureServer()
       => InitializeSecureServer();

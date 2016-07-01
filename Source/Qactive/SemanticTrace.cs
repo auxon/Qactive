@@ -5,8 +5,12 @@
     None,
 
     // Server-side tracing
-    ServerStarting, // TODO: log this
-    ServerStopped, // TODO: log this
+    ServerStarting,
+    ServerStarted,
+    ServerStopping,
+    ServerStopped,
+    ServerClientConnecting,
+    ServerClientConnected,
     ServerClientSubscribing,
     ServerReceivingExpression,
     ServerRewrittenExpression,
@@ -16,12 +20,14 @@
     ServerOnCompleted,
     ServerClientUnsubscribing,
     ServerClientUnsubscribed,
-    ServerClientDisconnecting, // TODO: log this
-    ServerClientDisconnected, // TODO: log this
-    ServerDisconnectingClient, // TODO: log this
-    ServerDisconnectedClient, // TODO: log this
+    ServerClientDisconnecting,
+    ServerClientDisconnected,
+    ServerDisconnectingClient,
+    ServerDisconnectedClient,
 
     // Full-duplex (server-side)
+    ServerConnecting, // TODO: log this
+    ServerConnected, // TODO: log this
     ServerSubscribing,
     ServerSubscribed,
     ServerClientOnNext,
@@ -39,6 +45,8 @@
     ServerDisconnected, // TODO: log this
 
     // Client-side tracing
+    ClientConnecting,
+    ClientConnected,
     ClientSubscribing,
     ClientSendingExpression,
     ClientSubscribed,
@@ -47,10 +55,12 @@
     ClientServerOnCompleted,
     ClientUnsubscribing,
     ClientUnsubscribed,
-    ClientDisconnecting, // TODO: log this
-    ClientDisconnected, // TODO: log this
+    ClientDisconnecting,
+    ClientDisconnected,
 
     // Full-duplex (client-side)
+    ClientServerConnecting, // TODO: log this
+    ClientServerConnected, // TODO: log this
     ClientServerSubscribing,
     ClientRewrittenExpression,
     ClientServerSubscribed,
