@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reactive;
-using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Qactive.Tests
@@ -38,7 +37,10 @@ namespace Qactive.Tests
         }
       }
 
-      actual.AssertEqual(expected);
+      if (!expected.SequenceEqual(actual))
+      {
+        Assert.Fail(CreateMessage(actual, expected, "The sequences are not equal."));
+      }
     }
 
     public static void AreEqual<T>(IEnumerable<Notification<T>> actual, params Notification<T>[] expected)
@@ -51,34 +53,47 @@ namespace Qactive.Tests
         return;
       }
 
-      Action<string, bool, IEnumerable<Expression>, IEnumerable<Expression>, TestExpressionEqualityComparer> fail = (message, includeIndices, a2, e2, comp) =>
-        Assert.Fail(message + Environment.NewLine
-                  + "Actual: " + Environment.NewLine + string.Join(Environment.NewLine, a2.Select((e, i) => (includeIndices ? i + ": " : string.Empty) + e.GetType().Name + ": " + e)) + Environment.NewLine
-                  + "Expected: " + Environment.NewLine + string.Join(Environment.NewLine, e2.Select((e, i) => (includeIndices ? i + ": " : string.Empty) + e.GetType().Name + ": " + e)) + Environment.NewLine
-                  + (comp == null || comp.InequalityNodes.Count == 0 ? string.Empty : Environment.NewLine
-                  + "-Differences-" + Environment.NewLine
-                  + "Actual: " + Environment.NewLine + string.Join(Environment.NewLine, comp.InequalityNodes.Select(e => e.GetType().Name + ": " + e)) + Environment.NewLine
-                  + "Expected: " + Environment.NewLine + string.Join(Environment.NewLine, comp.InequalityOthers.Select(e => e.GetType().Name + ": " + e))));
-
       var actualList = actual?.ToList() ?? new List<Expression>(0);
       var expectedList = expected?.ToList() ?? new List<Expression>(0);
 
       if (actualList.Count != expectedList.Count)
       {
-        fail("The actual expressions count is different from the expected expressions count.", true, actualList, expectedList, null);
+        Assert.Fail(CreateMessage(
+          actualList,
+          expectedList,
+          "The actual expressions count is different from the expected expressions count.",
+          label: "Expressions",
+          includeIndices: true,
+          includeTypes: true));
       }
 
+      TestExpressionEqualityComparer lastComparer = null;
+      var fail = false;
       var index = 0;
       foreach (var pair in actualList.Zip(expectedList, (a, e) => new { a, e }))
       {
-        var comparer = new TestExpressionEqualityComparer(reflectionNamesOnly);
+        lastComparer = new TestExpressionEqualityComparer(reflectionNamesOnly);
 
-        if (!comparer.Equals(pair.a, pair.e))
+        if (!lastComparer.Equals(pair.a, pair.e))
         {
-          fail($"The actual expression at index {index} is different from the expected expression.", false, new[] { pair.a }, new[] { pair.e }, comparer);
+          fail = true;
+          break;
         }
 
         index++;
+      }
+
+      if (fail)
+      {
+        Assert.Fail(CreateMessage(
+         actualList,
+         expectedList,
+         $"The actual expression at index {index} is different from the expected expression.",
+         label: "Expressions",
+         includeIndices: true,
+         includeTypes: true,
+         actualDiffs: lastComparer.InequalityNodes,
+         expectedDiffs: lastComparer.InequalityOthers));
       }
     }
 
@@ -90,17 +105,23 @@ namespace Qactive.Tests
       var expectedErrors = (expected ?? new Exception[0]).Select((ex, index) => new { Error = ex, index }).ToList();
       var actualErrors = (actual ?? new Exception[0]).Select((ex, index) => new { Error = ex, index }).ToList();
 
-      Func<string> buildMessageDetails = () =>
-          "Actual Errors: " + Environment.NewLine + string.Join(Environment.NewLine, actualErrors.Select(x => x.index + ": " + x.Error.Message)) + Environment.NewLine
-        + "Expected Errors: " + Environment.NewLine + string.Join(Environment.NewLine, expectedErrors.Select(x => x.index + ": " + x.Error.Message));
-
       if (expectedErrors.Count == 0)
       {
-        Assert.AreEqual(0, actualErrors.Count, "Unexpected error(s) encountered." + Environment.NewLine + buildMessageDetails());
+        Assert.AreEqual(0, actualErrors.Count, CreateMessage(
+          actualErrors.Select(e => e.Error.Message),
+          expectedErrors.Select(e => e.Error.Message),
+          "Unexpected error(s) encountered.",
+          label: "Exceptions",
+          includeIndices: true));
       }
       else if (actualErrors.Count != expectedErrors.Count)
       {
-        Assert.Fail($"Actual error count ({actualErrors.Count}) does not equal the expected error count ({expectedErrors.Count})." + Environment.NewLine + buildMessageDetails());
+        Assert.Fail(CreateMessage(
+          actualErrors.Select(e => e.Error.Message),
+          expectedErrors.Select(e => e.Error.Message),
+          $"Actual error count ({actualErrors.Count}) does not equal the expected error count ({expectedErrors.Count}).",
+          label: "Exceptions",
+          includeIndices: true));
       }
       else
       {
@@ -108,11 +129,21 @@ namespace Qactive.Tests
 
         if (!pairs.All(pair => pair.Actual.index == pair.Expected.index))
         {
-          Assert.Fail($"Actual errors are not in the same positions in the sequence as the expected errors." + Environment.NewLine + buildMessageDetails());
+          Assert.Fail(CreateMessage(
+          actualErrors.Select(e => e.Error.Message),
+          expectedErrors.Select(e => e.Error.Message),
+          "Actual errors are not in the same positions in the sequence as the expected errors.",
+          label: "Exceptions",
+          includeIndices: true));
         }
         else if (!pairs.All(pair => GetEquality(pair.Actual.Error, pair.Expected.Error)))
         {
-          Assert.Fail($"Actual errors are not equal to the expected errors." + Environment.NewLine + buildMessageDetails());
+          Assert.Fail(CreateMessage(
+          actualErrors.Select(e => e.Error.Message),
+          expectedErrors.Select(e => e.Error.Message),
+          "Actual errors are not equal to the expected errors.",
+          label: "Exceptions",
+          includeIndices: true));
         }
       }
     }
@@ -141,5 +172,27 @@ namespace Qactive.Tests
           where result.Kind == NotificationKind.OnError
           select result.Exception)
           .SingleOrDefault();
+
+    public static string CreateMessage<T>(
+      IEnumerable<T> actual,
+      IEnumerable<T> expected,
+      string message = null,
+      string label = null,
+      bool includeIndices = false,
+      bool includeTypes = false,
+      IEnumerable<object> actualDiffs = null,
+      IEnumerable<object> expectedDiffs = null)
+      => (string.IsNullOrWhiteSpace(message) ? string.Empty : message + Environment.NewLine)
+       + $"Actual{(string.IsNullOrWhiteSpace(label) ? string.Empty : " " + label)}: " + Environment.NewLine
+       + string.Join(Environment.NewLine, actual?.Select((x, i) => (includeIndices ? i + ": " : string.Empty) + (includeTypes ? x.GetType().Name + ": " : string.Empty) + x) ?? Enumerable.Empty<string>()) + Environment.NewLine
+       + $"Expected{(string.IsNullOrWhiteSpace(label) ? string.Empty : " " + label)}: " + Environment.NewLine
+       + string.Join(Environment.NewLine, expected?.Select((x, i) => (includeIndices ? i + ": " : string.Empty) + (includeTypes ? x.GetType().Name + ": " : string.Empty) + x) ?? Enumerable.Empty<string>())
+       + (actualDiffs == null && expectedDiffs == null
+       ? string.Empty
+       : Environment.NewLine + "Differences" + Environment.NewLine
+       + "Actual: " + Environment.NewLine
+       + string.Join(Environment.NewLine, actualDiffs?.Select(x => (includeTypes ? x.GetType().Name + ": " : string.Empty) + x) ?? Enumerable.Empty<string>()) + Environment.NewLine
+       + "Expected: " + Environment.NewLine
+       + string.Join(Environment.NewLine, expectedDiffs?.Select(x => (includeTypes ? x.GetType().Name + ": " : string.Empty) + x) ?? Enumerable.Empty<string>()));
   }
 }
