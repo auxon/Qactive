@@ -43,6 +43,20 @@ namespace Qactive.Tests.Queries
       Assert.IsFalse(provider1.HasQuery);
     }
 
+#if RX3
+    [TestMethod]
+    public async Task NestedQueriesAreAppliedToTheInnerProvider()
+    {
+      var service = TestService.Create(TestService.UnrestrictedOptions, Observable.Return(new TestContext()));
+      var results = await service.QueryAsync(source => from context in source
+                                                       from value in from value in context.CustomQuery
+                                                                     where value == 123
+                                                                     select value
+                                                       select value);
+
+      QactiveAssert.AreEqual(results, OnNext(999), OnCompleted<int>());
+    }
+#else
     [TestMethod]
     public async Task NestedQueriesAreAppliedToTheOuterProvider()
     {
@@ -55,6 +69,7 @@ namespace Qactive.Tests.Queries
 
       QactiveAssert.AreEqual(results, OnNext(123), OnCompleted<int>());
     }
+#endif
 
     private sealed class TestContext
     {

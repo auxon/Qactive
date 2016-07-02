@@ -21,6 +21,20 @@ namespace Qactive.Tests.Tcp.Queries
       QactiveAssert.AreEqual(results, OnNext(123), OnCompleted<int>());
     }
 
+#if RX3
+    [TestMethod]
+    public async Task NestedQueriesAreAppliedToTheInnerProvider()
+    {
+      var service = TcpTestService.Create(TcpTestService.UnrestrictedOptions, Observable.Return(new TestContext()));
+      var results = await service.QueryAsync(source => from context in source
+                                                       from value in from value in context.CustomQuery
+                                                                     where value == 123
+                                                                     select value
+                                                       select value);
+
+      QactiveAssert.AreEqual(results, OnNext(999), OnCompleted<int>());
+    }
+#else
     [TestMethod]
     public async Task NestedQueriesAreAppliedToTheOuterProvider()
     {
@@ -33,6 +47,7 @@ namespace Qactive.Tests.Tcp.Queries
 
       QactiveAssert.AreEqual(results, OnNext(123), OnCompleted<int>());
     }
+#endif
 
     private sealed class TestContext
     {

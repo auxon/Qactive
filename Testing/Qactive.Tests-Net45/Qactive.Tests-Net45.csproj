@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;ASYNCAWAIT;READONLYCOLLECTIONS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;ASYNCAWAIT;READONLYCOLLECTIONS;RX3</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -30,7 +30,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;ASYNCAWAIT;READONLYCOLLECTIONS</DefineConstants>
+    <DefineConstants>TRACE;REMOTING;SERIALIZATION;SERIALIZATION_REF;TRACING;TRACING_REF;CAS;CAS_REF;REFLECTION;ASYNCAWAIT;READONLYCOLLECTIONS;RX3</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
