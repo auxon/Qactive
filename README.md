@@ -23,10 +23,6 @@ A reactive queryable observable framework.
 > No dependencies  
 > Runtimes: .NET Framework 4.6.1; 4.5.2; 4.0
 
-Add a reference to the **Qactive.Providers.Tcp** package in your Visual Studio project. That package references the other packages as dependencies, so NuGet will automatically download all of them for you.
-
-Currently, the TCP provider is the only provider available.
-
 ## Overview
 Qactive builds on Reactive Extension's queryable observable providers, enabling you to write elegant reactive queries that execute server-side, even though they are written on the client.
 Qactive makes the extremely powerful act of querying a reactive service as easy as writing a typical Rx query.
@@ -46,28 +42,37 @@ For more information, see [this series of blog posts](http://davesexton.com/blog
 > See [Security Guidelines](Artifacts/Security Guidelines.md) for more information.
 
 ## Features
-* Works immediately with pre-built transport providers.
-  * TCP with binary serialization is provided by the optional Qactive.Providers.Tcp package on NuGet.
-  * Extensible so that any kind of custom transport and/or serialization mechanism can be used.
-* Simple server factory methods for hosting a Qbservable service.
-  * Supports hosting any `IObservable<T>` query as a service (_hot_ or _cold_).
-  * Supports hosting any `IQbservable<T>` query as a service.
-* Simple client factory methods for acquiring a Qbservable service.
-  * You must only specify the end point address and the expected return type.  The result is an `IQbservable<T>` that you can query and `Subscribe`.
-  * All Qbservable Rx operators are supported.
-* Automatically serialized Expression trees.
-  * Dynamic expressions and debug info expressions are not supported.  All other types of expressions are supported.
-* Automatically serialized anonymous types.
-* Immediate evaluation of local members and closures (optional; default behavior)
-  * Compiler-generated methods are executed locally and replaced with their return values before the expression is transmitted to the server.  This includes iterator blocks, which are serialized as `List<T>`.
-  * Evaluation assumes that local methods are never executed for their side-effects.  Actions (void-returning methods) cause an exception.  Do not depend upon the order in which members are invoked.
-* Full duplex communication (optional; default behavior for `IObservable<T>` closures)
-  * Must opt-in on server.
-  * May opt-in on client for full duplex communication of all local members; automatic for `IObservable<T>` closures.
-  * Duplex communication automatically supports iterator blocks.
-* Designed with extensibility in mind; e.g., supports custom Qbservable service providers, protocols and sinks.
 
-## Example
+Please refer to the [list of features](../../wiki/Features) in the wiki.
+
+## Getting Started
+Qactive is a set of .NET class libraries that you can reference in your projects. NuGet is recommended.
+
+Add a reference to the **Qactive.Providers.Tcp** package in your Visual Studio project. That package references the other packages as dependencies, so NuGet will automatically download all of them for you.
+
+> **Note:** Currently, the TCP provider is the only provider available.
+
+The source code contains an [Examples](Examples/) folder containing projects that show various usages of Qactive, from a simple query over a timer to a real-time chat application.
+
+### To run the examples:
+1. Run _QbservableServer.exe_.
+  1. The server will start hosting example Qbservable services as soon as the console application begins.
+  1. Pressing a key at any time will stop the server.
+1. Run _QbservableClient.exe_.
+  1. You can run several client console applications at the same time.
+1. When the client console application starts, press any key to connect to the server.  The client will begin running the first example.
+1. Press any key to stop the current example and start the following example.
+
+### To build the source code:
+1. Set the *QbservableServer* project as the startup project.
+1. Build and run. The server will start as soon as the console application begins.
+1. Set the *QbservableClient* project as the startup project.
+1. Build and run. You can run several client console applications at the same time.
+1. When the client console application starts, press any key to connect to the server.
+
+> **Tip:** To see the original and rewritten expression trees, run the client application with the debugger attached and look at the **Output** window.
+
+## Simple Example
 The following example creates a _cold_ observable sequence that generates a new notification every second and exposes it as an `IQbservable<long>` service over TCP port 3205 on the local computer.
 
 ### Server
@@ -103,25 +108,3 @@ using (query.Subscribe(
   Console.ReadKey();
 }
 ```
-## Getting Started
-Qactive is a set of .NET class libraries that you can reference in your projects. NuGet is recommended.
-
-The source code contains an [Examples](https://github.com/RxDave/Qactive/tree/master/Examples) folder containing projects that show various usages of Qactive, from a simple query over a timer to a real-time chat application.
-
-### To run the examples:
-1. Run _QbservableServer.exe_.
-  1. The server will start hosting example Qbservable services as soon as the console application begins.
-  1. Pressing a key at any time will stop the server.
-1. Run _QbservableClient.exe_.
-  1. You can run several client console applications at the same time.
-1. When the client console application starts, press any key to connect to the server.  The client will begin running the first example.
-1. Press any key to stop the current example and start the following example.
-
-### To build the source code:
-1. Set the *QbservableServer* project as the startup project.
-1. Build and run. The server will start as soon as the console application begins.
-1. Set the *QbservableClient* project as the startup project.
-1. Build and run. You can run several client console applications at the same time.
-1. When the client console application starts, press any key to connect to the server.
-
-> **Tip:** To see the original and rewritten expression trees, run the client application with the debugger attached and look at the **Output** window.
