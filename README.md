@@ -106,6 +106,8 @@ using (query.Subscribe(
 ## Getting Started
 Qactive is a set of .NET class libraries that you can reference in your projects. NuGet is recommended.
 
+The source code contains an [Examples](https://github.com/RxDave/Qactive/tree/master/Examples) folder containing projects that show various usages of Qactive, from a simple query over a timer to a real-time chat application.
+
 ### To run the examples:
 1. Run _QbservableServer.exe_.
   1. The server will start hosting example Qbservable services as soon as the console application begins.
@@ -123,11 +125,3 @@ Qactive is a set of .NET class libraries that you can reference in your projects
 1. When the client console application starts, press any key to connect to the server.
 
 > **Tip:** To see the original and rewritten expression trees, run the client application with the debugger attached and look at the **Output** window.
-
-## Planning
-1. Research building on top of WCF to support advanced configuration, customization, extensibility, standardization and additional transports such as WebSockets over HTTP.
-1. Improve expression tree serialization; e.g., fix bugs and write unit tests.
-1. Consider security.
-1. Consider memory/performance.
-1. Support querying from Silverlight 5 and Windows Phone 7.5 apps.  (This may require WebSockets though.)
-1. Support querying from RxJS clients.
