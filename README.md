@@ -52,7 +52,7 @@ Add a reference to the **Qactive.Providers.Tcp** package in your Visual Studio p
 
 > **Note:** Currently, the TCP provider is the only provider available.
 
-The source code contains an [Examples](Examples/) folder containing projects that show various usages of Qactive, from a simple query over a timer to a real-time chat application.
+The source code's [Examples](Examples/) folder contains projects that show various usages of Qactive, from a simple query over a timer to a real-time chat application.
 
 ### To run the examples:
 1. Run _QbservableServer.exe_.
