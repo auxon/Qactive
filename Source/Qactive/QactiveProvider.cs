@@ -77,12 +77,12 @@ namespace Qactive
       => Log.Started(IsServer, isServerReceiving: false, sourceId: Id, label: label, data: data);
 
     [Conditional("TRACE")]
-    protected void ReceivingConnection(object data = null, [CallerMemberName]string label = null)
-      => Log.Starting(isServer: true, isServerReceiving: true, sourceId: Id, label: label, data: data);
+    protected void ReceivingConnection(object idOverride = null, object data = null, [CallerMemberName]string label = null)
+      => Log.Starting(isServer: true, isServerReceiving: true, sourceId: idOverride ?? Id, label: label, data: data);
 
     [Conditional("TRACE")]
-    protected void ReceivedConnection(object data = null, [CallerMemberName]string label = null)
-      => Log.Started(isServer: true, isServerReceiving: true, sourceId: Id, label: label, data: data);
+    protected void ReceivedConnection(object idOverride = null, object data = null, [CallerMemberName]string label = null)
+      => Log.Started(isServer: true, isServerReceiving: true, sourceId: idOverride ?? Id, label: label, data: data);
 
     [Conditional("TRACE")]
     protected void Stopping(object data = null, [CallerMemberName]string label = null)
@@ -93,12 +93,12 @@ namespace Qactive
       => Log.Stopped(IsServer, isServerReceiving: false, sourceId: Id, label: label, data: data);
 
     [Conditional("TRACE")]
-    protected void Disconnecting(object data = null, [CallerMemberName]string label = null)
-      => Log.DuplexDisconnecting(IsServer, isClientReceiving: false, sourceId: Id, label: label, data: data);
+    protected void Disconnecting(object idOverride = null, object data = null, [CallerMemberName]string label = null)
+      => Log.DuplexDisconnecting(IsServer, isClientReceiving: false, sourceId: idOverride ?? Id, label: label, data: data);
 
     [Conditional("TRACE")]
-    protected void Disconnected(object data = null, [CallerMemberName]string label = null)
-      => Log.DuplexDisconnected(IsServer, isClientReceiving: false, sourceId: Id, label: label, data: data);
+    protected void Disconnected(object idOverride = null, object data = null, [CallerMemberName]string label = null)
+      => Log.DuplexDisconnected(IsServer, isClientReceiving: false, sourceId: idOverride ?? Id, label: label, data: data);
 
     [Conditional("TRACE")]
     protected void ReceivingDisconnection(object data = null, [CallerMemberName]string label = null)

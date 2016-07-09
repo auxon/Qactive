@@ -250,10 +250,10 @@ namespace Qactive
 
                Stopped();
              })
-             let number = Interlocked.Increment(ref lastServerClientNumber)
+             let capturedId = new CapturedId(Id + " C" + Interlocked.Increment(ref lastServerClientNumber) + " " + client.Client.RemoteEndPoint)
              from result in Observable.StartAsync(async cancel =>
              {
-               ReceivingConnection();
+               ReceivingConnection(idOverride: capturedId.Value);
 
                // These default settings enable a proper graceful shutdown. DisconnectAsync is used instead of Close on the server-side to request 
                // that the client terminates the connection ASAP. This is important because it prevents the server-side socket from going into a 
@@ -279,11 +279,13 @@ namespace Qactive
                try
                {
                  using (var stream = new NetworkStream(client.Client, ownsSocket: false))
-                 using (var protocol = await NegotiateServerAsync(Id + " C" + number + " " + remoteEndPoint, stream, formatterFactory(), options, cancel).ConfigureAwait(false))
+                 using (var protocol = await NegotiateServerAsync(capturedId.Value, stream, formatterFactory(), options, cancel).ConfigureAwait(false))
                  {
+                   capturedId.Value = protocol.ClientId;
+
                    var provider = providerFactory(protocol);
 
-                   ReceivedConnection();
+                   ReceivedConnection(idOverride: capturedId.Value);
 
                    try
                    {
@@ -325,7 +327,7 @@ namespace Qactive
 
                return new TcpClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
              })
-             .Finally(() => Shutdown(client.Client))
+             .Finally(() => Shutdown(client.Client, capturedId.Value))
              select result;
     }
 
@@ -348,7 +350,7 @@ namespace Qactive
       return protocol;
     }
 
-    private static async Task<IStreamQbservableProtocol> NegotiateServerAsync(string baseId, Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
+    private static async Task<IStreamQbservableProtocol> NegotiateServerAsync(object baseId, Stream stream, IRemotingFormatter formatter, QbservableServiceOptions serviceOptions, CancellationToken cancel)
     {
       Contract.Requires(stream != null);
       Contract.Requires(formatter != null);
@@ -398,7 +400,7 @@ namespace Qactive
       }
     }
 
-    private async void Shutdown(Socket socket)
+    private async void Shutdown(Socket socket, object id = null)
     {
       Contract.Requires(socket != null);
 
@@ -408,7 +410,7 @@ namespace Qactive
         {
           if (IsServer)
           {
-            Disconnecting();
+            Disconnecting(idOverride: id);
           }
           else
           {
@@ -450,7 +452,7 @@ namespace Qactive
             socket.Close();
           }
 
-          Disconnected();
+          Disconnected(idOverride: id);
         }
         else
         {
@@ -533,6 +535,16 @@ namespace Qactive
       }
 
       public IRemotingFormatter GetFormatter() => formatter;
+    }
+
+    private sealed class CapturedId
+    {
+      public CapturedId(object value)
+      {
+        Value = value;
+      }
+
+      public object Value { get; set; }
     }
   }
 }
