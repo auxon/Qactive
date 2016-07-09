@@ -32,9 +32,7 @@ namespace Qactive.Tests
     public bool Equals(Expression x, Expression y)
        => (x == null && y == null)
        || (x != null && y != null
-          && (reflectionNamesOnly
-              ? ExpressionEqualityComparer.ReflectionNamesOnly.Equals(x, y, visitor)
-              : ExpressionEqualityComparer.Exact.Equals(x, y, visitor)));
+          && ExpressionEqualityComparer.Equals(x, y, visitor));
 
     private bool ShallowEquals(Expression x, Expression y)
       => (x == null && y == null)

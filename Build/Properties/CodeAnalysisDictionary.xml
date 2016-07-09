@@ -13,6 +13,14 @@
       <Word>__</Word>
       <Word>___</Word>
       <Word>____</Word>
+      <Word>LabelTarget</Word>
+      <Word>SwitchCase</Word>
+      <Word>CatchBlock</Word>
+      <Word>ElementInit</Word>
+      <Word>MemberBinding</Word>
+      <Word>MemberAssignment</Word>
+      <Word>MemberMemberBinding</Word>
+      <Word>MemberListBinding</Word>
     </Recognized>
 
     <Compound>

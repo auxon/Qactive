@@ -8,7 +8,10 @@ namespace Qactive.Expressions
 {
   public sealed class ExpressionEqualityComparer : IEqualityComparer<Expression>
   {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "It's immutable.")]
     public static readonly ExpressionEqualityComparer Exact = new ExpressionEqualityComparer(reflectionNamesOnly: false);
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "It's immutable.")]
     public static readonly ExpressionEqualityComparer ReflectionNamesOnly = new ExpressionEqualityComparer(reflectionNamesOnly: true);
 
     private readonly bool reflectionNamesOnly;
@@ -21,11 +24,15 @@ namespace Qactive.Expressions
     public bool Equals(Expression x, Expression y)
       => Equals(x, y, new EqualityExpressionVisitor(ShallowEquals, TypeEquals, MemberEquals));
 
-    public bool Equals(Expression x, Expression y, EqualityExpressionVisitor visitor)
-      => visitor.ShallowEquals(x, y) && DeepEquals(x, y, visitor);
+    public static bool Equals(Expression first, Expression second, EqualityExpressionVisitor visitor)
+    {
+      Contract.Requires(visitor != null);
 
-    public bool ShallowEquals(Expression x, Expression y)
-      => NullsOrEquals(x, y, (f, s) => f.NodeType == s.NodeType && TypeEquals(GetRepresentativeType(f), GetRepresentativeType(s)));
+      return visitor.ShallowEquals(first, second) && DeepEquals(first, second, visitor);
+    }
+
+    public bool ShallowEquals(Expression first, Expression second)
+      => NullsOrEquals(first, second, (f, s) => f.NodeType == s.NodeType && TypeEquals(GetRepresentativeType(f), GetRepresentativeType(s)));
 
     public static Type GetRepresentativeType(Expression expression)
     {
@@ -45,18 +52,18 @@ namespace Qactive.Expressions
       return type;
     }
 
-    private bool DeepEquals(Expression x, Expression y, EqualityExpressionVisitor visitor)
+    private static bool DeepEquals(Expression first, Expression second, EqualityExpressionVisitor visitor)
     {
-      Contract.Requires((x == null && y == null) || (x != null && y != null));
+      Contract.Requires((first == null && second == null) || (first != null && second != null));
       Contract.Requires(visitor != null);
 
-      if (x == null && y == null)
+      if (first == null)
       {
         return true;
       }
 
-      visitor.SetOtherRoot(y);
-      visitor.Visit(x);
+      visitor.SetOtherRoot(second);
+      visitor.Visit(first);
 
       Contract.Assume(visitor.StackCount == 1);
 

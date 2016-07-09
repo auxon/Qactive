@@ -129,6 +129,7 @@ namespace Qactive
       return new TcpQactiveProvider(endPoint, transportInitializer);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Seems as simple as it's going to get.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The SocketAsyncEventArgs instance is either disposed before returning or by the observable's Finally operator.")]
     public override IObservable<TResult> Connect<TResult>(Func<IQbservableProtocol, Expression> prepareExpression)
     {
@@ -181,7 +182,7 @@ namespace Qactive
 
                                     var s = Observable.Using(
                                       () => new NetworkStream(e2.ConnectSocket, ownsSocket: false),
-                                      stream => ReadObservable<TResult>(stream, prepareExpression, cancel.Token))
+                                      stream => GetObservable<TResult>(stream, prepareExpression, cancel.Token))
                                       .SubscribeSafe(innerObserver);
 
                                     return new CompositeDisposable(s, cancel);
@@ -205,7 +206,7 @@ namespace Qactive
       }
     }
 
-    private IObservable<TResult> ReadObservable<TResult>(Stream stream, Func<IQbservableProtocol, Expression> prepareExpression, CancellationToken cancel)
+    private IObservable<TResult> GetObservable<TResult>(Stream stream, Func<IQbservableProtocol, Expression> prepareExpression, CancellationToken cancel)
     {
       Contract.Requires(stream != null);
       Contract.Requires(prepareExpression != null);
@@ -218,6 +219,7 @@ namespace Qactive
              select result;
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Seems as simple as it's going to get.")]
     public override IObservable<ClientTermination> Listen(QbservableServiceOptions options, Func<IQbservableProtocol, IParameterizedQbservableProvider> providerFactory)
     {
       return from listener in Observable.Return(new TcpListener(EndPoint))
@@ -251,84 +253,96 @@ namespace Qactive
                Stopped();
              })
              let capturedId = new CapturedId(Id + " C" + Interlocked.Increment(ref lastServerClientNumber) + " " + client.Client.RemoteEndPoint)
-             from result in Observable.StartAsync(async cancel =>
-             {
-               ReceivingConnection(idOverride: capturedId.Value);
-
-               // These default settings enable a proper graceful shutdown. DisconnectAsync is used instead of Close on the server-side to request 
-               // that the client terminates the connection ASAP. This is important because it prevents the server-side socket from going into a 
-               // TIME_WAIT state rather than the client. The linger option is meant to ensure that any outgoing data, such as an exception, is 
-               // completely transmitted to the client before the socket terminates. The seconds specified is arbitrary, though chosen to be large 
-               // enough to transfer any remaining data successfully and small enough to cause a timely disconnection. A custom prepareSocket 
-               // implementation can always change it via SetSocketOption, if necessary.
-               //
-               // https://msdn.microsoft.com/en-us/library/system.net.sockets.socket.disconnect(v=vs.110).aspx
-               client.LingerState.Enabled = true;
-               client.LingerState.LingerTime = LingerTimeInSeconds;
-
-               prepareSocket(client.Client);
-
-               var watch = Stopwatch.StartNew();
-
-               var localEndPoint = client.Client.LocalEndPoint;
-               var remoteEndPoint = client.Client.RemoteEndPoint;
-
-               var exceptions = new List<ExceptionDispatchInfo>();
-               var shutdownReason = QbservableProtocolShutdownReason.None;
-
-               try
-               {
-                 using (var stream = new NetworkStream(client.Client, ownsSocket: false))
-                 using (var protocol = await NegotiateServerAsync(capturedId.Value, stream, formatterFactory(), options, cancel).ConfigureAwait(false))
-                 {
-                   capturedId.Value = protocol.ClientId;
-
-                   var provider = providerFactory(protocol);
-
-                   ReceivedConnection(idOverride: capturedId.Value);
-
-                   try
-                   {
-                     await protocol.ExecuteServerAsync(provider).ConfigureAwait(false);
-                   }
-                   catch (OperationCanceledException)
-                   {
-                   }
-                   catch (Exception ex)
-                   {
-                     exceptions.Add(ExceptionDispatchInfo.Capture(ex));
-                   }
-                   finally
-                   {
-                     shutdownReason = protocol.ShutdownReason;
-                   }
-
-                   var protocolExceptions = protocol.Exceptions;
-
-                   if (protocolExceptions != null)
-                   {
-                     foreach (var exception in protocolExceptions)
-                     {
-                       exceptions.Add(exception);
-                     }
-                   }
-                 }
-               }
-               catch (OperationCanceledException)
-               {
-                 shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationCanceled;
-               }
-               catch (Exception ex)
-               {
-                 shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationError;
-
-                 exceptions.Add(ExceptionDispatchInfo.Capture(ex));
-               }
-
-               return new TcpClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
-             })
+             from termination in Observable.StartAsync(cancel => AcceptAsync(client, capturedId, options, providerFactory, cancel))
              .Finally(() => Shutdown(client.Client, capturedId.Value))
-             select result;
+             select termination;
+    }
+
+    private async Task<TcpClientTermination> AcceptAsync(
+      TcpClient client,
+      CapturedId capturedId,
+      QbservableServiceOptions options,
+      Func<IQbservableProtocol, IParameterizedQbservableProvider> providerFactory,
+      CancellationToken cancel)
+    {
+      Contract.Requires(client != null);
+      Contract.Requires(capturedId != null);
+      Contract.Requires(options != null);
+      Contract.Requires(providerFactory != null);
+
+      ReceivingConnection(idOverride: capturedId.Value);
+
+      // These default settings enable a proper graceful shutdown. DisconnectAsync is used instead of Close on the server-side to request 
+      // that the client terminates the connection ASAP. This is important because it prevents the server-side socket from going into a 
+      // TIME_WAIT state rather than the client. The linger option is meant to ensure that any outgoing data, such as an exception, is 
+      // completely transmitted to the client before the socket terminates. The seconds specified is arbitrary, though chosen to be large 
+      // enough to transfer any remaining data successfully and small enough to cause a timely disconnection. A custom prepareSocket 
+      // implementation can always change it via SetSocketOption, if necessary.
+      //
+      // https://msdn.microsoft.com/en-us/library/system.net.sockets.socket.disconnect(v=vs.110).aspx
+      client.LingerState.Enabled = true;
+      client.LingerState.LingerTime = LingerTimeInSeconds;
+
+      prepareSocket(client.Client);
+
+      var watch = Stopwatch.StartNew();
+
+      var localEndPoint = client.Client.LocalEndPoint;
+      var remoteEndPoint = client.Client.RemoteEndPoint;
+
+      var exceptions = new List<ExceptionDispatchInfo>();
+      var shutdownReason = QbservableProtocolShutdownReason.None;
+
+      try
+      {
+        using (var stream = new NetworkStream(client.Client, ownsSocket: false))
+        using (var protocol = await NegotiateServerAsync(capturedId.Value, stream, formatterFactory(), options, cancel).ConfigureAwait(false))
+        {
+          capturedId.Value = protocol.ClientId;
+
+          var provider = providerFactory(protocol);
+
+          ReceivedConnection(idOverride: capturedId.Value);
+
+          try
+          {
+            await protocol.ExecuteServerAsync(provider).ConfigureAwait(false);
+          }
+          catch (OperationCanceledException)
+          {
+          }
+          catch (Exception ex)
+          {
+            exceptions.Add(ExceptionDispatchInfo.Capture(ex));
+          }
+          finally
+          {
+            shutdownReason = protocol.ShutdownReason;
+          }
+
+          var protocolExceptions = protocol.Exceptions;
+
+          if (protocolExceptions != null)
+          {
+            foreach (var exception in protocolExceptions)
+            {
+              exceptions.Add(exception);
+            }
+          }
+        }
+      }
+      catch (OperationCanceledException)
+      {
+        shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationCanceled;
+      }
+      catch (Exception ex)
+      {
+        shutdownReason = QbservableProtocolShutdownReason.ProtocolNegotiationError;
+
+        exceptions.Add(ExceptionDispatchInfo.Capture(ex));
+      }
+
+      return new TcpClientTermination(localEndPoint, remoteEndPoint, watch.Elapsed, shutdownReason, exceptions);
     }
 
     private async Task<IStreamQbservableProtocol> NegotiateClientAsync(Stream stream, IRemotingFormatter formatter, CancellationToken cancel)
@@ -464,7 +478,7 @@ namespace Qactive
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The SocketAsyncEventArgs instance is either disposed before returning or by the observable's Finally operator.")]
-    private async Task DisconnectAsync(Socket socket)
+    private static async Task DisconnectAsync(Socket socket)
     {
       Contract.Requires(socket != null);
 

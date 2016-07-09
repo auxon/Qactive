@@ -8,6 +8,7 @@ using System.Reflection;
 
 namespace Qactive.Expressions
 {
+  [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Visitor pattern.")]
   public class EqualityExpressionVisitor : ExpressionVisitor
   {
     private readonly Stack<Expression> others = new Stack<Expression>();
@@ -55,16 +56,12 @@ namespace Qactive.Expressions
 
     internal bool ShallowEquals(Expression first, Expression second) => shallowEquals(first, second);
 
-    internal bool TypeEquals(Type first, Type second) => typeEquals(first, second);
-
-    internal bool MemberEquals(MemberInfo first, MemberInfo second) => memberEquals(first, second);
-
-    public void Break(IEnumerable<Expression> inequalityNodes, IEnumerable<Expression> inequalityOthers)
+    public void Break(IEnumerable<Expression> newInequalityNodes, IEnumerable<Expression> newInequalityOthers)
     {
       AreEqual = false;
 
-      this.inequalityNodes = inequalityNodes.ToList().AsReadOnly();
-      this.inequalityOthers = inequalityOthers.ToList().AsReadOnly();
+      this.inequalityNodes = newInequalityNodes.ToList().AsReadOnly();
+      this.inequalityOthers = newInequalityOthers.ToList().AsReadOnly();
     }
 
     internal void SetOtherRoot(Expression other)
@@ -149,18 +146,18 @@ namespace Qactive.Expressions
       }
     }
 
-    private void Visit<TExpression>(ICollection<TExpression> nodes, ICollection<TExpression> others)
+    private void Visit<TExpression>(ICollection<TExpression> nodes, ICollection<TExpression> otherNodes)
       where TExpression : Expression
     {
       if (AreEqual)
       {
-        if (!(ExpressionEqualityComparer.NullsOrEquals(nodes, others, (n, o) => n.Count == o.Count)))
+        if (!(ExpressionEqualityComparer.NullsOrEquals(nodes, otherNodes, (n, o) => n.Count == o.Count)))
         {
-          Break(nodes, others);
+          Break(nodes, otherNodes);
         }
-        else if (nodes != null && others != null)
+        else if (nodes != null && otherNodes != null)
         {
-          foreach (var pair in nodes.Zip(others, (node, other) => new { node, other }))
+          foreach (var pair in nodes.Zip(otherNodes, (node, other) => new { node, other }))
           {
             Visit(pair.node, pair.other);
           }
@@ -261,6 +258,7 @@ namespace Qactive.Expressions
       throw new InvalidOperationException("Bug: CatchBlock must not be visited since it's compared within the expressions that contain it.");
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Seems unavoidable.")]
     protected override Expression VisitTry(TryExpression node)
       => VisitIfEqual(node, other => ExpressionEqualityComparer.NullsOrEquals(node.Handlers, other.Handlers, (n, o) => n.Select(h => h.Test).SequenceEqual(o.Select(h => h.Test))),
                             other => Visit((node.Handlers ?? Enumerable.Empty<CatchBlock>()).Select(n => n.Body).ToList(), (other.Handlers ?? Enumerable.Empty<CatchBlock>()).Select(n => n.Body).ToList()),
@@ -311,26 +309,26 @@ namespace Qactive.Expressions
       throw new InvalidOperationException("Bug: MemberListBinding must not be visited since it's compared within the expressions that contain it.");
     }
 
-    private bool Equals(LabelTarget target, LabelTarget other)
+    private static bool Equals(LabelTarget target, LabelTarget other)
       => ExpressionEqualityComparer.NullsOrEquals(target, other, (n, o) => n.Name == o.Name && n.Type == o.Type);
 
-    private bool Equals(ICollection<MemberBinding> binding, ICollection<MemberBinding> other)
+    private static bool Equals(ICollection<MemberBinding> binding, ICollection<MemberBinding> other)
       => ExpressionEqualityComparer.NullsOrEquals(binding, other, (n, o) => n.Count == o.Count && n.Zip(o, Equals).All(b => b));
 
-    private bool Equals(MemberBinding binding, MemberBinding other)
+    private static bool Equals(MemberBinding binding, MemberBinding other)
       => ExpressionEqualityComparer.NullsOrEquals(binding, other, (n, o) => n.BindingType == o.BindingType
                                                                          && n.Member == o.Member
                                                                          && (EqualsIfType<MemberMemberBinding>(n, o, Equals)
                                                                            ?? EqualsIfType<MemberListBinding>(n, o, Equals)
                                                                            ?? false));
 
-    private bool Equals(MemberMemberBinding binding, MemberMemberBinding other)
+    private static bool Equals(MemberMemberBinding binding, MemberMemberBinding other)
       => Equals(binding.Bindings, other.Bindings);
 
-    private bool Equals(MemberListBinding binding, MemberListBinding other)
+    private static bool Equals(MemberListBinding binding, MemberListBinding other)
       => ExpressionEqualityComparer.NullsOrEquals(binding.Initializers, other.Initializers, (n, o) => n.Select(i => i.AddMethod).SequenceEqual(o.Select(i => i.AddMethod)));
 
-    private bool? EqualsIfType<T>(object first, object second, Func<T, T, bool> comparer)
+    private static bool? EqualsIfType<T>(object first, object second, Func<T, T, bool> comparer)
       where T : class
     {
       var x = first as T;
@@ -339,7 +337,7 @@ namespace Qactive.Expressions
       return x != null && y != null ? comparer(x, y) : (bool?)null;
     }
 
-    private ICollection<Expression> GetExpressions(ReadOnlyCollection<MemberBinding> bindings)
+    private static ICollection<Expression> GetExpressions(ReadOnlyCollection<MemberBinding> bindings)
       => bindings.OfType<MemberAssignment>().Select(assignment => assignment.Expression)
                  .Concat(
          bindings.OfType<MemberListBinding>().SelectMany(binding => binding.Initializers).SelectMany(init => init.Arguments))
