@@ -131,6 +131,17 @@
     <Compile Include="TestService{TSource}.cs" />
     <Compile Include="TestExpressionVisitor.cs" />
     <Compile Include="TransportStream.cs" />
+    <Compile Include="WebSockets\Operators\CustomTests.cs" />
+    <Compile Include="WebSockets\Operators\GroupJoinTests.cs" />
+    <Compile Include="WebSockets\Operators\JoinTests.cs" />
+    <Compile Include="WebSockets\Operators\SelectTests.cs" />
+    <Compile Include="WebSockets\Operators\WhereTests.cs" />
+    <Compile Include="WebSockets\Queries\WebSocketComplexTests.cs" />
+    <Compile Include="WebSockets\Queries\WebSocketDuplexTests.cs" />
+    <Compile Include="WebSockets\Queries\WebSocketNestedQueryTests.cs" />
+    <Compile Include="WebSockets\ServiceOptions\VisitorTests.cs" />
+    <Compile Include="WebSockets\WebSocketTestService.cs" />
+    <Compile Include="WebSockets\WebSocketTestService{TSource}.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Qactive.Expressions\Qactive.Expressions.csproj">
@@ -144,6 +155,10 @@
     <ProjectReference Include="..\..\Source\Qactive.Providers.Tcp\Qactive.Providers.Tcp.csproj">
       <Project>{33525618-7ed6-4b4e-a4b7-945beaa372ff}</Project>
       <Name>Qactive.Providers.Tcp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Source\Qactive.Providers.WebSockets\Qactive.Providers.WebSockets.csproj">
+      <Project>{72a4c22f-f2fd-4d4b-b34f-3840327819ad}</Project>
+      <Name>Qactive.Providers.WebSockets</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Source\Qactive\Qactive.csproj">
       <Project>{9b68408d-1974-4f76-9c89-eccd466a25e0}</Project>
