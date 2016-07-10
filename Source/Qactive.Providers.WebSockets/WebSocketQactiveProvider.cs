@@ -20,6 +20,8 @@ namespace Qactive
 {
   internal sealed class WebSocketQactiveProvider : QactiveProvider
   {
+    private const string protocol = "Qactive";
+
     public Uri Uri { get; }
 
     protected override object Id
@@ -135,6 +137,7 @@ namespace Qactive
       try
       {
         socket = new ClientWebSocket();
+        socket.Options.AddSubProtocol(protocol);
 
         prepareSocket(socket);
 
@@ -213,7 +216,7 @@ namespace Qactive
                Started();
              })
              from context in Observable.FromAsync(listener.GetContextAsync)
-                                       .SelectMany(context => context.AcceptWebSocketAsync("Qactive"))
+                                       .SelectMany(context => context.AcceptWebSocketAsync(protocol))
                                        .Repeat()
              .Finally(() =>
              {
