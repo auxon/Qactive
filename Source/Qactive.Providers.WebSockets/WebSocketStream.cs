@@ -44,7 +44,11 @@ namespace Qactive
       => socket.SendAsync(new ArraySegment<byte>(buffer, offset, count), WebSocketMessageType.Binary, false, cancellationToken);
 
     public override Task FlushAsync(CancellationToken cancellationToken)
-      => Task.CompletedTask;
+#if ASYNCAWAIT
+      => Task.FromResult(true);
+#else
+      => TaskEx.FromResult(true);
+#endif
 
     public override int ReadByte()
     {

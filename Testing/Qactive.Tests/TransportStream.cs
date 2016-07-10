@@ -62,9 +62,7 @@ namespace Qactive.Tests
     {
       Write(buffer, offset, count);
 
-#if TPL
-      return Task.CompletedTask;
-#elif ASYNCAWAIT
+#if ASYNCAWAIT
       return Task.FromResult(true);
 #else
       return TaskEx.FromResult(true);

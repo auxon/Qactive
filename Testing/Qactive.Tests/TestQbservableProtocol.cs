@@ -56,9 +56,7 @@ namespace Qactive
     {
       other.OnNext(message);
 
-#if TPL
-      return Task.CompletedTask;
-#elif ASYNCAWAIT
+#if ASYNCAWAIT
       return Task.FromResult(true);
 #else
       return TaskEx.FromResult(true);
@@ -78,15 +76,11 @@ namespace Qactive
       }
 
       public override Task InitializeAsync(QbservableProtocol<IObservable<TestMessage>, TestMessage> protocol, CancellationToken cancel)
-      {
-#if TPL
-        return Task.CompletedTask;
-#elif ASYNCAWAIT
-        return Task.FromResult(true);
+#if ASYNCAWAIT
+        => Task.FromResult(true);
 #else
-        return TaskEx.FromResult(true);
+        => TaskEx.FromResult(true);
 #endif
-      }
 
       protected override TestMessage CreateEnumeratorError(DuplexCallbackId id, ExceptionDispatchInfo error)
         => new TestDuplexMessage(QbservableProtocolMessageKind.DuplexEnumeratorErrorResponse, id, error);
@@ -132,15 +126,11 @@ namespace Qactive
       }
 
       public override Task InitializeAsync(QbservableProtocol<IObservable<TestMessage>, TestMessage> protocol, CancellationToken cancel)
-      {
-#if TPL
-        return Task.CompletedTask;
-#elif ASYNCAWAIT
-        return Task.FromResult(true);
+#if ASYNCAWAIT
+        => Task.FromResult(true);
 #else
-        return TaskEx.FromResult(true);
+        => TaskEx.FromResult(true);
 #endif
-      }
 
       protected override TestMessage CreateSubscribe(DuplexCallbackId clientId)
         => new TestDuplexMessage(QbservableProtocolMessageKind.DuplexSubscribe, clientId);

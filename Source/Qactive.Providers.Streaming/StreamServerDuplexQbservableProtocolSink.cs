@@ -34,9 +34,7 @@ namespace Qactive
     {
       Contract.Assume(this.protocol == protocol);
 
-#if TPL
-      return Task.CompletedTask;
-#elif ASYNCAWAIT
+#if ASYNCAWAIT
       return Task.FromResult(true);
 #else
       return TaskEx.FromResult(true);
