@@ -4,7 +4,6 @@ using System.Diagnostics.Contracts;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.ExceptionServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Qactive
@@ -13,7 +12,6 @@ namespace Qactive
   {
     private readonly ConcurrentQueue<Tuple<Func<Task>, TaskCompletionSource<bool>>> q = new ConcurrentQueue<Tuple<Func<Task>, TaskCompletionSource<bool>>>();
     private readonly Subject<ExceptionDispatchInfo> unhandledExceptions = new Subject<ExceptionDispatchInfo>();
-    private int isDequeueing;
 
     public IObservable<ExceptionDispatchInfo> UnhandledExceptions
     {
@@ -31,8 +29,6 @@ namespace Qactive
     {
       Contract.Invariant(q != null);
       Contract.Invariant(unhandledExceptions != null);
-      Contract.Invariant(isDequeueing >= 0);
-      Contract.Invariant(isDequeueing <= 1);
     }
 
     public Task EnqueueAsync(Func<Task> actionAsync)
@@ -51,7 +47,7 @@ namespace Qactive
 
     private async void EnsureDequeueing()
     {
-      while (q.Count > 0 && Interlocked.CompareExchange(ref isDequeueing, 1, 0) == 0)
+      while (q.Count > 0)
       {
         Tuple<Func<Task>, TaskCompletionSource<bool>> data;
 
@@ -81,8 +77,6 @@ namespace Qactive
             unhandledExceptions.OnNext(ExceptionDispatchInfo.Capture(ex));
           }
         }
-
-        isDequeueing = 0;
       }
     }
 
