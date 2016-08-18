@@ -22,8 +22,12 @@ namespace Qactive.Expressions
       TargetType = expression.Target.Type;
     }
 
-    internal override Expression Convert() => Expression.Label(
-                                                Expression.Label(TargetType, TargetName),
-                                                DefaultValue.TryConvert());
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitLabel(this);
+
+    internal override Expression ConvertBack()
+      => Expression.Label(
+          Expression.Label(TargetType, TargetName),
+          DefaultValue.TryConvertBack());
   }
 }

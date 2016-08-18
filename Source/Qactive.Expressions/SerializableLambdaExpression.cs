@@ -25,11 +25,15 @@ namespace Qactive.Expressions
       TailCall = expression.TailCall;
     }
 
-    internal override Expression Convert() => Expression.Lambda(
-                                                Type,
-                                                Body.TryConvert(),
-                                                Name,
-                                                TailCall,
-                                                Parameters.TryConvert<ParameterExpression>());
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitLambda(this);
+
+    internal override Expression ConvertBack()
+      => Expression.Lambda(
+          Type,
+          Body.TryConvertBack(),
+          Name,
+          TailCall,
+          Parameters.TryConvert<ParameterExpression>());
   }
 }

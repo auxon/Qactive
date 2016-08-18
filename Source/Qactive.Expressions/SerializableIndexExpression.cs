@@ -24,9 +24,13 @@ namespace Qactive.Expressions
       Object = converter.TryConvert(expression.Object);
     }
 
-    internal override Expression Convert() => Expression.MakeIndex(
-                                                Object.TryConvert(),
-                                                Indexer,
-                                                Arguments.TryConvert());
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitIndex(this);
+
+    internal override Expression ConvertBack()
+      => Expression.MakeIndex(
+          Object.TryConvertBack(),
+          Indexer,
+          Arguments.TryConvert());
   }
 }

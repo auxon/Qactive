@@ -19,7 +19,11 @@ namespace Qactive.Expressions
       Variables = converter.TryConvert<SerializableParameterExpression>(expression.Variables);
     }
 
-    internal override Expression Convert() => Expression.RuntimeVariables(
-                                                Variables.TryConvert<ParameterExpression>());
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitRuntimeVariables(this);
+
+    internal override Expression ConvertBack()
+      => Expression.RuntimeVariables(
+          Variables.TryConvert<ParameterExpression>());
   }
 }

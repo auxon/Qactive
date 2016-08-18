@@ -21,8 +21,12 @@ namespace Qactive.Expressions
       Member = converter.Convert(expression.Member);
     }
 
-    internal override Expression Convert() => Expression.MakeMemberAccess(
-                                                Expr.TryConvert(),
-                                                SerializableExpressionConverter.Convert(Member));
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitMember(this);
+
+    internal override Expression ConvertBack()
+      => Expression.MakeMemberAccess(
+          Expr.TryConvertBack(),
+          SerializableExpressionConverter.Convert(Member));
   }
 }

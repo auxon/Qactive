@@ -23,9 +23,13 @@ namespace Qactive.Expressions
       Variables = converter.TryConvert<SerializableParameterExpression>(expression.Variables);
     }
 
-    internal override Expression Convert() => Expression.Block(
-                                                Result.Type,
-                                                Variables.TryConvert<ParameterExpression>(),
-                                                Expressions.TryConvert());
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitBlock(this);
+
+    internal override Expression ConvertBack()
+      => Expression.Block(
+          Result.Type,
+          Variables.TryConvert<ParameterExpression>(),
+          Expressions.TryConvert());
   }
 }

@@ -17,6 +17,12 @@ namespace Qactive.Expressions
       Value = expression.Value;
     }
 
-    internal override Expression Convert() => Expression.Constant(Value, Type);
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitConstant(this);
+
+    internal override Expression ConvertBack()
+      => Expression.Constant(
+          Value,
+          Type);
   }
 }

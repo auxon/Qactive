@@ -145,6 +145,7 @@
     </Compile>
     <Compile Include="EqualityExpressionVisitor.cs" />
     <Compile Include="ExpressionEqualityComparer.cs" />
+    <Compile Include="SerializableExpressionStringBuilder.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerializableBinaryExpression.cs" />
@@ -155,6 +156,7 @@
     <Compile Include="SerializableExpression.cs" />
     <Compile Include="SerializableExpressionConverter.cs" />
     <Compile Include="SerializableExpressionExtensions.cs" />
+    <Compile Include="SerializableExpressionVisitor.cs" />
     <Compile Include="SerializableGotoExpression.cs" />
     <Compile Include="SerializableIndexExpression.cs" />
     <Compile Include="SerializableInvocationExpression.cs" />

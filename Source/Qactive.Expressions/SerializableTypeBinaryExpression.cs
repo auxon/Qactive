@@ -20,8 +20,12 @@ namespace Qactive.Expressions
       TypeOperand = expression.TypeOperand;
     }
 
-    internal override Expression Convert() => Expression.TypeIs(
-                                                Expr.TryConvert(),
-                                                TypeOperand);
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitTypeBinary(this);
+
+    internal override Expression ConvertBack()
+      => Expression.TypeIs(
+          Expr.TryConvertBack(),
+          TypeOperand);
   }
 }

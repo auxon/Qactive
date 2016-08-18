@@ -26,9 +26,13 @@ namespace Qactive.Expressions
       ContinueLabelName = expression.ContinueLabel.Name;
     }
 
-    internal override Expression Convert() => Expression.Loop(
-                                                Body.TryConvert(),
-                                                Expression.Label(BreakLabelType, BreakLabelName),
-                                                Expression.Label(ContinueLabelType, ContinueLabelName));
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitLoop(this);
+
+    internal override Expression ConvertBack()
+      => Expression.Loop(
+          Body.TryConvertBack(),
+          Expression.Label(BreakLabelType, BreakLabelName),
+          Expression.Label(ContinueLabelType, ContinueLabelName));
   }
 }

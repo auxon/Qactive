@@ -13,6 +13,11 @@ namespace Qactive.Expressions
       Contract.Requires(expression != null);
     }
 
-    internal override Expression Convert() => Expression.Default(Type);
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitDefault(this);
+
+    internal override Expression ConvertBack()
+      => Expression.Default(
+          Type);
   }
 }

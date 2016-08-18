@@ -21,10 +21,14 @@ namespace Qactive.Expressions
       Operand = converter.TryConvert(expression.Operand);
     }
 
-    internal override Expression Convert() => Expression.MakeUnary(
-                                                NodeType,
-                                                Operand.TryConvert(),
-                                                Type,
-                                                SerializableExpressionConverter.Convert(Method));
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitUnary(this);
+
+    internal override Expression ConvertBack()
+      => Expression.MakeUnary(
+          NodeType,
+          Operand.TryConvertBack(),
+          Type,
+          SerializableExpressionConverter.Convert(Method));
   }
 }

@@ -27,12 +27,16 @@ namespace Qactive.Expressions
       Right = converter.TryConvert(expression.Right);
     }
 
-    internal override Expression Convert() => Expression.MakeBinary(
-                                                NodeType,
-                                                Left.TryConvert(),
-                                                Right.TryConvert(),
-                                                IsLiftedToNull,
-                                                SerializableExpressionConverter.Convert(Method),
-                                                Conversion.TryConvert<LambdaExpression>());
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitBinary(this);
+
+    internal override Expression ConvertBack()
+      => Expression.MakeBinary(
+          NodeType,
+          Left.TryConvertBack(),
+          Right.TryConvertBack(),
+          IsLiftedToNull,
+          SerializableExpressionConverter.Convert(Method),
+          Conversion.TryConvertBack<LambdaExpression>());
   }
 }

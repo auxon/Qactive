@@ -32,15 +32,19 @@ namespace Qactive.Expressions
         .ToList();
     }
 
-    internal override Expression Convert() => Expression.MakeTry(
-                                                Type,
-                                                Body.TryConvert(),
-                                                Finally.TryConvert(),
-                                                Fault.TryConvert(),
-                                                Handlers.Select(h => Expression.MakeCatchBlock(
-                                                  h.Item3,
-                                                  h.Item4.TryConvert<ParameterExpression>(),
-                                                  h.Item1.TryConvert(),
-                                                  h.Item2.TryConvert())));
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitTry(this);
+
+    internal override Expression ConvertBack()
+      => Expression.MakeTry(
+          Type,
+          Body.TryConvertBack(),
+          Finally.TryConvertBack(),
+          Fault.TryConvertBack(),
+          Handlers.Select(h => Expression.MakeCatchBlock(
+            h.Item3,
+            h.Item4.TryConvertBack<ParameterExpression>(),
+            h.Item1.TryConvertBack(),
+            h.Item2.TryConvertBack())));
   }
 }

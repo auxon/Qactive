@@ -176,6 +176,12 @@
     <Compile Include="..\Qactive.Expressions\SerializableExpressionExtensions.cs">
       <Link>SerializableExpressionExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableExpressionStringBuilder.cs">
+      <Link>SerializableExpressionStringBuilder.cs</Link>
+    </Compile>
+    <Compile Include="..\Qactive.Expressions\SerializableExpressionVisitor.cs">
+      <Link>SerializableExpressionVisitor.cs</Link>
+    </Compile>
     <Compile Include="..\Qactive.Expressions\SerializableGotoExpression.cs">
       <Link>SerializableGotoExpression.cs</Link>
     </Compile>

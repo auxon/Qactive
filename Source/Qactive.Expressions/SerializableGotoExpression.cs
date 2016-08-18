@@ -24,10 +24,14 @@ namespace Qactive.Expressions
       Value = converter.TryConvert(expression.Value);
     }
 
-    internal override Expression Convert() => Expression.MakeGoto(
-                                                Kind,
-                                                Expression.Label(TargetType, TargetName),
-                                                Value.TryConvert(),
-                                                Type);
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitGoto(this);
+
+    internal override Expression ConvertBack()
+      => Expression.MakeGoto(
+          Kind,
+          Expression.Label(TargetType, TargetName),
+          Value.TryConvertBack(),
+          Type);
   }
 }

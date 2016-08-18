@@ -22,9 +22,12 @@ namespace Qactive.Expressions
       Bindings = expression.Bindings.Select(converter.Convert).ToList();
       NewExpression = converter.TryConvert<SerializableNewExpression>(expression.NewExpression);
     }
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitMemberInit(this);
 
-    internal override Expression Convert() => Expression.MemberInit(
-                                                NewExpression.TryConvert<NewExpression>(),
-                                                Bindings.Select(SerializableExpressionConverter.Convert));
+    internal override Expression ConvertBack()
+      => Expression.MemberInit(
+          NewExpression.TryConvertBack<NewExpression>(),
+          Bindings.Select(SerializableExpressionConverter.Convert));
   }
 }

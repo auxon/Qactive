@@ -9,6 +9,8 @@ namespace Qactive.Expressions
   {
     public readonly string Name;
 
+    public bool IsByRef => Type.IsByRef;
+
     public SerializableParameterExpression(ParameterExpression expression)
       : base(expression)
     {
@@ -17,8 +19,12 @@ namespace Qactive.Expressions
       Name = expression.Name;
     }
 
-    internal override Expression Convert() => Expression.Parameter(
-                                                Type,
-                                                Name);
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitParameter(this);
+
+    internal override Expression ConvertBack()
+      => Expression.Parameter(
+          Type,
+          Name);
   }
 }

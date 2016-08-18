@@ -27,11 +27,15 @@ namespace Qactive.Expressions
       SwitchValue = converter.TryConvert(expression.SwitchValue);
     }
 
-    internal override Expression Convert() => Expression.Switch(
-                                                Type,
-                                                SwitchValue.TryConvert(),
-                                                DefaultBody.TryConvert(),
-                                                SerializableExpressionConverter.Convert(Comparison),
-                                                Cases.Select(c => Expression.SwitchCase(c.Item1.TryConvert(), c.Item2.TryConvert())));
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitSwitch(this);
+
+    internal override Expression ConvertBack()
+      => Expression.Switch(
+          Type,
+          SwitchValue.TryConvertBack(),
+          DefaultBody.TryConvertBack(),
+          SerializableExpressionConverter.Convert(Comparison),
+          Cases.Select(c => Expression.SwitchCase(c.Item1.TryConvertBack(), c.Item2.TryConvert())));
   }
 }

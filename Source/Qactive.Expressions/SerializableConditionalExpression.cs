@@ -22,10 +22,14 @@ namespace Qactive.Expressions
       Test = converter.TryConvert(expression.Test);
     }
 
-    internal override Expression Convert() => Expression.Condition(
-                                                Test.TryConvert(),
-                                                IfTrue.TryConvert(),
-                                                IfFalse.TryConvert(),
-                                                Type);
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitConditional(this);
+
+    internal override Expression ConvertBack()
+      => Expression.Condition(
+          Test.TryConvertBack(),
+          IfTrue.TryConvertBack(),
+          IfFalse.TryConvertBack(),
+          Type);
   }
 }

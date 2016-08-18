@@ -179,7 +179,7 @@ namespace Qactive.Expressions
     }
 
     public static Expression TryConvert(SerializableExpression expression)
-      => expression.TryConvert();
+      => expression.TryConvertBack();
 
     // Workaround for a bug deserializing closed generic methods.
     // https://connect.microsoft.com/VisualStudio/feedback/details/736993/bound-generic-methodinfo-throws-argumentnullexception-on-deserialization
@@ -285,7 +285,7 @@ namespace Qactive.Expressions
       switch (data.Item2)
       {
         case MemberBindingType.Assignment:
-          return Expression.Bind(Convert(data.Item1), data.Item3.TryConvert());
+          return Expression.Bind(Convert(data.Item1), data.Item3.TryConvertBack());
         case MemberBindingType.ListBinding:
           return Expression.ListBind(Convert(data.Item1), data.Item4.Select(i => Expression.ElementInit(Convert(i.Item1), i.Item2.TryConvert())));
         case MemberBindingType.MemberBinding:

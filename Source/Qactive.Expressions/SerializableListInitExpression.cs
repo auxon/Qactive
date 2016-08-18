@@ -23,8 +23,12 @@ namespace Qactive.Expressions
       NewExpression = converter.TryConvert<SerializableNewExpression>(expression.NewExpression);
     }
 
-    internal override Expression Convert() => Expression.ListInit(
-                                                NewExpression.TryConvert<NewExpression>(),
-                                                Initializers.Select(i => Expression.ElementInit(SerializableExpressionConverter.Convert(i.Item1), i.Item2.TryConvert())));
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitListInit(this);
+
+    internal override Expression ConvertBack()
+      => Expression.ListInit(
+          NewExpression.TryConvertBack<NewExpression>(),
+          Initializers.Select(i => Expression.ElementInit(SerializableExpressionConverter.Convert(i.Item1), i.Item2.TryConvert())));
   }
 }

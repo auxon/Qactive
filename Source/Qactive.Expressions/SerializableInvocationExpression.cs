@@ -21,8 +21,12 @@ namespace Qactive.Expressions
       Expr = converter.TryConvert(expression.Expression);
     }
 
-    internal override Expression Convert() => Expression.Invoke(
-                                                Expr.TryConvert(),
-                                                Arguments.TryConvert());
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitInvocation(this);
+
+    internal override Expression ConvertBack()
+      => Expression.Invoke(
+          Expr.TryConvertBack(),
+          Arguments.TryConvert());
   }
 }

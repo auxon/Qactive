@@ -25,11 +25,15 @@ namespace Qactive.Expressions
       Members = converter.TryConvert(expression.Members);
     }
 
-    internal override Expression Convert() => Members.Count == 0
-                                            ? Expression.New(Constructor, Arguments.TryConvert())
-                                            : Expression.New(
-                                                Constructor,
-                                                Arguments.TryConvert(),
-                                                Members.Select(SerializableExpressionConverter.Convert));
+    internal override void Accept(SerializableExpressionVisitor visitor)
+      => visitor.VisitNew(this);
+
+    internal override Expression ConvertBack()
+      => Members.Count == 0
+       ? Expression.New(Constructor, Arguments.TryConvert())
+       : Expression.New(
+          Constructor,
+          Arguments.TryConvert(),
+          Members.Select(SerializableExpressionConverter.Convert));
   }
 }

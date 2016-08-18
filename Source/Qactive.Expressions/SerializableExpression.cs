@@ -38,14 +38,19 @@ namespace Qactive.Expressions
      * 
      * Expression variable 'p' of type 'System.Int32' referenced from scope '', but it is not defined
      */
-    internal Expression ConvertWithCache()
+    internal Expression ConvertBackWithCache()
     {
       Contract.Ensures(Contract.Result<Expression>() != null);
 
-      return converted ?? (converted = Convert());
+      return converted ?? (converted = ConvertBack());
     }
 
-    internal abstract Expression Convert();
+    internal abstract void Accept(SerializableExpressionVisitor visitor);
+
+    internal abstract Expression ConvertBack();
+
+    public override string ToString()
+      => SerializableExpressionStringBuilder.ExpressionToString(this);
   }
 
   [ContractClassFor(typeof(SerializableExpression))]
@@ -56,7 +61,7 @@ namespace Qactive.Expressions
     {
     }
 
-    internal override Expression Convert()
+    internal override Expression ConvertBack()
     {
       Contract.Ensures(Contract.Result<Expression>() != null);
       return null;
