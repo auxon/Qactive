@@ -24,7 +24,7 @@ A reactive queryable observable framework.
 > Runtimes: .NET Framework 4.6.1; 4.5.2; 4.0
 
 ## Overview
-Qactive builds on Reactive Extension's queryable observable providers, enabling you to write elegant reactive queries that execute server-side, even though they are written on the client.
+Qactive builds on Reactive Extension's queryable observable providers, enabling you to write elegant reactive queries in LINQ that execute server-side, even though they are written on the client.
 Qactive makes the extremely powerful act of querying a reactive service as easy as writing a typical Rx query.
 
 More specifically, Qactive enables you to easily expose `IQbservable<T>` services for clients to query. When a client defines a query and subscribes, a connection is made to the server and the 
@@ -39,7 +39,7 @@ For more information, see [this series of blog posts](http://davesexton.com/blog
 > it hasn't been fully considered yet. Do not expose a Qbservable service on a public server without 
 > taking the necessary precautions to secure it first.
 
-> See [Security Guidelines](Artifacts/Security Guidelines.md) for more information.
+> See [Security Guidelines](Artifacts/Security%20Guidelines.md) for more information.
 
 ## Features
 
