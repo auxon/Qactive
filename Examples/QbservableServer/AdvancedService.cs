@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Reactive.Linq;
@@ -25,7 +26,11 @@ namespace QbservableServer
           (from arguments in request.Do((IList<FeedServiceArgument> args) => ConsoleTrace.WriteLine(ConsoleColor.DarkCyan, "Advanced service received {0} arguments.", args.Count))
            from feed in arguments
            from _ in Observable.Timer(TimeSpan.Zero, TimeSpan.FromMinutes(1))
-           from item in Observable.Using(() => new HttpClient(), client => client.GetStreamAsync(feed.Url).ToObservable().Select(feed => SyndicationFeed.Load(XmlReader.Create(feed))))
+           from item in Observable.Using(() => new HttpClient(),
+            client => client.GetStreamAsync(feed.Url)
+                            .ToObservable()
+                            .Select(TryRead)
+                            .Where(feed => feed != null))
            select new FeedItem()
            {
              FeedUrl = feed.Url,
@@ -46,6 +51,20 @@ namespace QbservableServer
         },
         ex => ConsoleTrace.WriteLine(ConsoleColor.Red, "Advanced fatal service error: {0}", ex.Message),
         () => Console.WriteLine("This will never be printed because a service host never completes."));
+    }
+
+    private SyndicationFeed TryRead(Stream feed)
+    {
+      try
+      {
+        return SyndicationFeed.Load(XmlReader.Create(feed));
+      }
+      catch (XmlException ex)
+      {
+        Debug.WriteLine(ex);
+
+        return null;
+      }
     }
   }
 }
