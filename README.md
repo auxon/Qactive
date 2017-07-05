@@ -3,7 +3,7 @@ A reactive queryable observable framework.
 <img align="right" src="https://raw.githubusercontent.com/RxDave/Qactive/master/Artifacts/Logo2.png" />
 
 * **Runtime:** .NET Framework 4.6.1; 4.5.2 (portable); 4.0
-* **Development:** Visual Studio 2015 and C# 6
+* **Development:** Visual Studio 2017 and C# 7
 * **Dependencies:** [Reactive Extensions (Rx.NET)](https://github.com/Reactive-Extensions/Rx.NET)
 
 ## Download from NuGet
