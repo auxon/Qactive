@@ -108,8 +108,8 @@ namespace Qactive.Tests
       if (expectedErrors.Count == 0)
       {
         Assert.AreEqual(0, actualErrors.Count, CreateMessage(
-          actualErrors.Select(e => e.Error.Message),
-          expectedErrors.Select(e => e.Error.Message),
+          actualErrors.Select(e => GetMessage(e.Error)),
+          expectedErrors.Select(e => GetMessage(e.Error)),
           "Unexpected error(s) encountered.",
           label: "Exceptions",
           includeIndices: true));
@@ -117,8 +117,8 @@ namespace Qactive.Tests
       else if (actualErrors.Count != expectedErrors.Count)
       {
         Assert.Fail(CreateMessage(
-          actualErrors.Select(e => e.Error.Message),
-          expectedErrors.Select(e => e.Error.Message),
+          actualErrors.Select(e => GetMessage(e.Error)),
+          expectedErrors.Select(e => GetMessage(e.Error)),
           $"Actual error count ({actualErrors.Count}) does not equal the expected error count ({expectedErrors.Count}).",
           label: "Exceptions",
           includeIndices: true));
@@ -130,8 +130,8 @@ namespace Qactive.Tests
         if (!pairs.All(pair => pair.Actual.index == pair.Expected.index))
         {
           Assert.Fail(CreateMessage(
-          actualErrors.Select(e => e.Error.Message),
-          expectedErrors.Select(e => e.Error.Message),
+          actualErrors.Select(e => GetMessage(e.Error)),
+          expectedErrors.Select(e => GetMessage(e.Error)),
           "Actual errors are not in the same positions in the sequence as the expected errors.",
           label: "Exceptions",
           includeIndices: true));
@@ -139,8 +139,8 @@ namespace Qactive.Tests
         else if (!pairs.All(pair => GetEquality(pair.Actual.Error, pair.Expected.Error)))
         {
           Assert.Fail(CreateMessage(
-          actualErrors.Select(e => e.Error.Message),
-          expectedErrors.Select(e => e.Error.Message),
+          actualErrors.Select(e => GetMessage(e.Error)),
+          expectedErrors.Select(e => GetMessage(e.Error)),
           "Actual errors are not equal to the expected errors.",
           label: "Exceptions",
           includeIndices: true));
@@ -194,5 +194,8 @@ namespace Qactive.Tests
        + string.Join(Environment.NewLine, actualDiffs?.Select(x => (includeTypes ? x.GetType().Name + ": " : string.Empty) + x) ?? Enumerable.Empty<string>()) + Environment.NewLine
        + "Expected: " + Environment.NewLine
        + string.Join(Environment.NewLine, expectedDiffs?.Select(x => (includeTypes ? x.GetType().Name + ": " : string.Empty) + x) ?? Enumerable.Empty<string>()));
+
+    private static string GetMessage(Exception error)
+         => error is AggregateException e ? string.Join(Environment.NewLine, e.InnerExceptions.Select(GetMessage)) : error.Message;
   }
 }

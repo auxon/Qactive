@@ -19,10 +19,13 @@ namespace Qactive
       Value = value;
     }
 
-    private DuplexStreamMessage(QbservableProtocolMessageKind kind, DuplexCallbackId id, ExceptionDispatchInfo error, byte[] data)
-      : base(kind, data, data.Length)
+    private DuplexStreamMessage(QbservableProtocolMessageKind kind, DuplexCallbackId id, ExceptionDispatchInfo error, byte[] data, long length)
+      : base(kind, data, length)
     {
       Contract.Requires(error != null);
+      Contract.Requires(length >= 0);
+      Contract.Requires(length == 0 || data != null);
+      Contract.Requires(length == 0 || data.Length >= length);
 
       Id = id;
       Error = error;
@@ -75,7 +78,7 @@ namespace Qactive
           duplexMessage = new DuplexStreamMessage(
             message.Kind,
             BitConverter.ToInt64(message.Data, 0),
-            protocol.Deserialize<Exception>(message.Data, offset: DuplexCallbackId.Size),
+            ExceptionDispatchInfo.Capture(protocol.Deserialize<Exception>(message.Data, offset: DuplexCallbackId.Size)),
             message.Data,
             message.Length);
           return true;

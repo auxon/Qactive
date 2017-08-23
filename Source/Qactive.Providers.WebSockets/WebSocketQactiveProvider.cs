@@ -405,7 +405,7 @@ namespace Qactive
           {
             Stopping();
 
-            await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, reason.ToString(), CancellationToken.None).ConfigureAwait(false);
+            await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, reason.ToString(), CancellationToken.None).ConfigureAwait(false);
           }
         }
       }

@@ -155,6 +155,7 @@ namespace Qactive.Tests.WebSockets.Queries
     [Serializable]
     private sealed class Node
     {
+      [NonSerialized]
       private readonly IObservable<Leaf> leaves;
 
       public Node(string id)

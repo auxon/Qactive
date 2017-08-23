@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Reactive.Disposables;
 using System.Runtime.ExceptionServices;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Qactive.Properties;
@@ -406,9 +407,20 @@ namespace Qactive
       {
         await Protocol.SendMessageSafeAsync(CreateOnNext(id, value)).ConfigureAwait(false);
       }
+      catch (SerializationException ex)
+      {
+        SendOnError(name, id, ExceptionDispatchInfo.Capture(ex));
+      }
       catch (Exception ex)
       {
-        Fail(ExceptionDispatchInfo.Capture(ex));
+        if (Protocol.ServiceOptions.SendServerErrorsToClients)
+        {
+          SendOnError(name, id, ExceptionDispatchInfo.Capture(ex));
+        }
+        else
+        {
+          Fail(ExceptionDispatchInfo.Capture(ex));
+        }
       }
     }
 

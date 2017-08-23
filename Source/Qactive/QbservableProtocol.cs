@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
@@ -294,7 +293,7 @@ namespace Qactive
               {
                 /* Collecting exceptions handles a possible race condition.  Since this code is using a fire-and-forget model to 
                  * subscribe to the observable, due to the async OnNext handler, it's possible that more than one SendAsync task
-                 * can be executing concurrently.  As a result, cancelling the cancelSubscription below does not guarantee that 
+                 * can be executing concurrently.  As a result, canceling the cancelSubscription below does not guarantee that 
                  * this catch block won't run again.
                  */
                 networkErrors.Add(ExceptionDispatchInfo.Capture(ex));
