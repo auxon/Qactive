@@ -14,7 +14,7 @@ namespace Qactive.Tests.WebSockets.ServiceOptions
     public async Task SimpleVisitor()
     {
       var visitor = new TestExpressionVisitor();
-      var service = WebSocketTestService.Create(QbservableServiceOptions.Default.Add(visitor), Observable.Range(1, 5));
+      var service = WebSocketTestService.Create(QbservableServiceOptions.Default.Add(() => visitor), Observable.Range(1, 5));
 
       var results = await service.QueryAsync(source => from value in source
                                                        where value % 2 == 0

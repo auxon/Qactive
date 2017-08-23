@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq.Expressions;
 
@@ -27,7 +26,7 @@ namespace Qactive
       evaluationContext = new ServiceEvaluationContext()
     };
 
-    private readonly List<ExpressionVisitor> visitors = new List<ExpressionVisitor>();
+    private readonly List<Func<ExpressionVisitor>> visitorFactories = new List<Func<ExpressionVisitor>>();
     private bool sendServerErrorsToClients;
     private bool enableDuplex;
     private bool allowExpressionsUnrestricted;
@@ -38,7 +37,7 @@ namespace Qactive
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Required for code contracts.")]
     private void ObjectInvariant()
     {
-      Contract.Invariant(visitors != null);
+      Contract.Invariant(visitorFactories != null);
     }
 
     public bool IsFrozen { get; private set; }
@@ -86,9 +85,9 @@ namespace Qactive
     }
 
 #if READONLYCOLLECTIONS
-    public IReadOnlyList<ExpressionVisitor> Visitors => visitors.AsReadOnly();
+    public IReadOnlyList<Func<ExpressionVisitor>> VisitorFactories => visitorFactories.AsReadOnly();
 #else
-    public ReadOnlyCollection<ExpressionVisitor> Visitors => visitors.AsReadOnly();
+    public ReadOnlyCollection<Func<ExpressionVisitor>> VisitorFactories => visitors.AsReadOnly();
 #endif
 
     public ExpressionOptions ExpressionOptions
@@ -143,13 +142,13 @@ namespace Qactive
       evaluationContext = clone.evaluationContext;
     }
 
-    public QbservableServiceOptions Add(ExpressionVisitor visitor)
+    public QbservableServiceOptions Add(Func<ExpressionVisitor> visitorFactory)
     {
-      Contract.Requires(visitor != null);
+      Contract.Requires(visitorFactory != null);
 
       var options = IsFrozen ? Clone() : this;
 
-      options.visitors.Add(visitor);
+      options.visitorFactories.Add(visitorFactory);
 
       return options;
     }

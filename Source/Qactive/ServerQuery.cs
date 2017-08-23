@@ -135,8 +135,10 @@ namespace Qactive
 
       preparedExpression = visitor.Visit(preparedExpression);
 
-      foreach (var customVisitor in Provider.Options.Visitors)
+      foreach (var customVisitorFactory in Provider.Options.VisitorFactories)
       {
+        var customVisitor = customVisitorFactory();
+
         preparedExpression = customVisitor.Visit(preparedExpression);
       }
 
