@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.ExceptionServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Qactive
@@ -12,6 +13,7 @@ namespace Qactive
   {
     private readonly ConcurrentQueue<Tuple<Func<Task>, TaskCompletionSource<bool>>> q = new ConcurrentQueue<Tuple<Func<Task>, TaskCompletionSource<bool>>>();
     private readonly Subject<ExceptionDispatchInfo> unhandledExceptions = new Subject<ExceptionDispatchInfo>();
+    private volatile int isDequeueing;
 
     public IObservable<ExceptionDispatchInfo> UnhandledExceptions
     {
@@ -29,6 +31,8 @@ namespace Qactive
     {
       Contract.Invariant(q != null);
       Contract.Invariant(unhandledExceptions != null);
+      Contract.Invariant(isDequeueing >= 0);
+      Contract.Invariant(isDequeueing <= 1);
     }
 
     public Task EnqueueAsync(Func<Task> actionAsync)
@@ -45,9 +49,11 @@ namespace Qactive
       return task.Task;
     }
 
+    // The interlocked check ensures that only one thread is dequeuing at a time. It's required to
+    // ensure that each action in the queue is executed serially, in the order in which they were enqueued.
     private async void EnsureDequeueing()
     {
-      while (q.Count > 0)
+      while (q.Count > 0 && Interlocked.CompareExchange(ref isDequeueing, 1, 0) == 0)
       {
         Tuple<Func<Task>, TaskCompletionSource<bool>> data;
 
@@ -77,6 +83,8 @@ namespace Qactive
             unhandledExceptions.OnNext(ExceptionDispatchInfo.Capture(ex));
           }
         }
+
+        isDequeueing = 0;
       }
     }
 
