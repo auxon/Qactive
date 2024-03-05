@@ -7,9 +7,9 @@ using System.Resources;
 
 [assembly: AssemblyConfiguration(AssemblyConstants.Configuration)]
 
-[assembly: AssemblyCompany("Dave Sexton")]
+[assembly: AssemblyCompany("Dave Sexton & EntangleIT.com")]
 [assembly: AssemblyProduct("Qactive")]
-[assembly: AssemblyCopyright("Copyright © 2012-2016 Dave Sexton")]
+[assembly: AssemblyCopyright("Copyright ï¿½ 2012-2024 Dave Sexton & EntangleIT.com")]
 [assembly: AssemblyTrademark("")]
 
 [assembly: AssemblyVersion(AssemblyConstants.Version + ".0")]
@@ -21,7 +21,7 @@ using System.Resources;
 [SuppressMessage("Microsoft.Design", "CA1050:DeclareTypesInNamespaces", Justification = "Referenced by assembly-level attributes only.")]
 internal static class AssemblyConstants
 {
-  public const string Version = "2.1.0";
+  public const string Version = "3.0.0";
 
   /// <summary>
   /// Semantic version for the assembly, indicating a prerelease package in NuGet.
