@@ -1,8 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
-namespace Qactive.Tests
+namespace Qactive
 {
-  internal interface IReadOnlyCollection<T> : IEnumerable<T>
+    public interface IReadOnlyCollection<out T> : IEnumerable<T>, IEnumerable
+    {
+        int Count { get; }
+        new IEnumerable<T> GetEnumerator();
+    }
+
+    internal interface IReadOnlyCollection<T> : IEnumerable<T>
   {
     int Count { get; }
   }
